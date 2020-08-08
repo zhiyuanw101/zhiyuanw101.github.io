@@ -128,7 +128,7 @@ gitment:
 # https://github.com/gitalk/gitalk#install
 gitalk:
     owner: zhiyuanw101
-    repo: zhiyuanw101/zhiyuanw101.github.io
+    repo: zhiyuanw101.github.io
     clientID: c64b2dd32d2a4c0e5fcf
     clientSecret: 2453cdc82e5b2f45ef6aa1b911f12ab823cd9abf
 # 在使用其它评论组件时可点击显示 Disqus
