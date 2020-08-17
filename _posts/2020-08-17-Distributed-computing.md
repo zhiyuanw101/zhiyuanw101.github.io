@@ -25,3 +25,7 @@ keywords: Wiki, Utils
       - `k1` marks same nodes for maping, `k2` marks same nodes for reducing, distribute data to nodes, aggregate `k3` from different nodes
       - `(k2, v2), (k3, v3)` same domain, `(k1, v1)` a different domain
       - **user only cares about `Map` and `Reduce`**
+
+  - HDFS
+
+  - YARN
