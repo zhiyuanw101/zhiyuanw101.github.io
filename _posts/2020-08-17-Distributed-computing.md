@@ -29,3 +29,8 @@ keywords: Wiki, Utils
   - HDFS
 
   - YARN
+  - 其他组件
+
+    - Hive
+    - Hbase
+  
