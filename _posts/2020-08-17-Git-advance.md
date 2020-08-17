@@ -8,7 +8,8 @@ keywords: Utils, Git
 
 ## [使用分支](https://git-scm.com/book/zh/v2/Git-%E5%88%86%E6%94%AF-%E5%88%86%E6%94%AF%E7%9A%84%E6%96%B0%E5%BB%BA%E4%B8%8E%E5%90%88%E5%B9%B6)
 
-1. 基本流程
+### 1. 基本流程
+
     - 建立新本地分支
 
     ```bash
@@ -49,7 +50,7 @@ keywords: Utils, Git
     git branch -d <temp>
     ```
 
-2. 基本操作
+### 2. 基本操作
 
 ```bash
 git diff <branch1> <branch2> #两branch区别
@@ -60,7 +61,7 @@ git branch -v       #查看每个分支最后一次提交
 git push origin :<dev> #删除远程branch dev
 ```
 
-1. 一些关键问题
+### 3. 一些关键问题
 
 - 切换分支：当你切换分支的时候，Git 会重置你的工作目录，使其看起来像回到了你在那个分支上最后一次提交的样子。 Git 会自动添加、删除、修改文件以确保此时你的工作目录和这个分支最后一次提交时的样子一模一样。
 - 出现冲突：出现冲突的文件出现如下标记，手动选择其中一个修复
