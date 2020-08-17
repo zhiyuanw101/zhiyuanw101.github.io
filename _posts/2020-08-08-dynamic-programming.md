@@ -1,6 +1,6 @@
 ---
 layout: post
-title: 动态规划 Dynamic Programming
+title: Dynamic Programming 动态规划
 categories: [C++, Algorithms]
 description: 有关动态规划的一些总结与个人思考
 keywords: DP, Algorithms, C++

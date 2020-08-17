@@ -1,6 +1,6 @@
 ---
 layout: post
-title: 算法家族 Algorithm Families
+title: Algorithm Families 算法家族
 categories: [Algorithms]
 description: 有关算法的一些总结与个人思考，部分内容摘自EECS281
 keywords: Algorithms, C++
