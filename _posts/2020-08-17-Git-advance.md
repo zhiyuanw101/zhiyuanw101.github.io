@@ -10,7 +10,7 @@ keywords: Utils, Git
 
 ### 1. 基本流程
 
-    - 建立新本地分支
+- 建立新本地分支
 
     ```bash
     git clone <remote git>  
@@ -21,7 +21,7 @@ keywords: Utils, Git
     #切换分支
     ```
 
-    - 建立新的远程分支
+- 建立新的远程分支
   
     ```bash
     git push origin <dev>  
@@ -30,7 +30,7 @@ keywords: Utils, Git
     #提交本地dev到远程dev分支
     ```
 
-    - 合并分支
+- 合并分支
   
     ```bash
     git checkout master
@@ -38,13 +38,13 @@ keywords: Utils, Git
     git merge dev
     ```
 
-    - 提交远程master
+- 提交远程master
 
     ```bash
     git push origin master
     ```
 
-    - 删除本地分支
+- 删除本地分支
   
     ```bash
     git branch -d <temp>
