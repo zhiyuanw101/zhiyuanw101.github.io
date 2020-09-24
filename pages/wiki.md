@@ -9,6 +9,9 @@ permalink: /wiki/
 ---
 
 > 「有研究顯示，打字的時候不喜歡在中文和英文之間加空格的人，感情路都走得很辛苦，有七成的比例會在 34 歲的時候跟自己不愛的人結婚，而其餘三成的人最後只能把遺產留給自己的貓。畢竟愛情跟書寫都需要適時地留白。」——vinta/paranoid-auto-spacing
+
+
+> 我想要在这里做什么？我想在这里记录一些读书的体验。读书与Wiki有什么关系？胡适之在怎样读书中讲两条经验：精与博，我觉得恰合Wiki的主题。
 <ul class="listing">
 {% for wiki in site.wiki %}
 {% if wiki.title != "Wiki Template" and wiki.topmost == true %}
