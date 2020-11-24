@@ -4,7 +4,7 @@ title: About
 description: 
 keywords: Zhiyuan Wang
 comments: true
-menu: 关于
+menu: About
 permalink: /about/
 ---
 
@@ -17,10 +17,10 @@ permalink: /about/
 Sept/2019 - May/2022
 
 - GPA: 4.0
-- Courses: EECS 281: 
-  - Data Structures and Algorithms Structures 
-  - Math 412: Intro to Modern Algebra 
-  - EECS 370: Introduction to Computer Organization 
+- Courses: EECS 281:
+  - Data Structures and Algorithms Structures
+  - Math 412: Intro to Modern Algebra
+  - EECS 370: Introduction to Computer Organization
   - EECS 376: Foundations of Computer Science
   - EECS 484: Database System
 
@@ -53,15 +53,10 @@ while maintaining comparable model accuracy and even better completeness and gen
 - Created web blogs about related papers and studies. Wrote original contents about researches and basic theories
 in Machine Learning, which improved understanding of team members.
 
-## Contact
-
-<ul>
-{% for website in site.data.social %}
-<li>{{website.sitename }}：<a href="{{ website.url }}" target="_blank">@{{ website.name }}</a></li>
-{% endfor %}
-</ul>
-
-
+### Publication
+- **Pruning Multi-view Stereo Net for Efficient 3D Reconstruction**
+  Xiang Xiang, ***Zhiyuan Wang***, Shanshan Lao, Baochang Zhang
+  *In the ISPRS Journal of Photogrammetry and Remote Sensing (ISPRS 2020)*
 ## Skill Keywords
 
 {% for skill in site.data.skills %}
@@ -72,3 +67,13 @@ in Machine Learning, which improved understanding of team members.
 {% endfor %}
 </div>
 {% endfor %}
+
+
+## Contact
+
+<ul>
+{% for website in site.data.social %}
+<li>{{website.sitename }}：<a href="{{ website.url }}" target="_blank">@{{ website.name }}</a></li>
+{% endfor %}
+</ul>
+
