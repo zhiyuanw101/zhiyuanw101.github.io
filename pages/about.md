@@ -12,7 +12,7 @@ permalink: /about/
 ### Education
 
 ---
-**University of Michigan - Ann Arbor**
+**University of Michigan - Ann Arbor**\
 Sept/2019 - May/2022
 
 - GPA: 4.0
