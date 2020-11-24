@@ -7,8 +7,7 @@ comments: true
 menu: About
 permalink: /about/
 ---
-
-## CV
+> Hi! This is Zhiyuan Wang. I am a junior studying Computer Science and Mathematics at the University of Michigan. I love tennis, film, classical music and video games. I want to have a dog.
 
 ### Education
 
