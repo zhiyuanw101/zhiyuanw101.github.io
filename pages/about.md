@@ -53,11 +53,16 @@ while maintaining comparable model accuracy and even better completeness and gen
 in Machine Learning, which improved understanding of team members.
 
 ### Publication
+
+---
+
 - **Pruning Multi-view Stereo Net for Efficient 3D Reconstruction**\
   Xiang Xiang, ***Zhiyuan Wang***, Shanshan Lao, Baochang Zhang\
   *In the ISPRS Journal of Photogrammetry and Remote Sensing (ISPRS 2020)*
+  
 ### Skill Keywords
 
+---
 {% for skill in site.data.skills %}
 - {{ skill.name }}
 <div class="btn-inline">
