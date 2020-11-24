@@ -8,7 +8,50 @@ menu: 关于
 permalink: /about/
 ---
 
->>Hi! This is Zhiyuan Wang, an undergraduate studying Computer Science at the University of Michigan, Ann Arbor. Love traveling and skiing. Huge fan of Christopher Nolan, Radiohead & Blur. Want to have a dog.
+## CV
+
+### Education
+
+---
+**University of Michigan - Ann Arbor**
+Sept/2019 - May/2022
+
+- GPA: 4.0
+- Courses: EECS 281: 
+  - Data Structures and Algorithms Structures 
+  - Math 412: Intro to Modern Algebra 
+  - EECS 370: Introduction to Computer Organization 
+  - EECS 376: Foundations of Computer Science
+  - EECS 484: Database System
+
+### Projects
+
+---
+**Software Development Engineer Intern @ ByteDance**
+Data-Ads system, June/2020 - August/2020
+
+- Participated in the development of automatic advertising debugging tools, added modular displaying feature to improve the practicality of the tool, which received extensive usage inside the company.
+- Maintained and further developed the advertising business feedback oncall system, developed case aging statistics and reminder feature to improve the case solving rate by 20%.
+- Participated in the development of a real-time advertising data detection and alarm system which determine the data abnormality in the last hour based on historical data. The system significantly reduced the processing time of the advertising system abnormality by 60%.
+
+**NLP Algorithms Research Intern**
+Microsoft STCA, May/2020 - June/2020
+
+- Survey the newest development and implementation of NLP algorithms in Knowledge Base Question Answering system, share the results with group members.
+- Survey the state-of-the-art approaches in multi-lingual NLP training, proposed methods to train and evaluate multi-lingual KBQA system, especially in zero-shot situation.
+- Collected and organised the commonly used Knowledge Base and data set in KBQA task for our system, filtered the data set and Knowledge Base to generate answer candidates for quick searching.
+- Implemented the Transformer based methods in KBQA tasks and discussed the advantages and disadvantages of such methods.
+
+**Research Project: Pruning Multi-view Stereo Network for Efficient 3D Reconstruction**
+Undergraduate Research with Professor Xiang Xiang at JHU
+
+- Devised new approach to compress and accelerate Convolutional Neural Networks(CNNs) in 3D reconstruction.
+- Proposed a large multi-scale architecture for exploiting efficiency in 3D CNNs, and tested the proposed network
+with Tensorflow in Python.
+- Achieved an efficient Multiview 3D reconstruction system up to 2 times faster, in contrast to the state-of-the-art,
+while maintaining comparable model accuracy and even better completeness and generalize ability.
+- Created web blogs about related papers and studies. Wrote original contents about researches and basic theories
+in Machine Learning, which improved understanding of team members.
 
 ## Contact
 

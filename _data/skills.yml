@@ -1,8 +1,18 @@
-- name: Software Engineer Keywords
+- name: Computer Languages
   keywords:
-      - C++
+      - C/C++
       - Python
-      - JavaScript
+      - MATLAB
+- name: Machine Learning Library
+  keywords:
+      - Pytorch
+      - Tensorflow
+- name: Other abilities
+  keywords:
+      - SQL
+      - MongoDB
+      - LaTeX
+      - Linux     
 
 # - name: Mobile Developer Keywords
 #   keywords:

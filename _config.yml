@@ -5,7 +5,7 @@ baseurl:
 url: https://zhiyuanw101.github.io
 date_format: "ordinal"
 title: Zhiyuan Wang
-subtitle: "发条熊的Blog"
+subtitle: "zhiyuanw's Blog"
 description: "发条熊的个人博客"
 keywords: Zhiyuan Wang
 timezone: Asia/Shanghai
@@ -51,11 +51,11 @@ email: zhiyuanw@umich.edu
 navs:
   -
     href: /
-    label: 首页
+    label: Index
 
   -
     href: /categories/
-    label: 分类
+    label: Categories
 
 #   -
 #     href: /archives/
@@ -67,7 +67,7 @@ navs:
 
   -
     href: /wiki/
-    label: 维基
+    label: Wiki
 
 #   -
 #     href: /links/
@@ -75,7 +75,7 @@ navs:
 
   -
     href: /about/
-    label: 关于
+    label: About
 
 # ---------------- #
 #       RSS        #
