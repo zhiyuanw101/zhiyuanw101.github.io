@@ -56,10 +56,10 @@ in Machine Learning, which improved understanding of team members.
 - **Pruning Multi-view Stereo Net for Efficient 3D Reconstruction**\
   Xiang Xiang, ***Zhiyuan Wang***, Shanshan Lao, Baochang Zhang\
   *In the ISPRS Journal of Photogrammetry and Remote Sensing (ISPRS 2020)*
-## Skill Keywords
+### Skill Keywords
 
 {% for skill in site.data.skills %}
-### {{ skill.name }}
+- {{ skill.name }}
 <div class="btn-inline">
 {% for keyword in skill.keywords %}
 <button class="btn btn-outline" type="button">{{ keyword }}</button>
@@ -68,7 +68,7 @@ in Machine Learning, which improved understanding of team members.
 {% endfor %}
 
 
-## Contact
+### Contact
 
 <ul>
 {% for website in site.data.social %}
