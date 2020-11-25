@@ -16,8 +16,8 @@ permalink: /about/
 Sept/2019 - May/2022
 
 - GPA: 4.0
-- Courses: EECS 281:
-  - Data Structures and Algorithms Structures
+- Courses:
+  - EECS 281: Data Structures and Algorithms Structures
   - Math 412: Intro to Modern Algebra
   - EECS 370: Introduction to Computer Organization
   - EECS 376: Foundations of Computer Science
