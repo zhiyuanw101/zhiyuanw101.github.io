@@ -1,7 +1,7 @@
 ---
 layout: post
 title: 自然语言处理 Neural Language Processing [Neural Network Methods for Natural Language Porcessing 阅读笔记]
-categories: [Algorithms, NLP, Readings]
+categories: [Algorithms, NLP, Readings, Wiki]
 description: 文献：Neural Network Methods for Natural Language Porcessing*, Yoav Goldberg, 2018
 keywords: Algorithms, NLP, Readings, Notes
 ---
