@@ -41,8 +41,8 @@ keywords: DBMS
   - **Level**: $l$ init to 0
   - **Next** (split pointer): $s$ pointer to bucket to be split
   - **Hash** function:
-    - $h_{l}$
-    - $h_{l+1}$
+    - $h_{l}$: modulo $N\cdot 2^{l}$
+    - $h_{l+1}$: modulo $N\cdot 2^{l+1}$
 
   - \# bucket:
     - $N$: initial number of buckets
