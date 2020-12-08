@@ -85,7 +85,9 @@ keywords: DBMS
   - change buffer parameter $(B-1) => \lfloor(B/b)\rfloor -1$
 
 ## B+ Tree Sort
+
 B+ tree index on sorting colunm(s)
+
 - Clustered:
   - go to left-most leaf, retrieve all leaf pages
   - always better than external sort
