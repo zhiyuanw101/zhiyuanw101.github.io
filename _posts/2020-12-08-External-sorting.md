@@ -81,3 +81,14 @@ keywords: DBMS
     - increase \# pass (2-3)
 - cost:
   - change buffer parameter $(B-1) => \lfloor(B/b)\rfloor -1$
+
+## B+ Tree Sort
+
+- Clustered:
+  - go to left-most leaf, retrieve all leaf pages
+- Unclustered:
+  - cost:
+    - $pN$
+    - $p$ avg \# of records per page
+    - one I/O each record
+  - for extremely selective queries
