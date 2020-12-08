@@ -29,7 +29,7 @@ keywords: DBMS
     - Collapes split buckets (directory)
 
 - **Features**
-  - `disk access = (directory in mem) ? 1:2`
+  - `#disk access = (directory in mem) ? 1:2`
   - Directory can grow large
     - Doubling directory eveytime when overflow
   - Could have overflow pages
