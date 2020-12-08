@@ -34,6 +34,8 @@ keywords: DBMS
   - $\lceil N/B \rceil$ sorted **runs**
   - each **run** $B$ pages long
 - pass 1+: merge $(B-1)$ runs using $B-1$ buffers
+  - load first (sorted) page of each run to input buffers, load next once empty
+  - pick smallest, move to output buffer, flush output once full
 - cost:
   - \# of passes: $1+\lceil\log_{B-1}\lceil N/B\rceil \rceil$
   - \# page I/Os: $2N(1+\lceil\log_{B-1}\lceil N/B\rceil \rceil)$
