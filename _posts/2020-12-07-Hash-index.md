@@ -61,3 +61,4 @@ keywords: DBMS
         - Split the bucket $s$
         - $s = 0$
         - $l = l+1$
+  
