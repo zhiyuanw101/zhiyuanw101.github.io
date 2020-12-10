@@ -39,6 +39,7 @@ keywords: DBMS
 - cost:
   - \# of passes: $1+\lceil\log_{B-1}\lceil N/B\rceil \rceil$
   - \# page I/Os: $2N(1+\lceil\log_{B-1}\lceil N/B\rceil \rceil)$
+    - divide equally between read/write
 
 ## Replacement Sort
 
