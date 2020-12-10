@@ -74,3 +74,55 @@ An interleaving of actions from a set of transactions
     | commit  	|         	|
     |         	| commit  	|
 
+#### Conflict serializable
+
+- **conflict equivalent**:
+  - involve same transactions
+  - order each pair of conflicting operations in the same way
+- **conflict serializable**: conflict equivalent to serial schedule
+  - **conflict serializable** ==> **serializable**
+  - *Theorem:* **conflict serializable** <==> precedence graph is **acyclic**
+    - equivalent serial schedule given by any topological sort over graph
+
+
+### Recoverability
+
+- **Recoverable schedule**: Transaction commit only after all transactions whose changes they have read commit
+  - don't commit until all changes read have committed, such that if one of the changes is aborted, we could abort
+
+- **Avoid cascading aborts (ACA)**: Transaction only read changes of committed transactions
+  - **ACA** ==> **Recoverable**
+
+### Locking
+
+- types:
+  - **shared** lock: read
+  - **exclusive** lock: write
+
+- **Two-Phase Locking (2PL)**
+  - **2PL**:
+    - T release any lock, it can acquire no new lock
+    - Guarantee **conflict-serializability**
+      - equivalent schedule given order in which transactions enter shiring phase
+  - **Strict 2PL (S2PL)**:
+    - Hold **exclusive locks** till end of Xact
+    - Guarantee **conflict-serializability** and **ACA**
+  - **Strong Strict 2PL (SS2PL)**:
+    - Hold **all locks** till end of Xact
+    - simpler implemetation
+
+- Implementation: **Lock Table**
+  - Hash table of Lock Entries
+- **Deadlock**
+  - 4 conditions:
+    - Mutual Exclusion
+    - Hold and wait
+    - No Pre-emption
+    - Circular wait
+  - Detection:
+    - waits-for graph
+    - time-outs
+  - Prevention:
+    - assign priorities to transactions
+      - wait-die
+      - wound-wait
