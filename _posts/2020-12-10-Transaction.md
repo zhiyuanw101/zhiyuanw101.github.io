@@ -29,6 +29,14 @@ An interleaving of actions from a set of transactions
 - **Complete Schedule**: Each transactions ends in commit or abort
 - **Serial Schedule**: No interleaving actions among transactions
 - **Serializable Schedule**: Final state equal to some **complete serial schedule** of committed transactions.
+  - determine serializable:
+    - Read/ Write value matters
+    - assign value to guarantee
+    - **View serializability**
+      - **Initial Read**: If T1 reads an initial value A in S1, then T1 must also read that same initial value A in S2.
+      - **Updated Read**: If T1 reads a value A' written by T2 in S1, then T1 must also read the same value A' written by T2 in S2.
+      - **Final Write operation**: If the transaction T1 is the last to write A'' in S1, then T1 must also be the last to write A'' in S2.
+
 
 ### Conflict & Anomalies
 
