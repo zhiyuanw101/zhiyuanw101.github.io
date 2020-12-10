@@ -8,7 +8,7 @@ keywords: DBMS
 
 ## ACID
 
-- Atomicity: All actions in transaction happen or not happen
+- Atomicity: All actions in transaction happen or none of them happen
 - Consistency: consistent DB + consistant transaction => consistent DB
 - Isolation: Execution of transaction is isolated from other transaction
 - Durability: If a transaction commits, its effects persist
@@ -100,9 +100,11 @@ An interleaving of actions from a set of transactions
 
 - **Recoverable schedule**: Transaction commit only after all transactions whose changes they have read commit
   - don't commit until all changes read have committed, such that if one of the changes is aborted, we could abort
+  - could have cascade aborts
 
 - **Avoid cascading aborts (ACA)**: Transaction only read changes of committed transactions
   - **ACA** ==> **Recoverable**
+  - no aborts
 
 ### Locking
 
@@ -137,3 +139,37 @@ An interleaving of actions from a set of transactions
     - assign priorities to transactions
       - wait-die
       - wound-wait
+
+## Recovery
+
+- use memory as cache
+  - problems: (on crash)
+    - pages writes of commited (redo)
+    - pages writes of uncommited (undo)
+  - solution:
+    - invariant:
+      - FORCE: to disk upon COMMIT
+      - NOT STEAL: do not evict UNCOMMITED pages
+    - **ARIES**:
+      - supports FORCE & NOT STEAL
+      - every update write:
+        - database page
+        - transaction log
+          - help undo/redo
+      - Log:
+        - Entries:
+          - Log Sequence Number (LSN)
+          - XID: transaction id
+          - type: update/commit/abort/**CLRs**
+          - prevLSN
+          - page\#, offset, size
+          - prev-image, new-image
+        - also log commit/abort
+      - **Write-Ahead Logging** (WAL)
+        - update log record **before** data page to disk
+        - wirte all log records for Xact before **commit**
+        - gurantee:
+          - atomicity
+          - durability
+      - **Compensating Log Records** (CLRs)
+        - describe update about to be **undone** (due to abort), write to log before undo
