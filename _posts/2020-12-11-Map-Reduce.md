@@ -1,50 +1,12 @@
 ---
 layout: post
-title: MongoDB
-categories: [DBMS, SQL, NoSQL]
-description: MongoDB
-keywords: DB
+title: Map Reduce
+categories: [DBMS, Wiki, Distributed System]
+description: Map Reduce
+keywords: DBMS
 ---
-## Document
 
-## Field
-
-## [Expression](https://docs.mongodb.com/manual/meta/aggregation-quick-reference/#aggregation-expressions)
-
-- Meaning: result of calculation from some fields
-- **Field path**: `$user`, `$user.name`
-- **Expression objects**: 
-  - `{ <field1>: <expression1>, ... }`
-
-- [**Operator expressions**](https://docs.mongodb.com/manual/meta/aggregation-quick-reference/#agg-quick-ref-operator-expressions):
-  - `{ <operator>: [ <argument1>, <argument2> ... ] }`
-
-## Aggregation
-
-### [$group](https://docs.mongodb.com/manual/reference/operator/aggregation/group/)
-
-```js
-{
-  $group:
-    {
-      _id: <expression>, // Group By Expression
-      <field1>: { <accumulator1> : <expression1> },
-      ...
-    }
- }
-```
-
-- _id: group by **expression**, similar to GROUP BY in SQL
-- field1: optional, **accumulator** **operators** + **expression**
-- **accumulator operators**:
-  - `$push`: push expression to this fields' array
-  - `$max/ min`: max/ min expression value for each group
-  - `$sum`: sum of expression
-  - `$first/ last`: first/ last expression in the group
-
-- `$match` in next stage for HAVING
-
-## [Map-Reduce](https://docs.mongodb.com/v3.2/core/map-reduce/)
+## [Map-Reduce in MongoDB](https://docs.mongodb.com/v3.2/core/map-reduce/)
 
 ### [Map function](https://docs.mongodb.com/manual/reference/method/db.collection.mapReduce/#requirements-for-the-map-function)
 
@@ -75,4 +37,9 @@ function(key, values) {
     - `reduce( key, [ reduce(key, valuesArray) ] ) == reduce( key, valuesArray )`
 - The **reduce** function should not access the database, even to perform read operations.
 
-### [Examples](https://docs.mongodb.com/manual/tutorial/map-reduce-examples/)
+### [Examples in MongoDB](https://docs.mongodb.com/manual/tutorial/map-reduce-examples/)
+
+### Notes
+- type: 
+  - type(value) = type(result) [reduce result]
+  - type(values) = array<type(value)> [reduce input]
