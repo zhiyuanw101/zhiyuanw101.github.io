@@ -95,7 +95,6 @@ An interleaving of actions from a set of transactions
   - *Theorem:* **conflict serializable** <==> precedence graph is **acyclic**
     - equivalent serial schedule given by any topological sort over graph
 
-
 ### Recoverability
 
 - **Recoverable schedule**: Transaction commit only after all transactions whose changes they have read commit
@@ -150,26 +149,54 @@ An interleaving of actions from a set of transactions
     - invariant:
       - FORCE: to disk upon COMMIT
       - NOT STEAL: do not evict UNCOMMITED pages
-    - **ARIES**:
-      - supports FORCE & NOT STEAL
-      - every update write:
-        - database page
-        - transaction log
-          - help undo/redo
-      - Log:
-        - Entries:
-          - Log Sequence Number (LSN)
-          - XID: transaction id
-          - type: update/commit/abort/**CLRs**
-          - prevLSN
-          - page\#, offset, size
-          - prev-image, new-image
-        - also log commit/abort
-      - **Write-Ahead Logging** (WAL)
-        - update log record **before** data page to disk
-        - wirte all log records for Xact before **commit**
-        - gurantee:
-          - atomicity
-          - durability
-      - **Compensating Log Records** (CLRs)
-        - describe update about to be **undone** (due to abort), write to log before undo
+
+### ARIES
+
+- supports FORCE & NOT STEAL
+- every update write:
+  - database page
+  - transaction log
+    - help undo/redo
+- Log:
+  - Entries:
+    - Log Sequence Number (LSN)
+    - XID: transaction id
+    - type: update/commit/abort/**CLRs**
+    - prevLSN
+    - page\#, offset, size
+    - prev-image, new-image
+  - also log commit/abort
+- **Write-Ahead Logging** (WAL)
+  - update log record **before** data page to disk
+  - wirte all log records for Xact before **commit**
+  - gurantee:
+    - atomicity
+    - durability
+- **Compensating Log Records** (CLRs)
+  - describe update about to be **undone** (due to abort), write to log before undo
+
+### Checkpoint
+
+- **Transaction table**: (txid, status, lastLSN) each tx
+  - most **recent LSN** for each **live tx**
+  - latest possible **undo** point
+- **Dirty page table**: (recLSN) each dirty page in mem
+  - **first LSN** dirtied page
+  - earliest possible **redo** point
+- Process:
+  - **ANALYSIS** (forward)
+    - start from begin checkpoint, copy tx table, dp table
+    - scan forward, fix tx table/ dp table:
+      - tx table: remove if end-tx, update recent LSN
+      - dp table: add if page P not in dp table
+  - **REDO** (forward)
+    - start with **smallest recLSN** in **dp table**, scan forward
+    - for each update/CLRs, check and update
+      - check current LSN >= page recLSN
+      - check current LSN >= PageLSN on disk
+      - update, set PageLSN = current LSN
+      - write end-tx for committed tx in tx table
+  - **UNDO** (backwards)
+    - start identify all live tx at time of crash from tx table, ToUndo = {}
+    - for each update/CLRs/abort
+      - add prevLSN/undonextLSN to ToUndo
