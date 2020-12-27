@@ -62,3 +62,90 @@ keywords: Utils, Wiki
 - `grep/ rg`: find code
 - `history, fzf`: find shell commands
 - `tree/ nnn`: Directory Navigation
+
+### Exercise
+
+1. man ls
+
+    ```sh
+    ls -lAaGht
+    -A: all except ../ .
+    -a: include ../ .
+    -G: print color
+    -h: use unit suffixes: Byte, KB...
+    -t: sort by last modified
+    ```
+
+2. marco, polo
+
+    ```sh
+    marco () {
+        export MCD=$(pwd)
+        echo "MCD is set to ${MCD}"
+    }
+
+    polo () {
+        cd ${MCD}
+        echo ${MCD}
+        }
+    ```
+
+3. random test with counter
+
+    - notice difference between `sh xx.sh/ source xx.sh/ . ./source.sh`
+    - notice implementation of [counter](https://www.baeldung.com/linux/bash-script-counter)
+    - [if](https://thoughtbot.com/blog/the-unix-shells-humble-if)
+    - [comparison, test](http://mywiki.wooledge.org/BashFAQ/031)
+  
+    ```sh
+    #!/bin/sh
+  
+    counter=0
+    while true; do
+        echo "num: $counter"
+        sh random.sh
+        if [ $? -eq 1 ]; then
+            echo random\ script\ exit with error
+            break
+        fi
+        echo random\ script\ run\ successfully
+        let counter++
+    done
+    echo done!
+    ```
+
+4. [`xargs`](https://www.man7.org/linux/man-pages/man1/xargs.1.html)
+
+    - `xargs`: execute a command using STDIN as arguments
+      - `-0`: input null character as a separator
+      - `-t`: print command executed
+      - `-p`: print command to be execute
+      - `-Istr`: replace `str` initial-arguments with names read from standard input.
+    - [`find`](https://man7.org/linux/man-pages/man1/find.1.html):
+      - `find [starting-point...] [expression]`
+      - `[expression]`:
+        - Tests
+          - `-true`: find all
+          - `-name PATTERN`
+          - `-perm -MODE`/`-perm /MODE`: 
+        - Actions
+          - `-print`: by default
+          - `-print0`
+          - `-ok COMMAND`: like `-exec` but ask first
+          - `-exec COMMAND`: `{}` replaced by current filename being processed
+        - Global options
+          - `-maxdepth LEVELS`: Descend at most LEVELS (a non-negative integer)
+        - Positional options
+        - Operators: often replace `(`, `!` with `\(`, `\!`
+          - `( expr )`
+          - `! expr`/ `-not expr`
+          - `expr1 -a expr2`/ `expr1 -and expr2`/ `expr1 expr2`
+          - `expr1 -o expr2`/ `expr1 -or expr2`
+      - `-exec`: `{}` as the founded DIR, end with \; or ";"
+      - `-print0`: print result followed by a null character, corresponds to the -0 option of xargs.
+  
+    ```sh
+    # GNU find: gfind
+    gfind . -name "*.sh" -exec echo {} \; | xargs zip sh.zip 
+    gfind . -name "*.sh" -print0 | xargs -0 zip sh.zip
+    ```
