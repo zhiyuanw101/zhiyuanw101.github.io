@@ -5,6 +5,7 @@ categories: [Utils, Wiki]
 description: CS missing course
 keywords: Utils, Wiki
 ---
+**[./missing-semester](https://missing.csail.mit.edu/)**
 
 ## [Lec 1: Course overview + the shell](https://missing.csail.mit.edu/2020/course-shell/)
 
@@ -12,7 +13,7 @@ keywords: Utils, Wiki
 - `sudo su`: start a super user terminal
 - `#`: run in super user
 - `tee FILE`: write to FILE and stdout
-- `xrg-open / open FILE`: open file 
+- `xrg-open / open FILE`: open file
 - `chmod`:
   - direct mode: `chmod 777 FILE`
     - 4 for read
@@ -39,6 +40,7 @@ keywords: Utils, Wiki
 
 - define variables
 - strings: `"$foo" / '$foo'`
+  - `'$ VAR'` will be substituted
 - functions:
   - `source mcd.sh`
   - `mcd test`
@@ -46,7 +48,7 @@ keywords: Utils, Wiki
 - exit code
 - `$( CMD )`: *command substitution*, get output of command as variable
 - `<( CMD )`: *process substitution*: execute CMD and place the output in a temporary file and substitute the `<()` with that file’s name.
-- for loop: 
+- for loop:
 - if
   - [test](https://www.man7.org/linux/man-pages/man1/test.1.html)
 - shell globbing: `mv *.{.py,.sh} FOLDER`
