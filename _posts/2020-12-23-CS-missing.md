@@ -7,7 +7,7 @@ keywords: Utils, Wiki
 ---
 **[./missing-semester](https://missing.csail.mit.edu/)**
 
-## [Lec 1: Course overview + the shell](https://missing.csail.mit.edu/2020/course-shell/)
+## Lec 1: Course overview + the shell [🔗](https://missing.csail.mit.edu/2020/course-shell/)
 
 - `echo hello\ world`, `echo "hello world"`: white spaces between arguments
 - `sudo su`: start a super user terminal
@@ -34,7 +34,7 @@ keywords: Utils, Wiki
 - `cut`:
   - cuts out selected portions of each line (as specified by list) from each file and writes them to the standard output. If file not specified, read from standard input.
 
-## [Lec2: Shell Tools and Scripting](https://missing.csail.mit.edu/2020/shell-tools/)
+## Lec2: Shell Tools and Scripting [🔗](https://missing.csail.mit.edu/2020/shell-tools/)
 
 ### Scripting
 
@@ -150,7 +150,7 @@ keywords: Utils, Wiki
     gfind . -name "*.sh" -print0 | xargs -0 zip sh.zip
     ```
 
-## [Lec 3: Vim](https://missing.csail.mit.edu/2020/editors/)
+## Lec 3: Vim [🔗](https://missing.csail.mit.edu/2020/editors/)
 
 ### vimtutor
 
@@ -277,7 +277,7 @@ keywords: Utils, Wiki
 
 ```
 
-## Lec 4: Data Wrangling
+## Lec 4: Data Wrangling [🔗](https://missing.csail.mit.edu/2020/data-wrangling/)
 
 ### [Regular Expression](https://regex101.com/)
 
