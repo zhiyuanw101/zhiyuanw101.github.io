@@ -152,6 +152,8 @@ keywords: Utils, Wiki
 
 ## [Lec 3: Vim](https://missing.csail.mit.edu/2020/editors/)
 
+### vimtutor
+
 ```vim
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                    Lesson 1 SUMMARY
@@ -168,6 +170,7 @@ keywords: Utils, Wiki
 
   5. To insert or append text type:
      i   type inserted text   <ESC>         insert before the cursor
+     a   type appended text   <ESC>         append after the cursor
      A   type appended text   <ESC>         append after the line
 
 
@@ -175,27 +178,115 @@ keywords: Utils, Wiki
                    Lesson 2 SUMMARY
 
 
-  1. To delete from the cursor up to the next word type:    dw
-  2. To delete from the cursor to the end of a line type:    d$
-  3. To delete a whole line type:    dd
+  1. dw   - To delete from the cursor up to the next word 
+     d$   - To delete from the cursor to the end of a line
+     dd   - To delete a whole line
 
-  4. To repeat a motion prepend it with a number:   2w
-  5. The format for a change command is:
+  2. 2w   - To repeat a motion prepend it with a number
+  3. The format for a change command is:
                operator   [number]   motion
      where:
        operator - is what to do, such as  d  for delete
        [number] - is an optional count to repeat the motion
-       motion   - moves over the text to operate on, such as  w (word),
-		  $ (to the end of line), etc.
+       motion   - moves over the text to operate on, such as  w (word), $ (to the end of line), etc.
 
-  6. To move to the start of the line use a zero:  0
+  4. 0   - To move to the start of the line 
+     $   - move to end of line
+     ^   - move to first none space character
 
-  7. To undo previous actions, type: 	       u  (lowercase u)
-     To undo all the changes on a line, type:  U  (capital U)
-     To undo the undo's, type:		       CTRL-R
+  5. u        - To undo previous actions, 
+     U        - To undo all the changes on a line
+     CTRL-R   - To undo the undo's
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                   Lesson 3 SUMMARY
+
+
+  1. p    - paste after the cursor
+  
+  2. r    - replace character under cursor
+
+  3. c    - change from cursor to motion. The format for change is:
+
+     c   [number]   motion
+
+     ce    - change from the cursor to end of word
+     c$    - change to end of line
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                   Lesson 4 Traversing/ Searching in file
+
+
+  1. CTRL-G       - displays your location in the file and the file status
+     G            -  moves to the end of the file
+     number  G    - moves to that line number
+     gg           - moves to the first line
+
+  2. / phrase       - searches FORWARD for the phrase
+     ? phrase       - searches BACKWARD for the phrase
+     n/N            - After search, find the next occurrence in the same/opposite direction
+     CTRL-O/CTRL-I  - takes you back to older/newer positions
+
+  3. % - while the cursor is on a (,),[,],{, or } goes to its match
+
+  4. :s/old/new         - substitute new for the first old in a line type    
+     :s/old/new/g       - substitute new for all 'old's on a line type
+     :#,#s/old/new/g    - substitute phrases between two line #'s type
+     :%s/old/new/g      - substitute all occurrences in the file type
+     :%s/old/new/gc     - ask for confirmation each time add 'c'
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                   Lesson 5 SUMMARY
+
+
+  1.  :!COMMAND       - executes an external COMMAND.
+      :!ls            -  shows a directory listing.
+      :!rm FILENAME   -  removes file FILENAME.
+
+  2.  :w FILENAME     - writes the current Vim file to disk FILENAME.
+
+  3.  v  motion  :w FILENAME     - saves the Visually selected lines in FILENAME.
+
+  4.  :r FILENAME/COMMAND     - read output from FILENAME/COMMAND and puts below the cursor position.
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                   Lesson 6 SUMMARY
+
+  1. o   - open a line BELOW the cursor and start Insert mode.
+     O   - open a line ABOVE the cursor.
+
+  2. a   - insert text AFTER the cursor.
+     A   - insert text after the end of the line.
+
+  4. y   -  yanks (copies) text
+     p   -  puts (pastes) it.
+
+  5. R   - Replace mode until  <ESC>  is pressed.
+
+  6. :set xxx   - sets the option "xxx".  Some options are:
+        'ic' 'ignorecase'   ignore upper/lower case when searching
+        'is' 'incsearch'    show partial matches for a search phrase
+        'hls' 'hlsearch'    highlight all matching phrases
+     You can either use the long or the short option name.
+     Prepend "no" to switch an option off:   :set noic
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ```
 
+## Lec 4: Data Wrangling
+
+### [Regular Expression](https://regex101.com/)
+
+### Tools
+- `sort`
+- `awk`
+- `paste`
+- `wc`
+- `R`
+- `bc`
+- `gnuplot`
 
