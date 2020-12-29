@@ -42,7 +42,7 @@ Sept/2019 - May/2022
 - Implemented the Transformer based methods in KBQA tasks and discussed the advantages and disadvantages of such methods.
 
 **Research Project: Pruning Multi-view Stereo Network for Efficient 3D Reconstruction**\
-*Undergraduate Research with Professor Xiang Xiang at JHU*
+*Undergraduate Research with Xiang Xiang at JHU*
 
 - Devised new approach to compress and accelerate Convolutional Neural Networks(CNNs) in 3D reconstruction.
 - Proposed a large multi-scale architecture for exploiting efficiency in 3D CNNs, and tested the proposed network

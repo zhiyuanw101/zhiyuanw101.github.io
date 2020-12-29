@@ -62,7 +62,7 @@ keywords: Utils, Wiki
 - `grep/ rg`: find code
 - `history, fzf`: find shell commands
 - `tree/ nnn`: Directory Navigation
-
+- `fasd`: Directory Navigation with frequency
 ### Exercise
 
 1. man ls
