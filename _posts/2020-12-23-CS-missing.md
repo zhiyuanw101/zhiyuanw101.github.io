@@ -279,7 +279,7 @@ keywords: Utils, Wiki
 
 ## Lec 4: Data Wrangling [🔗](https://missing.csail.mit.edu/2020/data-wrangling/)
 
-### [Regular Expression](https://regex101.com/)
+### [Regex](https://regex101.com/)
 
 ### Tools
 
