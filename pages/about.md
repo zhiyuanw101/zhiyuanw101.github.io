@@ -12,8 +12,8 @@ permalink: /about/
 ### Education
 
 ---
-**University of Michigan - Ann Arbor**\
-Sept/2019 - May/2022
+**University of Michigan - Ann Arbor** (*Sept/2019 - May/2022*)\
+*Major in Computer Science*
 
 - GPA: 4.0
 - Courses:
