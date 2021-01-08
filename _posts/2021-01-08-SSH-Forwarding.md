@@ -8,6 +8,8 @@ keywords: SSH Forwarding
 
 ## Local Forwarding
 
+Used when trying to connect to Target, access Target by accessing `SourceIP:SourcePort` connected to Server
+
 ```sh
 ssh -L [SourceIP:]SourcePort:TargetIP:TargetPort User@Server
 ```
@@ -31,3 +33,15 @@ ssh -L [SourceIP:]SourcePort:TargetIP:TargetPort User@Server
 ![SSH_L](/assets/images/SSH-L.png)
 ![SSH-L1](/assets/images/SSH-L1.PNG)
 
+## Remote Forwarding
+
+Used when allowing others to connect to Target (connected with local), others access Target by accessing RemoteIP:RemotePort on Server
+
+```sh
+ssh -R [RemoteIP:]RemotePort:TargetIP:TargetPort User@Server
+```
+
+- meaning connect ssh with `User@Server`, Forward all connections to `RemoteIP:RemotePort` to `TargetIP:TargetPort`, which is connected to your local machine.
+- `TargetIP:TargetPort` relative to local machine that set up the ssh
+
+![SSH-R](/assets/images/SSH-R.png)
