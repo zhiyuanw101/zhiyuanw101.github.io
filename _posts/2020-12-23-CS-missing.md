@@ -482,6 +482,7 @@ def load_reference(name_or_id):
 - `git diff <filename>`: show changes you made relative to the staging area
 - `git diff <revision> <filename>`: shows differences in a file between snapshots
 - `git checkout <revision>`: updates HEAD and current branch
+- `git checkout <file>`: discard file changes in workspace
 
 #### Branching and merging
 
