@@ -365,9 +365,35 @@ log show | egrep '=== system boot:|Previous shutdown cause:'
   - `kill -(signal_name|signal_number) (pid|%job_id)`
     - process can be referred to by pid or job_id
 
-### Terminal Multiplexers
+### [Terminal Multiplexers (tmux)](https://tmuxcheatsheet.com/)
 
-TMUX
+[tutorial](https://www.hamvocke.com/blog/a-quick-and-easy-guide-to-tmux/)
+[customization](https://www.hamvocke.com/blog/a-guide-to-customizing-your-tmux-conf/)
+
+#### Session
+
+- `$ tmux -s mysession`: start new session named myssion
+- `$ tmux ls`: list all sessions
+- `$ tmux a -t mysession`: attatch to mysession
+- `C-b d`: detach current session
+- `C-b $`: rename session
+- `C-b s`: list sessions
+
+#### Windows
+
+- `C-b c`: create window
+- `C-b &`: close current window
+- `C-b p`: previous window
+- `C-b n`: next window
+- `C-b 1...9`: select window by number
+
+#### Panels
+
+- `C-b ;`: last active panel
+- `C-b %`: split vertically
+- `C-b "`: split horizontally
+- `C-b z`: zoom panel
+- `C-b !`: convert panel into window
 
 ### Dotfiles
 
@@ -379,9 +405,117 @@ TMUX
 
 using soft-link, source at `~/Configs/`, remote at `git@github.com:zhiyuanw101/Dotfiles-Configs.git`
 
+### ssh
+
+#### [ssh forwarding](https://zhiyuanw101.github.io/2021/01/08/SSH-Forwarding/)
+#### utils
+- [mosh](https://mosh.org/)
+- [sshfs](https://github.com/libfuse/sshfs)
 ### Excercise
 
 1. From what we have seen, we can use some `ps aux | grep` commands to get our jobs’ pids and then kill them, but there are better ways to do it. Start a `sleep 10000` job in a terminal, background it with `Ctrl-Z` and continue its execution with bg. Now use [`pgrep`](https://www.man7.org/linux/man-pages/man1/pgrep.1.html) to find its pid and `pkill` to kill it without ever typing the pid itself. (Hint: use the `-af` flags).
 2. Say you don’t want to start a process until another completes, how you would go about it? In this exercise our limiting process will always be `sleep 60 &`. One way to achieve this is to use the [`wait`](https://www.man7.org/linux/man-pages/man1/wait.1p.html) command. Try launching the sleep command and having an `ls` wait until the background process finishes.
 However, this strategy will fail if we start in a different bash session, since wait only works for child processes. One feature we did not discuss in the notes is that the kill command’s exit status will be zero on success and nonzero otherwise. kill -0 does not send a signal but will give a nonzero exit status if the process does not exist. Write a bash function called pidwait that takes a pid and waits until the given process completes. You should use sleep to avoid wasting CPU unnecessarily.
 
+
+## Lec 4: Git
+
+### Data model
+
+```c++
+// a file is a bunch of bytes
+type blob = array<byte>
+
+// a directory contains named files and directories
+type tree = map<string, tree | blob>
+
+// a commit has parents, metadata, and the top-level tree
+type commit = struct {
+    parent: array<commit>
+    author: string
+    message: string
+    snapshot: tree
+}
+
+// Objects
+type object = blob | tree | commit
+
+objects = map<string, object>
+
+// SHA-1 hash for id
+def store(object):
+    id = sha1(object)
+    objects[id] = object
+
+def load(id):
+    return objects[id]
+
+// References
+references = map<string, string>
+
+def update_reference(name, id):
+    references[name] = id
+
+def read_reference(name):
+    return references[name]
+
+def load_reference(name_or_id):
+    if name_or_id in references:
+        return load(references[name_or_id])
+    else:
+        return load(name_or_id)
+```
+
+### Interface
+
+- `git cat-file -p <hash-id>`: Pretty-print the contents of \<object\> based on its type.
+
+#### Basics
+
+- `git help <command>`: get help for a git command
+- `git init`: creates a new git repo, with data stored in the .git directory
+- `git status`: tells you what’s going on
+- `git add <filename>`: adds files to staging area
+- `git commit`: creates a new commit.
+- `git log`: shows a flattened log of history
+- `git log --all --graph --decorate`: visualizes history as a DAG
+- `git diff <filename>`: show changes you made relative to the staging area
+- `git diff <revision> <filename>`: shows differences in a file between snapshots
+- `git checkout <revision>`: updates HEAD and current branch
+
+#### Branching and merging
+
+- `git branch`: shows branches
+- `git branch <name>`: creates a branch
+- `git checkout -b <name>`: creates a branch and switches to it
+  - same as `git branch <name>`; `git checkout <name>`
+- `git merge <revision>`: merges into current branch
+- `git mergetool`: use a fancy tool to help resolve merge conflicts
+- `git rebase`: rebase set of patches onto a new base
+
+#### Remotes
+
+- `git remote`: list remotes
+- `git remote add <name> <url>`: add a remote
+- `git push <remote> <local branch>:<remote branch>`: send objects to remote, and update remote reference
+- `git branch --set-upstream-to=<remote>/<remote branch>`: set up correspondence between local and remote branch
+- `git fetch`: retrieve objects/references from a remote
+- `git pull:` same as git fetch; git merge
+- `git clone`: download repository from remote
+
+#### Undo
+
+- `git commit --amend`: edit a commit’s contents/message
+- `git reset HEAD <file>`: unstage a file
+- `git checkout -- <file>`: discard changes
+
+#### Advanced Git
+
+- `git config`: Git is highly customizable
+- `git clone --depth=1`: shallow clone, without entire version history
+- `git add -p`: interactive staging
+- `git rebase -i`: interactive rebasing
+- `git blame`: show who last edited which line
+- `git stash`: temporarily remove modifications to working directory
+- `git bisect`: binary search history (e.g. for regressions)
+- `.gitignore`: specify intentionally untracked files to ignore
