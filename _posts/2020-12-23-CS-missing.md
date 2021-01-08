@@ -40,7 +40,7 @@ keywords: Utils, Wiki
 
 - define variables
 - strings: `"$foo" / '$foo'`
-  - `'$ VAR'` will be substituted
+  - `"$VAR"` will be substituted
 - functions:
   - `source mcd.sh`
   - `mcd test`
@@ -63,6 +63,7 @@ keywords: Utils, Wiki
 - `history, fzf`: find shell commands
 - `tree/ nnn`: Directory Navigation
 - `fasd`: Directory Navigation with frequency
+
 ### Exercise
 
 1. man ls
@@ -279,7 +280,21 @@ keywords: Utils, Wiki
 
 ## Lec 4: Data Wrangling [🔗](https://missing.csail.mit.edu/2020/data-wrangling/)
 
-### [Regex](https://regex101.com/)
+### [Regex](https://regexone.com/)
+
+[Regex debugger](https://regex101.com/)
+
+- `.`: any single character
+- `\d`: Any digit, `\D`: any none digit
+- `\w`: any alphanumeric character, `\W`: any non-alphanumeric character
+- `[abc]/ [a-c]`: single character in a,b,c
+- `{m}`: m repititions
+- `*`: zero or more repititions
+- `+`: one or more repititions
+- `\s`: any whitespace (space, tab, new line/...), `\S`: any non-whitespace
+- `^...&`: start and end of line
+- `(...)`: capture group, `(abc|def)`: match abc or def
+- `?`: optional character
 
 ### Tools
 
@@ -290,3 +305,83 @@ keywords: Utils, Wiki
 - `R`
 - `bc`
 - `gnuplot`
+
+### Excerise
+
+1. [Regex](https://regexone.com/)
+2. Find the number of words (in `/usr/share/dict/words`) that contain at least three `a`s and don’t have a `'s` ending. What are the three most common last two letters of those words? `sed`’s y command, or the `tr` program, may help you with case insensitivity. How many of those two-letter combinations are there? And for a challenge: which combinations do not occur?
+
+  ```sh
+ head -n 20 /usr/share/dict/words | \
+ tr "[A-Z]" "[a-z]" | \
+ sed -E 's/((^(\w*a\w*){3}([^'][a-zA-Z]|[a-zA-Z'][^s])$|^(\w*a\w*){2}(a\w|[a-zA-Z']a)$)|.*)/\2/'
+  ```
+
+  ```sh
+  cat /usr/share/dict/words | \
+  grep '.\+.\+' | \
+  sed -E 's/^.*(..)$/\1/' | \
+  sort | \
+  uniq -c | \
+  sort -nk1,1 | \
+  tail -n 3
+  ```
+
+  ```sh
+  cat /usr/share/dict/words | \
+  grep '.\+.\+' | \
+  sed -E 's/^.*(..)$/\1/' | \
+  sort | \
+  uniq -c | \
+  wc -l
+  ```
+
+3. To do in-place substitution it is quite tempting to do something like `sed s/REGEX/SUBSTITUTION/ input.txt > input.txt`. However this is a bad idea, why? Is this particular to `sed`? Use `man sed` to find out how to accomplish this.
+
+  ```sh
+  sed -i '' 's/find/replace/g' filename
+  ```
+
+4. Find your average, median, and max system boot time over the last ten boots. Use `journalctl` on Linux and `log show` on macOS, and look for log timestamps near the beginning and end of each boot. 
+
+```sh
+log show | egrep '=== system boot:|Previous shutdown cause:'
+```
+
+## Lec 5: Command-line Environment
+
+### Job Control
+
+- `SIGINT`: `Ctrl-C`
+- `SIGQUIT`: `Ctrl-\`
+- `SIGTERM`: `kill -TERM %job-id`
+- `SIGSTP/SIGSTOP`: `Ctrl-Z`
+- `jobs`: show all jobs
+- `COMMAND &`: run in backgrounds
+- `bg`: continue stopped job in background
+- `fg`: continue stopped job in prompt
+- `kill`: signal a process
+  - `kill -l`: list all signals
+  - `kill -(signal_name|signal_number) (pid|%job_id)`
+    - process can be referred to by pid or job_id
+
+### Terminal Multiplexers
+
+TMUX
+
+### Dotfiles
+
+- bash - `~/.bashrc, ~/.bash_profile`
+- git - `~/.gitconfig`
+- vim - `~/.vimrc and the ~/.vim folder`
+- ssh - `~/.ssh/config`
+- tmux - `~/.tmux.conf`
+
+using soft-link, source at `~/Configs/`, remote at `git@github.com:zhiyuanw101/Dotfiles-Configs.git`
+
+### Excercise
+
+1. From what we have seen, we can use some `ps aux | grep` commands to get our jobs’ pids and then kill them, but there are better ways to do it. Start a `sleep 10000` job in a terminal, background it with `Ctrl-Z` and continue its execution with bg. Now use [`pgrep`](https://www.man7.org/linux/man-pages/man1/pgrep.1.html) to find its pid and `pkill` to kill it without ever typing the pid itself. (Hint: use the `-af` flags).
+2. Say you don’t want to start a process until another completes, how you would go about it? In this exercise our limiting process will always be `sleep 60 &`. One way to achieve this is to use the [`wait`](https://www.man7.org/linux/man-pages/man1/wait.1p.html) command. Try launching the sleep command and having an `ls` wait until the background process finishes.
+However, this strategy will fail if we start in a different bash session, since wait only works for child processes. One feature we did not discuss in the notes is that the kill command’s exit status will be zero on success and nonzero otherwise. kill -0 does not send a signal but will give a nonzero exit status if the process does not exist. Write a bash function called pidwait that takes a pid and waits until the given process completes. You should use sleep to avoid wasting CPU unnecessarily.
+
