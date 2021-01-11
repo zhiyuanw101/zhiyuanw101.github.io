@@ -422,6 +422,13 @@ However, this strategy will fail if we start in a different bash session, since 
 
 ### Data model
 
+- three types of objects: `blob`(file), `tree`(directories), `commit`
+- `commit` referes to a `tree` that represents the state of the files at the time of the commit, parent(s) `commit`(s), message, etc.
+- each objects identified by SHA-1 id
+- `refs`: reference (branch, head) murtable notes to commits
+  - `git commit`: adds commit node to DAG and move `refs` forward to it
+  - `HEAD`: special `refs` to current active branch
+
 ```c++
 // a file is a bunch of bytes
 type blob = array<byte>
@@ -520,3 +527,36 @@ def load_reference(name_or_id):
 - `git stash`: temporarily remove modifications to working directory
 - `git bisect`: binary search history (e.g. for regressions)
 - `.gitignore`: specify intentionally untracked files to ignore
+
+#### Details & Practical usage
+
+- [`git checkout`](https://git-scm.com/docs/git-checkout):
+  - Switch branches, or updates files in the working tree to match the version in the index or the specified tree. If no `pathspec` was given, git checkout will also update `HEAD` to set the specified branch as the current branch.
+  - if `[<branch>]`: update index, working tree to `branch`, point `HEAD` to `branch`
+  - if no `<commit>`: restore working tree from index
+  - `git checkout <refs>/<commit_id>`: move `HEAD` to that commit, update index and files in working space, local modifications are kept. 
+    - `<refs>`: `HEAD^`: parent node of current `HEAD`, `HEAD~n`: `n`th parent 
+- `git branch`: List, create, or delete branches
+  - create branch: `git branch <branchname> [<start-point>]`: if no `start-point`, create from `HEAD`
+  - delete (remote) branch: `git branch -D [-r] <branchname>`
+  - list branch: `git branch [-a|-r]`
+  - change branch: `git branch -f <branch> <refs>/<commit_id>`: change that branch reference to specified commit 
+- `git rebase`: create linear commit log, alternative to `merge`:
+  - Reapply commits on top of another base tip: `git rebase <onto-branch> [<root-branch>]`, `root-branch` not specified, use `HEAD` branch
+- `git cherry-pick <commit>[<commit>..]`: add modifications to `HEAD` branch from `commit`s in order
+- `git push <repo> <src>[:<dst>]`:
+  - `<repo>`: remote repo name, usually origin
+  - `<src>`: a local commit, could be a reference/branch, when `<src>` empty, delete remote branch
+  - `dst`: a remote branch
+- `git fetch <repo> <src>[:<dst>]`:
+  - `<repo>`: remote repo name, usually origin
+  - `<src>`: a remote commit, could be a reference/branch
+  - `dst`: a local branch
+- `git pull <repo> <src>[:<dst>] [--rebase]`
+  - `fetch` with `rebase` or `merge`
+- `git reset [<mode>] <commit>`
+  - use: Reset current `HEAD` to the specified state, and possibly change index or working tree
+  - `mode`: 
+    - `--mixed`: default, reset index but not working tree
+    - `--soft`: does not affect working tree or index
+    - `--hard`: reset both working tree and index
