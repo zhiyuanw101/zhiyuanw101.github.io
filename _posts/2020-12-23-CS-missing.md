@@ -418,7 +418,7 @@ using soft-link, source at `~/Configs/`, remote at `git@github.com:zhiyuanw101/D
 However, this strategy will fail if we start in a different bash session, since wait only works for child processes. One feature we did not discuss in the notes is that the kill command’s exit status will be zero on success and nonzero otherwise. kill -0 does not send a signal but will give a nonzero exit status if the process does not exist. Write a bash function called pidwait that takes a pid and waits until the given process completes. You should use sleep to avoid wasting CPU unnecessarily.
 
 
-## Lec 4: Git
+## Lec 6: Git
 
 ### Data model
 
@@ -560,3 +560,52 @@ def load_reference(name_or_id):
     - `--mixed`: default, reset index but not working tree
     - `--soft`: does not affect working tree or index
     - `--hard`: reset both working tree and index
+
+
+## Lec 7: Debugging and Profiling [🔗](https://missing.csail.mit.edu/2020/debugging-profiling/)
+
+### Logging
+
+- logging scripts
+- system logs
+
+### Debuggers
+
+- python: [`ipydb (pdb)`](https://github.com/spiside/pdb-tutorial)
+  - start: `python -m ipdb module.py` / `bin/ipdb3 module.py`
+  - `l(ist)`: display lines
+  - `n(ect)`: Continue execution until the next line in the current function is reached or it returns.
+  - `s(tep)`: step into line, stop at the first possible occasion.
+  - `c(ontinue)`: Continue execution until the error or end.
+  - `r(eturn)`: Execute until the return line
+  - `b(reak) n`: breakpoint at line `n`
+  - `p(rint) var`: print `var` value
+- C-like: `gdb`, `lldb`
+
+### Profiling
+
+#### timing
+
+- `time command [arguments...]`: time a simple command or give resource usage
+- python: `time` module
+
+
+#### Profilers
+##### CPU
+- python: `cProfile` module
+  - [line profiler](https://github.com/pyutils/line_profiler)
+
+##### memory
+- C-like: Valgrind
+- python: [memory profiler](https://pypi.org/project/memory-profiler/)
+
+##### event
+- perf
+
+
+##### visualization
+- [Flame graph](http://www.brendangregg.com/flamegraphs.html)
+- python, call graph: [pycallgraph](http://pycallgraph.slowchop.com/en/master/)
+
+##### resource monitoring
+- general monitoring: [`htop`](https://htop.dev/)
