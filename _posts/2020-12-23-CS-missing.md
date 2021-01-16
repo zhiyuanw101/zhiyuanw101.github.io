@@ -622,6 +622,8 @@ def load_reference(name_or_id):
 
 ## Lec 8: Metaprogramming
 
+- `git ls-files` useful for listing all files
+
 ### Build system
 
 - `Makefile`
