@@ -408,9 +408,12 @@ using soft-link, source at `~/Configs/`, remote at `git@github.com:zhiyuanw101/D
 ### ssh
 
 #### [ssh forwarding](https://zhiyuanw101.github.io/2021/01/08/SSH-Forwarding/)
+
 #### utils
+
 - [mosh](https://mosh.org/)
 - [sshfs](https://github.com/libfuse/sshfs)
+
 ### Excercise
 
 1. From what we have seen, we can use some `ps aux | grep` commands to get our jobs’ pids and then kill them, but there are better ways to do it. Start a `sleep 10000` job in a terminal, background it with `Ctrl-Z` and continue its execution with bg. Now use [`pgrep`](https://www.man7.org/linux/man-pages/man1/pgrep.1.html) to find its pid and `pkill` to kill it without ever typing the pid itself. (Hint: use the `-af` flags).
@@ -534,13 +537,13 @@ def load_reference(name_or_id):
   - Switch branches, or updates files in the working tree to match the version in the index or the specified tree. If no `pathspec` was given, git checkout will also update `HEAD` to set the specified branch as the current branch.
   - if `[<branch>]`: update index, working tree to `branch`, point `HEAD` to `branch`
   - if no `<commit>`: restore working tree from index
-  - `git checkout <refs>/<commit_id>`: move `HEAD` to that commit, update index and files in working space, local modifications are kept. 
-    - `<refs>`: `HEAD^`: parent node of current `HEAD`, `HEAD~n`: `n`th parent 
+  - `git checkout <refs>/<commit_id>`: move `HEAD` to that commit, update index and files in working space, local modifications are kept.
+    - `<refs>`: `HEAD^`: parent node of current `HEAD`, `HEAD~n`: `n`th parent
 - `git branch`: List, create, or delete branches
   - create branch: `git branch <branchname> [<start-point>]`: if no `start-point`, create from `HEAD`
   - delete (remote) branch: `git branch -D [-r] <branchname>`
   - list branch: `git branch [-a|-r]`
-  - change branch: `git branch -f <branch> <refs>/<commit_id>`: change that branch reference to specified commit 
+  - change branch: `git branch -f <branch> <refs>/<commit_id>`: change that branch reference to specified commit
 - `git rebase`: create linear commit log, alternative to `merge`:
   - Reapply commits on top of another base tip: `git rebase <onto-branch> [<root-branch>]`, `root-branch` not specified, use `HEAD` branch
 - `git cherry-pick <commit>[<commit>..]`: add modifications to `HEAD` branch from `commit`s in order
@@ -556,11 +559,10 @@ def load_reference(name_or_id):
   - `fetch` with `rebase` or `merge`
 - `git reset [<mode>] <commit>`
   - use: Reset current `HEAD` to the specified state, and possibly change index or working tree
-  - `mode`: 
+  - `mode`:
     - `--mixed`: default, reset index but not working tree
     - `--soft`: does not affect working tree or index
     - `--hard`: reset both working tree and index
-
 
 ## Lec 7: Debugging and Profiling [🔗](https://missing.csail.mit.edu/2020/debugging-profiling/)
 
@@ -589,23 +591,33 @@ def load_reference(name_or_id):
 - `time command [arguments...]`: time a simple command or give resource usage
 - python: `time` module
 
-
 #### Profilers
+
 ##### CPU
+
 - python: `cProfile` module
+  - usage: `python -m cPython [-o output_file] [-s sort_order] (-m module | myscript.py)`
   - [line profiler](https://github.com/pyutils/line_profiler)
+    - insert `@profile` before the monitored function
+    - `kernprof -l -v script_to_profile.py`
 
 ##### memory
+
 - C-like: Valgrind
 - python: [memory profiler](https://pypi.org/project/memory-profiler/)
 
 ##### event
+
 - perf
 
-
 ##### visualization
+
 - [Flame graph](http://www.brendangregg.com/flamegraphs.html)
 - python, call graph: [pycallgraph](http://pycallgraph.slowchop.com/en/master/)
+  - `pycallgraph graphviz -- ./module.py`
 
 ##### resource monitoring
+
 - general monitoring: [`htop`](https://htop.dev/)
+
+## Lec 8: Metaprogramming
