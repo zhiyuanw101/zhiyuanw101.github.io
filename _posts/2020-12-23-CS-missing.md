@@ -641,4 +641,5 @@ def load_reference(name_or_id):
 
 #### Github actions
 
-- https://github.com/features/actions
+- [Use others actions](https://docs.github.com/en/actions/quickstart)
+- [Build own actions](https://docs.github.com/en/actions/creating-actions)
