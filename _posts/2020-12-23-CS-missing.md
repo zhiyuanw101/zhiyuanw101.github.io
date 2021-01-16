@@ -621,3 +621,24 @@ def load_reference(name_or_id):
 - general monitoring: [`htop`](https://htop.dev/)
 
 ## Lec 8: Metaprogramming
+
+### Build system
+
+- `Makefile`
+
+### Dependency management
+
+- [semantic versioning(https://semver.org/)
+  - If a new release does not change the API, increase the patch version.
+  - If you add to your API in a backwards-compatible way, increase the minor version.
+  - If you change the API in a non-backwards-compatible way, increase the major version.
+
+### Continuous Integration System
+
+#### Git
+
+- `.git/hooks`
+
+#### Github actions
+
+- https://github.com/features/actions
