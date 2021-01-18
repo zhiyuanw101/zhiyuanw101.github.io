@@ -645,3 +645,50 @@ def load_reference(name_or_id):
 
 - [Use others actions](https://docs.github.com/en/actions/quickstart)
 - [Build own actions](https://docs.github.com/en/actions/creating-actions)
+
+## Lec 9: Security and Cryptography
+
+### Entropy
+
+- measure of randomness
+- equal to `log_2(# of possibilities)`
+
+### hash functions
+
+- cryptographic hash function: maps data of arbitrary size to a fixed size, have special property:
+  - Deterministic: the same input always generates the same output.
+  - Non-invertible: it is hard to find an input m such that hash(m) = h for some desired output h.
+  - Target collision resistant: given an input m_1, it’s hard to find a different input m_2 such that hash(m_1) = hash(m_2).
+  - Collision resistant: it’s hard to find two inputs m_1 and m_2 such that hash(m_1) = hash(m_2) (note that this is a strictly stronger property than target collision resistance).
+- `sha1sum`
+
+### Key derivation functions(KDFs)
+
+### Symmetric cryptography
+
+```sh
+keygen() -> key  (this function is randomized)
+
+encrypt(plaintext: array<byte>, key) -> array<byte>  (the ciphertext)
+decrypt(ciphertext: array<byte>, key) -> array<byte>  (the plaintext)
+```
+
+`decrypt(encrypt(m, k), k) = m`
+
+### Asymmetric cryptography
+
+```sh
+keygen() -> (public key, private key)  (this function is randomized)
+
+encrypt(plaintext: array<byte>, public key) -> array<byte>  (the ciphertext)
+decrypt(ciphertext: array<byte>, private key) -> array<byte>  (the plaintext)
+
+sign(message: array<byte>, private key) -> array<byte>  (the signature)
+verify(message: array<byte>, signature: array<byte>, public key) -> bool  (whether or not the signature is valid)
+```
+
+`decrypt(encrypt(m, public key), private key) = m`
+
+### Case
+
+- [set up GPG](https://www.digitalocean.com/community/tutorials/how-to-use-gpg-to-encrypt-and-sign-messages)
