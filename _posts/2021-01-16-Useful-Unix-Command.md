@@ -5,6 +5,17 @@ categories: [Unix, Utils, Wiki]
 description: Useful Unix Command
 keywords: Unix, Utils, Wiki
 ---
+## Parameter Expansion
+
+- https://wiki.bash-hackers.org/syntax/pe
+
+## Expansions and substitutions
+
+- https://wiki.bash-hackers.org/syntax/expansion/intro
+
+## Compound commands
+
+- https://wiki.bash-hackers.org/syntax/ccmd/intro
 
 ## `tr <string1> <string2>`
 
@@ -35,4 +46,10 @@ keywords: Unix, Utils, Wiki
 
 ## `set`
 
+- [`set -euxo pipefail`](https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/)
+- [doc](https://www.gnu.org/software/bash/manual/html_node/The-Set-Builtin.html)
 - Display, set or unset values of shell attributes and positional parameters
+
+## `file`
+
+- determine file type
