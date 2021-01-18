@@ -7,15 +7,15 @@ keywords: Unix, Utils, Wiki
 ---
 ## Parameter Expansion
 
-- https://wiki.bash-hackers.org/syntax/pe
+- [link](https://wiki.bash-hackers.org/syntax/pe)
 
 ## Expansions and substitutions
 
-- https://wiki.bash-hackers.org/syntax/expansion/intro
+- [link](https://wiki.bash-hackers.org/syntax/expansion/intro)
 
 ## Compound commands
 
-- https://wiki.bash-hackers.org/syntax/ccmd/intro
+- [link](https://wiki.bash-hackers.org/syntax/ccmd/intro)
 
 ## `tr <string1> <string2>`
 
