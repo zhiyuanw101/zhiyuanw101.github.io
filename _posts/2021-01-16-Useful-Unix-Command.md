@@ -53,3 +53,23 @@ keywords: Unix, Utils, Wiki
 ## `file`
 
 - determine file type
+
+## `source` and execution
+
+- `source`: execute in current shell
+
+  ```sh
+  $ source [path-to-file]
+  # is equivalent to
+  $ . [path-to-file]
+  ```
+
+- `./` execute: execute executable in new shell
+
+  ```sh
+  $ [path-to-executable]
+  # for example, python is in $PATH
+  $ python
+  # executable is not in $PATH, but in current directory
+  $ ./executable
+  ```
