@@ -73,3 +73,7 @@ keywords: Unix, Utils, Wiki
   # executable is not in $PATH, but in current directory
   $ ./executable
   ```
+
+## `groups`
+
+- [reference](https://www.howtogeek.com/50787/add-a-user-to-a-group-or-second-group-on-linux/)
