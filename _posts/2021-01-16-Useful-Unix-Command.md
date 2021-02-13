@@ -77,3 +77,61 @@ keywords: Unix, Utils, Wiki
 ## `groups`
 
 - [reference](https://www.howtogeek.com/50787/add-a-user-to-a-group-or-second-group-on-linux/)
+
+
+## Unix file
+- File descriptor table
+  - file descriptor as indexes
+    - 0: stdin
+    - 1: stdout
+    - 2: stderr
+
+### redirection
+
+- `[n]<`: set file as input for fd `n`
+- `[n]>`: set file as output for fd `n`
+- `&>`: set file as fd1 and fd2, overwrite
+- `[a]>&[b]`: redirect `a` to `b` 
+
+
+## Control flow
+### `for`
+```sh
+for var in list; do
+    command
+done
+```
+### `while`
+```sh
+while test-commands; do
+    command
+done
+```
+### `until`
+```sh
+until test-command; do
+    command
+done
+```
+### `if-elif-else`
+```sh
+if test-commands; then
+    command
+elif test-commands; then
+    command
+else
+    command
+fi
+```
+### test commands
+#### `test expr`
+- short hand: `[ expr ]`
+
+#### `[[ expr ]]`: bash condition
+- rich set of operators `==, != , >, <`
+  - compare on strings
+- numeric comparison:
+  - `-eq`, `-ge`, `-ne` ...
+
+#### `(( expr ))`: bash arithmetic conditional
+- evaluated as arithmetic expression
