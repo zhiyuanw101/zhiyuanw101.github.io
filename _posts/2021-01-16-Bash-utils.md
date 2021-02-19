@@ -93,7 +93,7 @@ keywords: Unix, Utils, Wiki
 - `[n]>`: set file as output for fd `n`
 - `&>`: set file as fd1 and fd2, overwrite
 - `[a]>&[b]`: redirect `a` to `b`
-
+- `[command] <<< "string"`: send string as stdin
 
 ## Control flow
 
