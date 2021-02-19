@@ -1,8 +1,8 @@
 ---
 layout: post
-title: Useful Unix Command
-categories: [Unix, Utils, Wiki]
-description: Useful Unix Command
+title: Bash utils
+categories: [Unix, Utils, Wiki, Shell, Bash]
+description:  Bash utils
 keywords: Unix, Utils, Wiki
 ---
 ## Parameter Expansion
@@ -20,6 +20,7 @@ keywords: Unix, Utils, Wiki
 ## `tr <string1> <string2>`
 
 - translate characters: copies standard input to standard output with substitution or deletion of selected characters
+- `tr -d '*'`: delete all `*` from input and output to stdout
 
 ## `env`
 
@@ -91,15 +92,19 @@ keywords: Unix, Utils, Wiki
 - `[n]<`: set file as input for fd `n`
 - `[n]>`: set file as output for fd `n`
 - `&>`: set file as fd1 and fd2, overwrite
-- `[a]>&[b]`: redirect `a` to `b` 
+- `[a]>&[b]`: redirect `a` to `b`
 
 
 ## Control flow
+
 ### `for`
 ```sh
 for var in list; do
     command
 done
+
+# inline
+for file in $(ls); do echo "loop: $file"; done
 ```
 ### `while`
 ```sh
@@ -122,7 +127,11 @@ elif test-commands; then
 else
     command
 fi
+
+# inline
+if [[ 100 -lt 200 ]]; then echo "100 < 200"; fi
 ```
+
 ### test commands
 #### `test expr`
 - short hand: `[ expr ]`
@@ -134,4 +143,75 @@ fi
   - `-eq`, `-ge`, `-ne` ...
 
 #### `(( expr ))`: bash arithmetic conditional
+
 - evaluated as arithmetic expression
+
+## function
+
+```sh
+# funciton in subshell, does not affect current shell
+function myfunc (
+  ...
+)
+
+# current shell, function affect your current shell
+function myfunc {
+  ...
+}
+
+# same to above
+myfunc () {
+  ...
+}
+
+# call myfunc
+myfunc
+```
+
+## Regex
+
+- POSIX BRE/POSIX ERE
+  - `egrep` or `-E` to use extended version
+  - `grep` by default filter out that don't match
+
+### Special characters
+
+- `.`: any single char
+- `|`: OR between regexes
+- `\`: special expression
+- `()`: enclose expression as subexpression
+  - `(hello|goodbye) (Cat|dog)` 
+
+### Quantifiers
+
+- `?`: <=1
+- `*`: >=0
+- `+`: >=1
+- `{n}`: n
+- `{n,}`: >=n
+- `{,m}`: <=m
+- `{n, m}`: between m, n inclusive
+
+### Brackets
+
+- `[]`: a set to match for one char
+  - `[abc]`: one of a, b, c
+
+- inside:
+  - `-`: range
+  - `^`: not in set
+  - Named classes: `[[:alnum:]]`
+    - `[:alnum:]`: alphanumeric char
+    - `[:alpha:]`: alphabetic char
+    - `[:blank:]`: space and tab
+
+### Anchors
+
+- `^`: beginning of line
+- `$`: end of line
+
+### Backreferences
+
+- Match previous `()` subexpression
+- `\n` match nth subexpression
+  - e.g. `(123)testing\1` matches `123testing123`
