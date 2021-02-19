@@ -215,3 +215,4 @@ myfunc
 - Match previous `()` subexpression
 - `\n` match nth subexpression
   - e.g. `(123)testing\1` matches `123testing123`
+  - exact the same thing
