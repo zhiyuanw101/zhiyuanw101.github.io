@@ -316,6 +316,22 @@ Reference: [stanford](https://nlp.stanford.edu/IR-book/html/htmledition/latent-s
 
 ### Fuzzy Set Model
 
+- *fuzzy* framework:
+  - Each **term** associated with a *fuzzy* set
+  - Each **doc** has a degree of membership in fuzzy set
+- Thesaurus: $C$ is term-term correlation matrix 
+  - $C(i, j) = \frac{n(i, j)}{n(i) + n(j) - n(i, j)}$, for $K_i, K_j$
+    - $n(i)$ Is number of documents contains $K_i$
+    - $n(i, j)$ is number of documents contains both $K_i, K_j$
+  - Notion of proximity between terms
+- Define: $K_i$ fuzzy set membership for document $D_j$:
+  - $\mu(K_i, D_j) = 1-\prod_{K_l \in D_j}(1-C(i, l))$
+  - membership of $D_j$ in fuzzy set associated with $K_i$
+  - $\mu(\neg K_i, D_j) = 1- \mu(K_i, D_j)$
+- Disjunctions and Conjunctions
+  - Disjunctive set: $\mu(K_1\vert  K_2 \vert  ... \vert K_n, D_j) = 1-\prod(1-\mu(K_i, D_j))$
+  - Conjunctive set: $\mu(K_1 \wedge K_2 \wedge ... K_n, D_j) = \prod (\mu (K_i, D_j))$
+
 ## 6. Word Representations
 
 ### A. Sparse representations
