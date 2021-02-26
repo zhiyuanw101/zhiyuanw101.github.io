@@ -9,6 +9,9 @@ keywords: Unix, Utils, Wiki
 
 - [link](https://wiki.bash-hackers.org/syntax/pe)
 
+### Special parameter
+
+- `$$`: current pid
 ## Expansions and substitutions
 
 - [link](https://wiki.bash-hackers.org/syntax/expansion/intro)
@@ -89,10 +92,11 @@ keywords: Unix, Utils, Wiki
 
 ### redirection
 
-- `[n]<`: set file as input for fd `n`
-- `[n]>`: set file as output for fd `n`
-- `&>`: set file as fd1 and fd2, overwrite
-- `[a]>&[b]`: redirect `a` to `b`
+- `[n]<file`: set file as input for fd `n`
+- `[n]>file`: set file as output for fd `n`
+- `&>file`: set file as fd1 and fd2, overwrite
+- `[a]>&[b]`: redirect fd `a` to fd `b`
+  - compare with `>`: `>` is to file, `>&` to fd
 - `[command] <<< "string"`: send string as stdin
 
 ## Control flow
@@ -216,3 +220,5 @@ myfunc
 - `\n` match nth subexpression
   - e.g. `(123)testing\1` matches `123testing123`
   - exact the same thing
+
+
