@@ -66,8 +66,8 @@ navs:
 #     label: 开源
 
   -
-    href: /wiki/
-    label: Wiki
+    href: /misc/
+    label: Misc
 
 #   -
 #     href: /links/
@@ -104,9 +104,9 @@ plugins:
     - jemoji
 #     - jekyll-mentions
 collections:
-    wiki:
+    misc:
         output: true
-        permalink: /wiki/:path/
+        permalink: /misc/:path/
 
 # ---------------- #
 #      Comments    #
