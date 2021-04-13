@@ -404,5 +404,178 @@ Reference: [stanford](https://nlp.stanford.edu/IR-book/html/htmledition/latent-s
 
 
 
+## 7. Link Analysis
+
+### Anchor Text
+
+- anchor text: surrounding each link
+- add anchor text to the content of destination page
+- Pros: increase relevant information, increase recall
+- Cons: anchor change rapidly
+
+### PageRank
+
+$$
+S(V_i) = \frac{1-d}{N} + d\sum_{j\in In(V_i)}\frac{1}{\vert Out(V_j)\vert} S(V_j)
+$$
+
+- PageRank + Topic sensitive: 
+
+  - For each class $k$, for each node $i$
+
+    - $$
+      S(V_{ik}) = Bias_{ik}\frac{1-d}{N} + d\sum_{j\in In(V_{ik})}\frac{1}{\vert Out(V_{jk})\vert} S(V_{jk})
+      $$
+
+    - $$
+      Bias_{ik} = \begin{cases}
+      \frac{1}{\vert T_k \vert}&, V_i \in T_k\\
+      0&, \text{Otherwise}
+      \end{cases}
+      $$
+
+    - $T_k$ is set of nodes in class $k$
+
+  - $$
+    Score(V_i) = \sum_k P(C_k\vert Q) \cdot S(V_{ik})
+    $$
+
+### HITS
+
+- Hub: points to many pages
+- Authority: pointed by many pages
+- Iterate:
+  - root set, base set
+    - Root set: all pages containing query
+    - Base set: root set add connected to root 
+  - Step:
+    - $HITS_A(V_i) = \sum_{j\in In(V_i)}HITS_H(V_j)$
+    - $HITS_H(V_i) = \sum_{j\in Out(V_i)}HITS_A(V_j)$
+  - Normalization
+
+## 8. Relevance feedback
+
+### Query Reformulation
+
+- Optimal query
+  - Standard Rocchio method
+  - Ide Regular method
+  - Ide "Dec Hi" Method
+- Query expansion
+  - Thesaurus
+  - Global analysis
+  - Local analysis
+
+## 9. IR Evaluation
+
+### F-measure
+
+- $$
+  F = \frac{2PR}{P + R} = \frac{2}{\frac{1}{R} + \frac{1}{P}}
+  $$
+
+- Parametreized F-measure: $\beta$ to control tradeoff
+
+### Ranked retrieval measures
+
+#### Binary relevance
+
+- Precision/ Recall Curve
+- R-precision
+  - R = number of relevance
+  - Precision at R-th position in the ranking result
+  - Precision and recall are the same
+- Precision@K
+  - % of relevant document in top K ranking result
+- Mean Average Precision (MAP)
+- Mean Reciprocal Rank
+
+#### Multiple level relevance
+
+- Cumulative Gain
+- Discounted Cumulative Gain (DCG)
+- Normalized Discounted Cumulative Gain (NDCG)
+
+### Kendall-tau Distance to Compare Rankings
+
+- $$
+  \frac{X-Y}{X+Y}
+  $$
+
+- $X$ is number of agreements pair
+
+- $Y$ Is number of disagreements pair
+
+### A/B test
+
+## 10. Text Classification
+
+### Naive Bayes
+
+### Decision Trees
+
+### Rocchio Text Classification
+
+### K-NN
+
+### Neural Networks
+
+### Evalution
+
+- Learning Curves
+
+### Bootstrapping
+
+## 11. Question Answering
+
+- Factoid Questions
+  - information extraction + ranking
+  - Evaluation:
+    - Mean Reciprocal Rank
+- Non-Factoid Questions
+  - filtering and summarization of factoid
+    - Query-based summarization
+    - Focused Summarization
+
+###  IR-based QA (text-based)
+
+- Question Preprocessing
+  - Answer type
+  - Query (keywords)
+  - Focus: word to replace
+- Passage Retrieval
+- Answer Processing:
+  - use Answer type + retrieved ranked passages
+
+### Knowledge-based QA
+
+### Hybrid
+
+## 12. Image Retrieval
+
+### Metadata based
+
+### Content Based
+
+- visual representations
+  - color histogram
+  - Texture histogram
+  - Shape distance
+  - Bag-of-Visual-Words
+    - interesting point detection: key points
+    - descriptor: describe key point using texture, shape, color, etc.
+    - visual words generation: construct visual words dictionary
+      - cluster key points representation
+
+### Efficient Image Retrieval Strategies
+
+- Bare-Bones Triangle Inequality Algorithm
+  - offline: 
+    - choose set of key images
+    - store distance from database images to keys
+  - Online: 
+    - compute distance from Q to key images
+    - Obtain lower bounds on distances to databases images
+
 
 
