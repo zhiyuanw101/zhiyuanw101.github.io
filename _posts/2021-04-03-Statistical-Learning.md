@@ -11,8 +11,8 @@ keywords: Wiki, Data, Machine Learning, Stats
 ### Taxonomy
 
 - Links:
-  - https://www.cs.cornell.edu/courses/cs4780/2018fa/lectures/lecturenote04.html
-  - https://www.cs.cmu.edu/~tom/mlbook/Joint_MLE_MAP.pdf
+  - <https://www.cs.cornell.edu/courses/cs4780/2018fa/lectures/lecturenote04.html>
+  - <https://www.cs.cmu.edu/~tom/mlbook/Joint_MLE_MAP.pdf>
 - (Probability) Estimation: estimating the **parameters** of a distribution
   - MLE
   - MAP
@@ -36,11 +36,11 @@ keywords: Wiki, Data, Machine Learning, Stats
 - Idea
   - $\hat{\theta} = \arg max_{\theta}f_n(x\vert  \theta) $
 
-- Likelihood: 
+- Likelihood:
   - $L_n(\theta) = f_n(x\vert  \theta)$
   - measures the [goodness of fit](https://en.wikipedia.org/wiki/Goodness_of_fit) of a [statistical model](https://en.wikipedia.org/wiki/Statistical_model) to a [sample of data](https://en.wikipedia.org/wiki/Sample_(statistics)) for given values of the unknown [parameters](https://en.wikipedia.org/wiki/Statistical_parameter)
-  - similar to probability, formed from the [joint probability distribution](https://en.wikipedia.org/wiki/Joint_probability_distribution) of the sample, but viewed and used as a function of the parameters only. 
-- Goal: 
+  - similar to probability, formed from the [joint probability distribution](https://en.wikipedia.org/wiki/Joint_probability_distribution) of the sample, but viewed and used as a function of the parameters only.
+- Goal:
   - find parameters that maximize likelihood function
   - select parameters that gives observed data largest probability
   - get probability distribution based on the parameters
@@ -54,7 +54,7 @@ keywords: Wiki, Data, Machine Learning, Stats
 
 - Posteriori
   - posterior probability of $\theta$: $f(\theta \vert  x) = \frac{f(x\vert \theta) \cdot g(\theta)}{f(x)}$
-  -  $\hat{\theta} = \arg max_{\theta}f(\theta\vert  x)  = \arg max_\theta f(x\vert \theta)\cdot g(\theta)$
+  - $\hat{\theta} = \arg max_{\theta}f(\theta\vert  x)  = \arg max_\theta f(x\vert \theta)\cdot g(\theta)$
 
 #### EM (Expectation Maximization)
 
@@ -67,7 +67,7 @@ keywords: Wiki, Data, Machine Learning, Stats
   - Steps:
     - Expectation step:
     - Maximization step:
-- Example: 
+- Example:
   - GMM
     - E-step: fix parameters, softly assign examples to clusters
     - M-step: re-estimate each cluster parameters
@@ -86,11 +86,11 @@ keywords: Wiki, Data, Machine Learning, Stats
   - Joint probability contains all information: marginal, conditional
     - $P(b) = Σa Σc Σd P(a, b, c, d) $
     - $P(c \vert b) = Σa Σd P(a, c, d \vert b) $
-  - Chain rule of Factoring: 
+  - Chain rule of Factoring:
     - $P(a, b, c, … z) = P(a \vert b, c, …. z) P(b \vert c,.. z) P(c\vert .. z)..P(z)$
   - Conditional independence
     - $P(X1, X2,…. XK \vert C) = Π P(Xi \vert C)$
-    -  Naïve Bayes assumption
+    - Naïve Bayes assumption
   - Graph graph <==> Conditional independence relations
     - $p(X1, X2,....XN) = Π p(Xi \vert parents(Xi))$
 
@@ -146,6 +146,3 @@ $$
 ##### Unknown Labels
 
 - EM for GMM
-
-
-
