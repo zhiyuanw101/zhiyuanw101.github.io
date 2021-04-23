@@ -62,11 +62,19 @@ keywords: Wiki, Data, Machine Learning, Stats
   - Estimate parameters with MLE or MAP when model depends on **unobserved latent variables**.
     - GMM: unobserved cluster labels
 - Description:
-  - Given: $X$ observed data, unobserved latent variables $Z$, and joint likelihood $L(\theta; X, Z) = p(X, Z \vert \theta)$
+  - Given: 
+    - $X$ observed data, unobserved latent variables $Z$
+    - Joint likelihood $L(\theta; X, Z) = p(X, Z \vert \theta)$
   - Maximize marginal likelihood of observed data $L(\theta; X) = p(X\vert \theta) = \sum_Z p(X, Z \vert \theta)$, however equlity is often **intractable**
+    - Maximize $L(\theta; X)$ by maximizing $Q(\theta\vert \theta^t)$
+  
   - Steps:
     - Expectation step:
+      - Find $p(Z\vert X, \theta^t)$
+      - $$Q(\theta\vert \theta^t) = \mathbb{E}_{Z\vert X, \theta^t}[\log{L(\theta; X, Z)}]$$
     - Maximization step:
+      - Find parameters to maximize $Q(\theta\vert \theta^t)$
+      - i.e. $\theta^{t+1} = \arg{max\,} Q(\theta\vert \theta^t)$
 - Example:
   - GMM
     - E-step: fix parameters, softly assign examples to clusters
@@ -103,13 +111,9 @@ keywords: Wiki, Data, Machine Learning, Stats
 
 - Estimation
 
-  - $$
-    \mu_{MLE} = \sum_{i=1}^n{\frac{x^{(i)}}{n}}
-    $$
-
-  - $$
-    \sigma^2_{MLE} = \sum_{i=1}^n{\frac{(x^{(i)}-\mu_{MLE})^2}{n}}
-    $$
+  - $$\mu_{MLE} = \sum_{i=1}^n{\frac{x^{(i)}}{n}}$$
+    
+  - $$\sigma^2_{MLE} = \sum_{i=1}^n{\frac{(x^{(i)}-\mu_{MLE})^2}{n}}$$
 
 #### Multivariate Gaussian Distribution
 
@@ -117,17 +121,11 @@ keywords: Wiki, Data, Machine Learning, Stats
 
 - Spherical Gaussian
 
-  - $$
-    \Sigma = \sigma^2\mathbf{I}_d
-    $$
-
-  - $$
-    \overline{\mu}_{MLE} = \sum_{i=1}^n{\frac{ \overline{x}^{(i)}}{n}}
-    $$
-
-  - $$
-    \sigma^2_{MLE} = \sum_{i=1}^n{\frac{\vert\vert\overline{x}^{(i)}-\overline{\mu}_{MLE}\vert\vert^2}{nd}}
-    $$
+  - $$\Sigma = \sigma^2\mathbf{I}_d$$
+    
+  - $$\overline{\mu}_{MLE} = \sum_{i=1}^n{\frac{ \overline{x}^{(i)}}{n}}$$
+  
+  - $$\sigma^2_{MLE} = \sum_{i=1}^n{\frac{\vert\vert\overline{x}^{(i)}-\overline{\mu}_{MLE}\vert\vert^2}{nd}}$$
 
 #### Gaussian Mixture Model (GMM)
 
