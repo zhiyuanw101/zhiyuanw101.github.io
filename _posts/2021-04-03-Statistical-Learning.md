@@ -122,7 +122,7 @@ keywords: Wiki, Data, Machine Learning, Stats
     $$
 
   - $$
-    \overline{\mu}_{MLE} = \sum_{i=1}^n{\frac{{\overline{x}^{(i)}}}{n}}
+    \overline{\mu}_{MLE} = \sum_{i=1}^n{\frac{ \overline{x}^{(i)}}{n}}
     $$
 
   - $$
