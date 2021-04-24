@@ -65,7 +65,7 @@ keywords: Wiki, Data, Machine Learning, Stats
   - Given: 
     - $X$ observed data, unobserved latent variables $Z$
     - Joint likelihood $L(\theta; X, Z) = p(X, Z \vert \theta)$
-  - Maximize marginal likelihood of observed data $L(\theta; X) = p(X\vert \theta) = \sum_Z p(X, Z \vert \theta)$, however equlity is often **intractable**
+  - Maximize marginal likelihood of observed data $L(\theta; X) = p(X\vert \theta) = \sum_Z p(X, Z \vert \theta) = \sum_ZL(\theta; X, Z)$, however equlity is often **intractable**
     - Maximize $L(\theta; X)$ by maximizing $Q(\theta\vert \theta^t)$
   
   - Steps:
@@ -88,19 +88,7 @@ keywords: Wiki, Data, Machine Learning, Stats
   - Learn prior $P(Y)$ and likelihood $P(X_1, .., X_n\vert Y)$  to calculate $P(Y\vert X_1, ..., X_n)$
   - Choose class to maximize posterior $\arg max_{Y} P(Y\vert X_1, ..., X_n)$
 
-#### Bayesian Network
 
-- Ideas:
-  - Joint probability contains all information: marginal, conditional
-    - $P(b) = Σa Σc Σd P(a, b, c, d) $
-    - $P(c \vert b) = Σa Σd P(a, c, d \vert b) $
-  - Chain rule of Factoring:
-    - $P(a, b, c, … z) = P(a \vert b, c, …. z) P(b \vert c,.. z) P(c\vert .. z)..P(z)$
-  - Conditional independence
-    - $P(X1, X2,…. XK \vert C) = Π P(Xi \vert C)$
-    - Naïve Bayes assumption
-  - Graph graph <==> Conditional independence relations
-    - $p(X1, X2,....XN) = Π p(Xi \vert parents(Xi))$
 
 #### Univeriate Gaussian
 
@@ -144,3 +132,63 @@ $$
 ##### Unknown Labels
 
 - EM for GMM
+
+#### Bayesian Network
+
+- Ideas:
+  - **Joint probability** contains all information: marginal, conditional
+    - $P(b) = Σa Σc Σd P(a, b, c, d) $
+    - $P(c \vert b) = Σa Σd P(a, c, d \vert b) $
+  - Chain rule of Factoring:
+    - $P(a, b, c, … z) = P(a \vert b, c, …. z) P(b \vert c,.. z) P(c\vert .. z)..P(z)$
+  - Conditional independence
+    - $P(X_1, X_2,…. X_K \vert C) = Π P(X_i \vert C)$
+    - Naïve Bayes assumption
+  - Graph graph <==> Conditional independence relations
+    - $p(X_1, X_2,....X_N) = Π p(X_i \vert parents(X_i))$
+- **Independence**:
+  - Marginal Independence :$X_1 \perp X_2$
+    - $P(X_1, X_2) = P(X_1) \cdot P(X_2 )$
+    - $P(X_1\vert X_2) = P(X_1)$
+  - Conditional Independence: $X_1 \perp X_2 \vert X_3$
+    - $P(X_1, X_2 \vert X_3) = P(X_1\vert X_3) \cdot P(X_2 \vert X_3)$
+    - $P(X_1\vert X_2, X_3) = P(X_1\vert X_3)$
+- **d-separation**:
+  - Inference independence from graph
+  - Steps:
+    - Keep only ancestral graph
+    - Connect nodes with comon child
+    - Make undirected
+    - Read property
+  - **Property**:
+    - Marginally independence: no path between
+    - Conditional independence:
+      - No path between
+      - All path go through one of the conditioned node
+- Inference
+- Learning
+  - Model Parameters: MLE
+  - Model structures: BIC
+
+#### Hidden Markov Models
+
+- Independence:
+  - $Z_{t-1} \perp Z_{t+1} \vert Z_t$: all future nodes are independent of all other previous nodes given current state node
+  - current observation independent of all other nodes given current state. 
+- Model:
+  - Structure:
+    - special bayesian network
+    - observed $X$ (observation), latent variable $Z$ (hidden state, discrete rv), 
+    - Set of hidden states $h_i\in H$, set of observation $o_l\in O$
+  - Probability:
+    - Transition Probability: $A(h_i, h_j)$
+    - Emission Probability: $B(h_i, o_l)$
+    - Starting Probability: $\pi(h_i)$
+  - Likelihood of a given seq:
+    - $P(x_1, ..., x_T, z_1, ..., z_T) = \pi(z_1)\prod_{t=1}^{T-1}A(z_t, z_{t+1})\prod_{t=1}^{T}B(z_t, x_t)$
+
+- Decoding:
+  - Given model parameters, observations, infer hidden states
+  - $\arg max_{z_1, ..., z_T} P(x_1, ..., x_T, z_1, ..., z_T; \theta)$
+  - Viterbi Algorithm
+

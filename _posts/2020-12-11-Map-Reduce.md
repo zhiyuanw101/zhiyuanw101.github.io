@@ -1,10 +1,29 @@
 ---
 layout: post
 title: Map Reduce
-categories: [DBMS, Wiki, Distributed System]
+categories: [DBMS, Wiki, Distributed System, Parallel Computing]
 description: Map Reduce
-keywords: DBMS
+keywords: DBMS, Data, Computation
 ---
+
+## MapReduce (Hadoop)
+
+- Big Idea:
+  - seperate work into phases: mapping, grouping, reducing
+    - **Mapping**: turn data into (key, value) pairs
+    - **Grouping**: put same key together
+    - **Reducing**: combine value of same key
+  - define phases such that multiple computers can work without communication
+  - client provide: 
+    - input data
+    - Map() function/ program
+    - Reduce() function/ program
+- MapReduce server
+  - 
+- Key notes:
+  - all pairs with same key go to same reducer
+  - reduce starts after all map finish
+  - Client, worker, master communicate in real distributed sys?
 
 ## [Map-Reduce in MongoDB](https://docs.mongodb.com/v3.2/core/map-reduce/)
 
