@@ -188,7 +188,11 @@ $$
     - $P(x_1, ..., x_T, z_1, ..., z_T) = \pi(z_1)\prod_{t=1}^{T-1}A(z_t, z_{t+1})\prod_{t=1}^{T}B(z_t, x_t)$
 
 - Decoding:
-  - Given model parameters, observations, infer hidden states
+  - Given **model parameters**, **observations**, ==> infer **hidden states**
   - $\arg max_{z_1, ..., z_T} P(x_1, ..., x_T, z_1, ..., z_T; \theta)$
   - Viterbi Algorithm
+- Parameter Estimation:
+  - Given observations, infer **model parameters**
+  - Complete Data: MLE
+  - Incomplete Data: EM
 
