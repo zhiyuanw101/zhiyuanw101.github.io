@@ -21,7 +21,9 @@ keywords: DBMS, Data, Computation
 - MapReduce server
   - 
 - Key notes:
-  - all pairs with same key go to same reducer
+  - all pairs with **same key** go to **same reducer**
+    - merge two tables: match with same key
+    - aggregate in one table: count, max, min by key
   - reduce starts after all map finish
   - Client, worker, master communicate in real distributed sys?
 
