@@ -1,9 +1,9 @@
 ---
 layout: post
-title: SSH Tunneling 实现内网穿透
+title: Reverse Proxy 实现内网穿透
 categories: [SSH, Networks]
-description: SSH Tunneling 实现内网穿透
-keywords: SSH, Networks
+description: Reverse Proxy 实现内网穿透
+keywords: SSH, Networks, fro
 ---
 
 ### Recourses
@@ -11,6 +11,9 @@ keywords: SSH, Networks
 - [利用ssh反向代理以及autossh实现从外网连接内网服务器](https://www.cnblogs.com/kwongtai/p/6903420.html)
 - [内网穿透系列——SSH反向隧道 （最简单的内网穿透方案）](https://my.oschina.net/runescape/blog/1616031)
 - [SSH Forwarding](https://zhiyuanw101.github.io/2021/01/08/SSH-Forwarding/)
+- [frp](https://github.com/fatedier/frp)
+
+## SSH
 
 ### Requirements
 
@@ -97,4 +100,57 @@ ssh-copy-id root@localhost
 - 相比 `ssh` 多出一个参数 `-M 7281` 指定断开重连的沟通端口
 
 - 增加启动自动运行
+
+## frp
+
+[Access computer in LAN by SSH](https://github.com/fatedier/frp#access-your-computer-in-lan-by-ssh)
+
+[Download frp][https://github.com/fatedier/frp/releases]
+
+### 内网服务器
+
+配置`frpc.ini`
+
+```sh
+# frps.ini
+[common]
+bind_port = 7000
+```
+
+运行：
+
+```sh
+/root/frp/frpc -c /root/frp/frpc.ini
+```
+
+### 公网服务器
+
+配置`frpc.ini`
+
+```sh
+# frpc.ini
+[common]
+server_addr = 123.123.123.123
+server_port = 7000
+
+[ssh]
+type = tcp
+local_ip = 127.0.0.1
+local_port = 22
+remote_port = 6000
+```
+
+运行：
+
+```sh
+/root/frp/frps -c /root/frp/frps.ini
+```
+
+### Cliet
+
+```sh
+ssh -p6000 inside@123.123.123.123
+```
+
+
 
