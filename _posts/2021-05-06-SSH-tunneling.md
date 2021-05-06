@@ -10,6 +10,7 @@ keywords: SSH, Networks
 
 - [利用ssh反向代理以及autossh实现从外网连接内网服务器](https://www.cnblogs.com/kwongtai/p/6903420.html)
 - [内网穿透系列——SSH反向隧道 （最简单的内网穿透方案）](https://my.oschina.net/runescape/blog/1616031)
+- [SSH Forwarding](https://zhiyuanw101.github.io/2021/01/08/SSH-Forwarding/)
 
 ### Requirements
 
@@ -38,6 +39,7 @@ keywords: SSH, Networks
   -R 将远程主机(服务器)的某个端口转发到本地端指定机器的指定端口
   -L 将本地机(客户机)的某个端口转发到远端指定机器的指定端口
   -p 指定远程主机的端口
+  
   ```
 
   
