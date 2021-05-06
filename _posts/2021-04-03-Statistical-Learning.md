@@ -122,7 +122,8 @@ keywords: Wiki, Data, Machine Learning, Stats
 - Likelihood:
 
 $$
-P(S_n) =\prod_{i=1}^n\sum_{j=1}^k\delta(j\vert i)\gamma_j N(\overline{x}_{(i)} \vert \overline{\mu}^{(j)}\sigma^2_j)
+P(S_n) =\prod_{i=1}^n\sum_{j=1}^k\delta(j\vert i)\gamma_j N(\over
+line{x}_{(i)} \vert \overline{\mu}^{(j)}\sigma^2_j)
 $$
 
 - $\delta(j\vert i)$ is indicator function
