@@ -16,5 +16,6 @@ keywords: Wiki, Shell
 - Up/ Down history: `Ctrl-P`, `Ctrl-N`
 - Delete: `Ctrl-?`
 - Delete line/ word: `Ctrl-U`, `Ctrl-W`
+- Search in reverse order: `Ctrl-R`
 - Other bindings: `bindkey`
 - zsh builtins manual: `man zshzle`
