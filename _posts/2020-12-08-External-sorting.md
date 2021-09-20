@@ -5,7 +5,7 @@ categories: [DBMS, Wiki]
 description: sorting in DBMS
 keywords: DBMS
 ---
-
+The following contents are partly based on [EECS484](https://dijkstra.eecs.umich.edu/kleach/eecs484/f20/) course materials from the University of Michigan. 
 - Problem:
   - sort 1 TB data, not able to fit in memory
   - minimize disk access cost

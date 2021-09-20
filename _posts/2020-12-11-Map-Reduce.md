@@ -5,7 +5,7 @@ categories: [DBMS, Wiki, Distributed System, Parallel Computing]
 description: Map Reduce
 keywords: DBMS, Data, Computation
 ---
-
+The following contents are partly based on [EECS484](https://dijkstra.eecs.umich.edu/kleach/eecs484/f20/) course materials from the University of Michigan. 
 ## MapReduce (Hadoop)
 
 - Big Idea:
