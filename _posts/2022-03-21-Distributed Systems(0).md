@@ -1,10 +1,16 @@
 ---
 layout: post
 title: Distributed Systems (0)
-categories: [Wiki, Distributed Systems]
+categories: [Wiki, Distributed System]
 description: knowledge base on distributed systems
 keywords: Distributed systems, Concurrent
 ---
+
+## References
+
+- [Stackoverflow](https://stackoverflow.com/questions/9762101/what-is-linearizability)
+- [Wiki](https://www.wikiwand.com/en/Linearizability#:~:text=Linearizability%20is%20a%20strong%20correctness,an%20unexpected%20or%20unpredictable%20manner.)
+- EECS 491 @ Umich
 
 ## Linearizability
 
@@ -33,4 +39,7 @@ This definition of linearizability is equivalent to the following:
 ### Other Explanation
 
 - https://stackoverflow.com/questions/9762101/what-is-linearizability
+- From EECS 491 slides:
+  - Total ordering of writes
+  - Read returns last **completed** write (note: complete does not require receive a reply, it is when the entire system committed the write)
 
