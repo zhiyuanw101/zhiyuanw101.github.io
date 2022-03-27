@@ -1,12 +1,10 @@
-```
+---
 layout: post
-title: Distributed Systems(0)
-categories: [Distributed Systems, Systems]
-description: Outline of Distributed Systems
-keywords: Systems, RPC, Computing
-```
-
-
+title: Distributed Systems (0)
+categories: [Wiki, Distributed Systems]
+description: knowledge base on distributed systems
+keywords: Distributed systems, Concurrent
+---
 
 ## Linearizability
 
@@ -35,3 +33,4 @@ This definition of linearizability is equivalent to the following:
 ### Other Explanation
 
 - https://stackoverflow.com/questions/9762101/what-is-linearizability
+
