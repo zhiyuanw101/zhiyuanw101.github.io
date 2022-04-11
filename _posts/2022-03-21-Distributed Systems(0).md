@@ -3,7 +3,7 @@ layout: post
 title: Distributed Systems (0)
 categories: [Wiki, Distributed System]
 description: knowledge base on distributed systems
-keywords: Distributed systems, Concurrent
+keywords: Distributed system, Concurrent
 ---
 
 ## References
@@ -19,7 +19,7 @@ keywords: Distributed systems, Concurrent
 A history ![\sigma ](https://wikimedia.org/api/rest_v1/media/math/render/svg/59f59b7c3e6fdb1d0365a494b81fb9a696138c36) is *linearizable* if there is a linear order of the completed operations such that:
 
 1. For every completed operation in ![\sigma ](https://wikimedia.org/api/rest_v1/media/math/render/svg/59f59b7c3e6fdb1d0365a494b81fb9a696138c36), the operation returns the same result in the execution as the operation would return if every operation was completed one by one in order ![\sigma ](https://wikimedia.org/api/rest_v1/media/math/render/svg/59f59b7c3e6fdb1d0365a494b81fb9a696138c36).
-2. If an operation op1 completes (gets a response) before op2 begins (invokes), then op1 precedes op2 in ![\sigma ](https://wikimedia.org/api/rest_v1/media/math/render/svg/59f59b7c3e6fdb1d0365a494b81fb9a696138c36).\[[1\]](https://doi.org/10.1145%2F78969.78972)
+2. If an operation op1 completes (gets a response) before op2 begins (invokes), then op1 precedes op2 in ![\sigma ](https://wikimedia.org/api/rest_v1/media/math/render/svg/59f59b7c3e6fdb1d0365a494b81fb9a696138c36).\[1](https://doi.org/10.1145%2F78969.78972)
 
 
 
