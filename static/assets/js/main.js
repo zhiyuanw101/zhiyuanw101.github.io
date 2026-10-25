@@ -115,15 +115,15 @@ if (toc && tocLink) {
 	tocLink.addEventListener("click", () => (toc.querySelector("details").open = true), { capture: true });
 }
 
-// Background-knowledge cards: a "Card N" citation opens its card and briefly highlights it.
-const openCard = (id) => {
-	const card = document.getElementById(id);
-	if (!card || !card.classList.contains("side-card")) return;
-	card.querySelector("details").open = true;
-	card.classList.add("flash");
-	setTimeout(() => card.classList.remove("flash"), 1600);
+// Collapsible notes: a "(Note N)" citation opens its note and briefly highlights it.
+const openNote = (id) => {
+	const note = document.getElementById(id);
+	if (!note || !note.classList.contains("note")) return;
+	note.open = true;
+	note.classList.add("flash");
+	setTimeout(() => note.classList.remove("flash"), 1600);
 };
-document.querySelectorAll("a.card-ref").forEach((a) => {
-	a.addEventListener("click", () => openCard(a.hash.slice(1)), { capture: true });
+document.querySelectorAll("a.note-ref").forEach((a) => {
+	a.addEventListener("click", () => openNote(a.hash.slice(1)), { capture: true });
 });
-if (location.hash.startsWith("#card-")) openCard(location.hash.slice(1));
+if (location.hash.startsWith("#note-")) openNote(location.hash.slice(1));

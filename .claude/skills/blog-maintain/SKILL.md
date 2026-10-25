@@ -15,12 +15,13 @@ own words, correctness), the post markup and the writing style. This skill is th
 2. **Outline in the Lil'Log shape**: motivation paragraphs, Notation table (if math-heavy), `<h1>`
    sections that follow the logic (not necessarily the source's order), Quick Summary, References.
    Plan the figures: which ideas need a picture (geometry, a simulation, a decomposition).
-   Then sort the material (see "Side cards" and "Key results" in AGENTS.md):
+   Then sort the material (see "Collapsible notes" and "Key results" in AGENTS.md):
    - the **main line**: intuition, the key results and what later sections build on;
-   - **side cards**: prerequisite theory (`background`), long mechanical proofs (`derivation`),
-     extensions and links (`reading`). Test: can a reader skip it and still follow the post?
+   - **collapsible notes**: prerequisite theory (`background`), long mechanical proofs
+     (`derivation`), extensions and links (`reading`). Test: can a reader skip it and still follow
+     the post? Write them as concisely as the main text.
    - **key results**: the 4-8 conclusions worth a highlighted box.
-   A source's "detour" or "review" section is usually a background card.
+   A source's "detour" or "review" section is usually a background note.
 3. **Create the file** `content/posts/<today>-<short-slug>.html` with the front-matter comment
    (`title`, `date`, `tags`; reuse existing tags where they fit, e.g. `Statistics`, `Math-Heavy`).
 4. **Write the body in English**, in your own words, with derivations filled in. Cite the source as
@@ -60,8 +61,8 @@ In a browser at http://localhost:8765:
   `[...document.querySelectorAll('.post-content a[href^="#"]')].filter(a => !document.getElementById(decodeURIComponent(a.hash.slice(1))))`
   returns an empty list.
 - Figures render, labels don't overlap, and figure numbers match the "(Fig. N)" references.
-- At 1440px every side card floats in the right margin without overlapping another card; clicking
-  a "Card N" chip opens and highlights its card. Below 1380px cards sit inline, collapsed.
+- Every note is collapsed on load and shows only "Note N. Title"; clicking a "Note N" citation opens
+  it. Opened notes read like the main text (same font and size), with no layout breaks.
 - Every further-reading link opens (`curl -sL -o /dev/null -w '%{http_code}' URL` gives 200).
 - No horizontal scrolling at phone width; text is readable in dark mode.
 - Reread the text once for English, accuracy and tone.

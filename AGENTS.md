@@ -78,52 +78,52 @@ Markup conventions (match the existing post):
 - Vectors and matrices in bold: `\mathbf{y}`, `\mathbf{X}`, `\boldsymbol{\beta}`.
 - Code: `<pre tabindex="0"><code class="language-python">...</code></pre>`; escape `<`, `>`, `&`.
 - Tables: plain `<table><thead>...</thead><tbody>...</tbody></table>`.
-- Side cards (`<aside class="card">`) and key-result boxes (`<div class="key-result">`): see the next two sections.
+- Collapsible notes (`<aside class="note">`) and key-result boxes (`<div class="key-result">`): see the next two sections.
 - Update notes go first in the body:
   `<p><span class="update">[Updated on YYYY-MM-DD: what changed.]</span></p>`
 - References are the last section: `<h1>References</h1>` followed by
   `<p>[n] Authors. <a href="...">&ldquo;Title.&rdquo;</a> Venue, Year.</p>`.
 
-## Side cards: keep the main line lean
+## Collapsible notes: keep the main line lean
 
 A post has one main line of argument. Material a reader may need but that is **not** part of that
-line goes into a side card. Readers who already know it skip it; everyone else gets enough to keep
-reading. A side card shows its title and a one-sentence summary, and opens to the full content. On
-wide screens (1380px and up) it floats in the right margin beside the paragraph that cites it; on
-narrower screens it sits inline, collapsed.
+line goes into a collapsible note: readers who already know it skip it, everyone else opens it.
+Collapsed, a note is a single line, "▶ Note N. Title", styled like the theme's Table of Contents.
+Opened, its content sits in the flow of the article, set off only by a light left rule like a
+blockquote, and reads like the surrounding text.
 
-Three kinds:
+Three kinds (the `kind` attribute is for authors; it does not change the look):
 
 | `kind` | Use it for | Example |
 | --- | --- | --- |
-| `background` (default) | Prerequisite theory from another field that the reader may not know | column space and projections; the $\chi^2$, $t$, $F$ distributions |
-| `derivation` | Long or mechanical derivations that establish a result but add no intuition | matrix-calculus gradient of RSS; Frisch-Waugh-Lovell |
-| `reading` | Extension material and further reading beyond what the post needs | more hat-matrix properties (leverage, Cook's distance) with links |
+| `background` (default) | Prerequisite theory the reader may not know | column space and projection; the $\chi^2$, $t$, $F$ distributions |
+| `derivation` | Long or mechanical derivations that add no intuition | gradient of RSS; Frisch-Waugh-Lovell |
+| `reading` | Extensions and further reading beyond what the post needs | leverage and Cook's distance from the hat matrix |
 
-Decide with one question: *could a reader who skips this still follow the rest of the post?* If yes,
-it is a card. Intuition, the key result itself, and anything later sections build on stay in the
-main text. A result stated in the main text can have its proof in a `derivation` card.
+Test: *could a reader who skips this still follow the rest of the post?* If yes, it is a note.
+Intuition, key results and anything later sections build on stay in the main text. A result stated
+in the main text can have its proof in a `derivation` note.
 
-Syntax: place the card **immediately before** the paragraph that first cites it, and cite it from
-the text with `<!--card-ref:id-->` (rendered as a "Card N" chip that opens the card):
+Write notes like the main text: concise, plain paragraphs, no bold run-in labels, no lists of
+bullet points where a sentence will do. Two or three short paragraphs is typical. End with a
+"Further reading:" sentence of links if useful, and only with links you have opened and checked.
+
+Place a note **right after** the passage that first cites it (after the paragraph, list or display
+equation that the citation belongs to, not in the middle of a derivation). Cite it with
+`<!--note-ref:id-->`, which renders as a plain "Note N" link; write the parentheses yourself:
 
 ```html
-<aside class="card" id="column-space" title="Column space, linear systems and projection" kind="background">
-<p class="summary">One sentence that is enough for a reader who will not open the card.</p>
-<p>Full explanation: definitions, the argument, $\LaTeX$ as usual...</p>
-<ul class="further-reading">
-<li><a href="https://...">Source title</a> (publisher or site), what it adds</li>
-</ul>
-</aside>
+<p>... can only reach the column space $\mathcal{C}(\mathbf{X})$ (<!--note-ref:column-space-->).</p>
 
-<p>Least squares is a projection problem in disguise ... <!--card-ref:column-space-->.</p>
+<aside class="note" id="column-space" title="Column space and projection" kind="background">
+<p>The <strong>column space</strong> $\mathcal{C}(\mathbf{A})$ is the set of all linear combinations ...</p>
+<p>Further reading: <a href="https://...">Title</a> (Site).</p>
+</aside>
 ```
 
-Rules (the build enforces the first four): every card has a `<p class="summary">`; the `title` is
-plain text, no math; no `<h1>`-`<h3>` inside a card (use `<b>` run-in labels); every card is cited
-at least once; keep the summary to one sentence; no figures inside cards; the optional
-`<ul class="further-reading">` goes last and holds only links you have opened and checked. Cards
-are numbered automatically in order of appearance.
+The build enforces: plain-text `title` (no math), no `<h1>`-`<h3>` inside a note, no summary, and
+every note cited at least once. Notes are numbered automatically in order of appearance. No figures
+or key-result boxes inside notes.
 
 ## Key results
 
@@ -141,7 +141,7 @@ $$</div>
 
 The title is short and may contain inline math. An optional `<p>` after the formula can state the
 conditions (e.g. "when $\mathbf{X}$ has full column rank"). Key results belong to the main line, so
-never put one inside a card.
+never put one inside a note.
 
 ## Writing style (Lil'Log voice)
 

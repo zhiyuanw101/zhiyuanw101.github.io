@@ -100,31 +100,22 @@ $$</div>
 
 <h2>The normal equations</h2>
 
-<aside class="card" id="rss-gradient" title="Matrix calculus: the gradient of RSS" kind="derivation">
-<p class="summary">Expanding $\text{RSS}(\boldsymbol{\beta})$ and applying two matrix-derivative rules gives the gradient $-2\mathbf{X}^\top(\mathbf{y} - \mathbf{X}\boldsymbol{\beta})$ and the Hessian $2\mathbf{X}^\top\mathbf{X}$, which is positive semidefinite, so any stationary point is a global minimum.</p>
-<p><b>Expand.</b> Using $\mathbf{y}^\top\mathbf{X}\boldsymbol{\beta} = \boldsymbol{\beta}^\top\mathbf{X}^\top\mathbf{y}$ (a scalar equals its transpose):</p>
-<div>$$
-\text{RSS}(\boldsymbol{\beta}) = \mathbf{y}^\top\mathbf{y} - 2\boldsymbol{\beta}^\top\mathbf{X}^\top\mathbf{y} + \boldsymbol{\beta}^\top\mathbf{X}^\top\mathbf{X}\boldsymbol{\beta}
-$$</div>
-<p><b>Two rules.</b> For a constant vector $\mathbf{a}$ and a constant matrix $\mathbf{A}$: $\dfrac{\partial\, \mathbf{a}^\top\boldsymbol{\beta}}{\partial \boldsymbol{\beta}} = \mathbf{a}$ and $\dfrac{\partial\, \boldsymbol{\beta}^\top\mathbf{A}\boldsymbol{\beta}}{\partial \boldsymbol{\beta}} = (\mathbf{A} + \mathbf{A}^\top)\boldsymbol{\beta}$, which is $2\mathbf{A}\boldsymbol{\beta}$ when $\mathbf{A}$ is symmetric. Both follow from writing the sums out coordinate by coordinate.</p>
-<p><b>Gradient.</b> With $\mathbf{a} = \mathbf{X}^\top\mathbf{y}$ and the symmetric $\mathbf{A} = \mathbf{X}^\top\mathbf{X}$:</p>
-<div>$$
-\nabla_{\boldsymbol{\beta}}\, \text{RSS} = -2\mathbf{X}^\top\mathbf{y} + 2\mathbf{X}^\top\mathbf{X}\boldsymbol{\beta} = -2\mathbf{X}^\top(\mathbf{y} - \mathbf{X}\boldsymbol{\beta})
-$$</div>
-<p><b>Convexity.</b> The Hessian is $2\mathbf{X}^\top\mathbf{X}$, and $\mathbf{v}^\top\mathbf{X}^\top\mathbf{X}\mathbf{v} = \|\mathbf{X}\mathbf{v}\|^2 \ge 0$ for every $\mathbf{v}$. So RSS is convex and every solution of the normal equations is a global minimizer. If $\mathbf{X}$ has full column rank, $\mathbf{X}\mathbf{v} \ne \mathbf{0}$ for $\mathbf{v} \ne \mathbf{0}$, the Hessian is positive definite, and the minimizer is unique.</p>
-<ul class="further-reading">
-<li><a href="https://www.math.uwaterloo.ca/~hwolkowi/matrixcookbook.pdf">The Matrix Cookbook</a> (Petersen &amp; Pedersen), section 2.4 on derivatives</li>
-<li><a href="https://en.wikipedia.org/wiki/Matrix_calculus">Matrix calculus</a> (Wikipedia), including layout conventions</li>
-</ul>
-</aside>
-
-<p>RSS is a convex quadratic in $\boldsymbol{\beta}$, so we take its gradient and set it to zero <!--card-ref:rss-gradient-->:</p>
+<p>RSS is a convex quadratic in $\boldsymbol{\beta}$, so we take its gradient and set it to zero (<!--note-ref:rss-gradient-->):</p>
 
 <div>$$
 \begin{aligned}
 \frac{\partial\, \text{RSS}}{\partial \boldsymbol{\beta}} &= -2\, \underset{(p+1)\times n}{\mathbf{X}^\top}\, \underset{n \times 1}{(\mathbf{y} - \mathbf{X}\boldsymbol{\beta})} = \mathbf{0}_{(p+1)\times 1}
 \end{aligned}
 $$</div>
+
+<aside class="note" id="rss-gradient" title="The gradient of RSS" kind="derivation">
+<p>Expanding, $\text{RSS}(\boldsymbol{\beta}) = \mathbf{y}^\top\mathbf{y} - 2\boldsymbol{\beta}^\top\mathbf{X}^\top\mathbf{y} + \boldsymbol{\beta}^\top\mathbf{X}^\top\mathbf{X}\boldsymbol{\beta}$. With $\partial(\mathbf{a}^\top\boldsymbol{\beta})/\partial\boldsymbol{\beta} = \mathbf{a}$ and $\partial(\boldsymbol{\beta}^\top\mathbf{A}\boldsymbol{\beta})/\partial\boldsymbol{\beta} = 2\mathbf{A}\boldsymbol{\beta}$ for symmetric $\mathbf{A}$,</p>
+<div>$$
+\nabla_{\boldsymbol{\beta}}\,\text{RSS} = -2\mathbf{X}^\top\mathbf{y} + 2\mathbf{X}^\top\mathbf{X}\boldsymbol{\beta} = -2\mathbf{X}^\top(\mathbf{y} - \mathbf{X}\boldsymbol{\beta})
+$$</div>
+<p>The Hessian $2\mathbf{X}^\top\mathbf{X}$ is positive semidefinite because $\mathbf{v}^\top\mathbf{X}^\top\mathbf{X}\mathbf{v} = \|\mathbf{X}\mathbf{v}\|^2 \ge 0$, so every stationary point is a global minimum. It is positive definite, and the minimum unique, when $\mathbf{X}$ has full column rank.</p>
+<p>Further reading: <a href="https://www.math.uwaterloo.ca/~hwolkowi/matrixcookbook.pdf">The Matrix Cookbook</a>; <a href="https://en.wikipedia.org/wiki/Matrix_calculus">Matrix calculus</a> (Wikipedia).</p>
+</aside>
 
 <p>This gives the <strong>normal equations</strong></p>
 
@@ -167,29 +158,21 @@ $$</div>
 $$</div>
 </div>
 
-<aside class="card" id="hat-matrix" title="More on the hat matrix: leverage and influence" kind="reading">
-<p class="summary">The diagonal entries $h_{ii}$ of the hat matrix, the leverages, measure how strongly each observation pulls its own fitted value; they set the residual variances, give leave-one-out errors for free, and underlie influence diagnostics such as Cook&rsquo;s distance.</p>
-<p><b>Projection facts.</b> $\mathbf{H}\mathbf{X} = \mathbf{X}$ and $(\mathbf{I}-\mathbf{H})\mathbf{X} = \mathbf{0}$; $\mathbf{I}-\mathbf{H}$ is also symmetric and idempotent; $\mathbf{H}(\mathbf{I}-\mathbf{H}) = \mathbf{0}$; every eigenvalue of $\mathbf{H}$ is 0 or 1.</p>
-<p><b>Leverage.</b> Since $\hat{y}_i = \sum_j h_{ij} y_j$, the diagonal entry $h_{ii} = \partial \hat{y}_i / \partial y_i$ measures how much observation $i$ determines its own fit. Leverages satisfy $0 \le h_{ii} \le 1$ (and $h_{ii} \ge 1/n$ with an intercept), and $\sum_i h_{ii} = \text{tr}(\mathbf{H}) = p+1$, so the average is $(p+1)/n$; a common rule of thumb flags $h_{ii} > 2(p+1)/n$. In simple regression, $h_{ii} = \frac{1}{n} + \frac{(x_i - \bar{x})^2}{\sum_j (x_j - \bar{x})^2}$: leverage is distance from the center of the predictors.</p>
-<p><b>Residual variances.</b> $\text{Cov}(\hat{\mathbf{y}}) = \sigma^2\mathbf{H}$ and $\text{Cov}(\mathbf{r}) = \sigma^2(\mathbf{I}-\mathbf{H})$, so $\text{Var}(r_i) = \sigma^2(1 - h_{ii})$. High-leverage points have <em>small</em> residuals by construction, because the fit bends toward them. Hence residuals are usually standardized as $r_i / (\hat\sigma\sqrt{1 - h_{ii}})$ before being compared.</p>
-<p><b>Leave-one-out for free.</b> The prediction error at $\mathbf{x}_i$ of the model refit without observation $i$ is $y_i - \hat{y}_{(i)} = r_i / (1 - h_{ii})$, so the leave-one-out cross-validation error needs only one fit: $\frac{1}{n}\sum_i \big(r_i / (1-h_{ii})\big)^2$.</p>
-<p><b>Influence.</b> An observation is influential when it has both a large residual and high leverage. Cook&rsquo;s distance combines the two:</p>
-<div>$$
-D_i = \frac{r_i^2}{(p+1)\,\hat\sigma^2} \cdot \frac{h_{ii}}{(1 - h_{ii})^2}
-$$</div>
-<ul class="further-reading">
-<li><a href="https://en.wikipedia.org/wiki/Leverage_(statistics)">Leverage</a>, <a href="https://en.wikipedia.org/wiki/Studentized_residual">studentized residuals</a> and <a href="https://en.wikipedia.org/wiki/Cook%27s_distance">Cook&rsquo;s distance</a> (Wikipedia)</li>
-<li><a href="https://www.statsmodels.org/stable/diagnostic.html">Regression diagnostics in statsmodels</a></li>
-<li><a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/plot.lm.html">R&rsquo;s <code>plot.lm</code></a>, the standard four diagnostic plots</li>
-</ul>
-</aside>
-
-<p>The $n\times n$ matrix $\mathbf{H} = \mathbf{X}(\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top$ is called the <strong>hat matrix</strong> because it &ldquo;puts the hat on $\mathbf{y}$&rdquo;. It has three properties that come up again and again (and many more that matter for diagnostics <!--card-ref:hat-matrix-->):</p>
+<p>The $n\times n$ matrix $\mathbf{H} = \mathbf{X}(\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top$ is called the <strong>hat matrix</strong> because it &ldquo;puts the hat on $\mathbf{y}$&rdquo;. It has three properties that come up again and again (and others that matter for diagnostics, collected in <!--note-ref:hat-matrix-->):</p>
 <ul>
 <li><strong>Symmetric</strong>: $\mathbf{H}^\top = \mathbf{H}$.</li>
 <li><strong>Idempotent</strong>: $\mathbf{H}^2 = \mathbf{H}$. Projecting twice is the same as projecting once, a hint of the geometry coming in the <a href="#the-geometry-of-least-squares">next section</a>.</li>
-<li><strong>Trace equals rank</strong>: $\text{tr}(\mathbf{H}) = \text{tr}\big((\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top\mathbf{X}\big) = \text{tr}(\mathbf{I}_{p+1}) = p+1$, using the cyclic property of the trace <!--card-ref:quadratic-form-->.</li>
+<li><strong>Trace equals rank</strong>: $\text{tr}(\mathbf{H}) = \text{tr}\big((\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top\mathbf{X}\big) = \text{tr}(\mathbf{I}_{p+1}) = p+1$, using the cyclic property of the trace (<!--note-ref:quadratic-form-->).</li>
 </ul>
+
+<aside class="note" id="hat-matrix" title="More on the hat matrix" kind="reading">
+<p>Since $\hat{y}_i = \sum_j h_{ij} y_j$, the diagonal entry $h_{ii}$, the <strong>leverage</strong> of observation $i$, measures how strongly $y_i$ pulls its own fitted value. With an intercept, leverages lie in $[1/n, 1]$ and sum to $\text{tr}(\mathbf{H}) = p+1$; a common rule flags $h_{ii} > 2(p+1)/n$, twice the average.</p>
+<p>Because $\text{Cov}(\mathbf{r}) = \sigma^2(\mathbf{I} - \mathbf{H})$, we have $\text{Var}(r_i) = \sigma^2(1 - h_{ii})$: high-leverage points have small residuals by construction, which is why residuals are standardized by $\hat\sigma\sqrt{1 - h_{ii}}$. The leave-one-out prediction error is $r_i / (1 - h_{ii})$, so cross-validation needs a single fit. Cook&rsquo;s distance combines residual and leverage into a measure of influence:</p>
+<div>$$
+D_i = \frac{r_i^2}{(p+1)\,\hat\sigma^2} \cdot \frac{h_{ii}}{(1 - h_{ii})^2}
+$$</div>
+<p>Further reading: <a href="https://en.wikipedia.org/wiki/Leverage_(statistics)">Leverage</a> and <a href="https://en.wikipedia.org/wiki/Cook%27s_distance">Cook&rsquo;s distance</a> (Wikipedia); <a href="https://www.statsmodels.org/stable/diagnostic.html">regression diagnostics in statsmodels</a>; <a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/plot.lm.html">R&rsquo;s <code>plot.lm</code></a>.</p>
+</aside>
 
 <p>The <strong>predicted value</strong> at a new point $\mathbf{x}^* = (x_1^*, \dots, x_p^*)$ is computed the same way, $\hat{y}^* = \hat\beta_0 + \hat\beta_1 x_1^* + \dots + \hat\beta_p x_p^*$, or $\hat{\mathbf{y}}^* = \mathbf{X}^*\hat{\boldsymbol{\beta}}$ for a batch of new points. The formula is identical, but the distinction matters: a fitted value is evaluated at a feature vector that is part of the training data, while a predicted value is evaluated at an unseen $\mathbf{x}^*$ that is independent of the training data.</p>
 
@@ -237,29 +220,20 @@ $$</li>
 $$</div>
 </div>
 
-<aside class="card" id="quadratic-form" title="Trace tricks: the expected value of a quadratic form">
-<p class="summary">If $\boldsymbol{\varepsilon}$ has mean zero and covariance $\sigma^2\mathbf{I}$, then $\mathbb{E}[\boldsymbol{\varepsilon}^\top\mathbf{A}\boldsymbol{\varepsilon}] = \sigma^2\,\text{tr}(\mathbf{A})$; and the trace of a projection matrix equals its rank.</p>
-<p><b>Trace basics.</b> $\text{tr}(\mathbf{A}) = \sum_i a_{ii}$ is linear, and it is <strong>cyclic</strong>: $\text{tr}(\mathbf{A}\mathbf{B}\mathbf{C}) = \text{tr}(\mathbf{C}\mathbf{A}\mathbf{B}) = \text{tr}(\mathbf{B}\mathbf{C}\mathbf{A})$ whenever the products are defined, even if the matrices are not square.</p>
-<p><b>The quadratic form.</b> A scalar is its own trace, so cycling and then taking expectations (both linear operations) gives</p>
-<div>$$
-\mathbb{E}[\boldsymbol{\varepsilon}^\top\mathbf{A}\boldsymbol{\varepsilon}]
-= \mathbb{E}\big[\text{tr}(\mathbf{A}\boldsymbol{\varepsilon}\boldsymbol{\varepsilon}^\top)\big]
-= \text{tr}\big(\mathbf{A}\,\mathbb{E}[\boldsymbol{\varepsilon}\boldsymbol{\varepsilon}^\top]\big)
-= \text{tr}(\mathbf{A}\,\sigma^2\mathbf{I}) = \sigma^2\,\text{tr}(\mathbf{A})
-$$</div>
-<p>The mean-zero assumption is what makes $\mathbb{E}[\boldsymbol{\varepsilon}\boldsymbol{\varepsilon}^\top]$ equal the covariance. In general, for $\mathbf{x}$ with mean $\boldsymbol{\mu}$ and covariance $\boldsymbol{\Sigma}$: $\mathbb{E}[\mathbf{x}^\top\mathbf{A}\mathbf{x}] = \text{tr}(\mathbf{A}\boldsymbol{\Sigma}) + \boldsymbol{\mu}^\top\mathbf{A}\boldsymbol{\mu}$.</p>
-<p><b>Trace of a projection.</b> A symmetric idempotent matrix $\mathbf{P}$ ($\mathbf{P}^2 = \mathbf{P}$) has eigenvalues $\lambda$ with $\lambda^2 = \lambda$, so every eigenvalue is 0 or 1. The trace is the sum of eigenvalues, i.e. the number of ones, which is the rank. For regression, $\text{tr}(\mathbf{H}) = p+1$ and $\text{tr}(\mathbf{I}-\mathbf{H}) = n-p-1$.</p>
-<ul class="further-reading">
-<li><a href="https://en.wikipedia.org/wiki/Quadratic_form_(statistics)">Quadratic form (statistics)</a> (Wikipedia)</li>
-<li><a href="https://www.math.uwaterloo.ca/~hwolkowi/matrixcookbook.pdf">The Matrix Cookbook</a> (Petersen &amp; Pedersen), trace identities</li>
-</ul>
-</aside>
-
-<p>The denominator $n-p-1$ is the <strong>residual degrees of freedom</strong>. Why not divide by $n$? Because $\mathbf{r} = (\mathbf{I}-\mathbf{H})\boldsymbol{\varepsilon}$ (note $(\mathbf{I}-\mathbf{H})\mathbf{X} = \mathbf{0}$), and the expected value of a quadratic form in the errors is $\sigma^2$ times the trace of its matrix <!--card-ref:quadratic-form-->, so</p>
+<p>The denominator $n-p-1$ is the <strong>residual degrees of freedom</strong>. Why not divide by $n$? Because $\mathbf{r} = (\mathbf{I}-\mathbf{H})\boldsymbol{\varepsilon}$ (note $(\mathbf{I}-\mathbf{H})\mathbf{X} = \mathbf{0}$), and the expected value of a quadratic form in the errors is $\sigma^2$ times the trace of its matrix (<!--note-ref:quadratic-form-->), so</p>
 
 <div>$$
 \mathbb{E}[\text{RSS}] = \mathbb{E}\big[\boldsymbol{\varepsilon}^\top(\mathbf{I}-\mathbf{H})\boldsymbol{\varepsilon}\big] = \sigma^2\,\text{tr}(\mathbf{I}-\mathbf{H}) = \sigma^2 (n - p - 1)
 $$</div>
+
+<aside class="note" id="quadratic-form" title="Expected value of a quadratic form" kind="background">
+<p>A scalar equals its own trace, and the trace is cyclic, $\text{tr}(\mathbf{A}\mathbf{B}\mathbf{C}) = \text{tr}(\mathbf{C}\mathbf{A}\mathbf{B})$. So for $\boldsymbol{\varepsilon}$ with mean zero and covariance $\sigma^2\mathbf{I}$,</p>
+<div>$$
+\mathbb{E}[\boldsymbol{\varepsilon}^\top\mathbf{A}\boldsymbol{\varepsilon}] = \mathbb{E}\big[\text{tr}(\mathbf{A}\boldsymbol{\varepsilon}\boldsymbol{\varepsilon}^\top)\big] = \text{tr}\big(\mathbf{A}\,\mathbb{E}[\boldsymbol{\varepsilon}\boldsymbol{\varepsilon}^\top]\big) = \sigma^2\,\text{tr}(\mathbf{A})
+$$</div>
+<p>A symmetric idempotent matrix has eigenvalues 0 or 1, so its trace equals its rank: $\text{tr}(\mathbf{H}) = p+1$ and $\text{tr}(\mathbf{I} - \mathbf{H}) = n-p-1$.</p>
+<p>Further reading: <a href="https://en.wikipedia.org/wiki/Quadratic_form_(statistics)">Quadratic form (statistics)</a> (Wikipedia).</p>
+</aside>
 
 <p>Each estimated coefficient uses up one dimension, leaving $n-p-1$ dimensions for the residuals to live in. Dividing by $n-p-1$ makes $\hat\sigma^2$ unbiased.</p>
 
@@ -267,38 +241,19 @@ $$</div>
 
 <p>The normal equations have a beautiful geometric reading. Recall that we look for $\hat{\boldsymbol{\beta}}$ minimizing $\|\mathbf{y} - \mathbf{X}\boldsymbol{\beta}\|^2$. Any minimizer is called a <em>least squares solution</em>, and the set of all least squares solutions is exactly the set of solutions of the normal equations $(\mathbf{X}^\top\mathbf{X})\boldsymbol{\beta} = \mathbf{X}^\top\mathbf{y}$. The solution is unique if and only if $\text{rank}(\mathbf{X}) = p+1$.</p>
 
-<aside class="card" id="column-space" title="Column space, linear systems and projection">
-<p class="summary">A system $\mathbf{A}\mathbf{z} = \mathbf{c}$ has a solution exactly when $\mathbf{c}$ lies in the column space of $\mathbf{A}$; when it does not, the closest point we can reach is the orthogonal projection of $\mathbf{c}$ onto that space, found by solving $\mathbf{A}^\top\mathbf{A}\mathbf{z} = \mathbf{A}^\top\mathbf{c}$.</p>
-<p>Take $\mathbf{A} \in \mathbb{R}^{m\times k}$ with columns $\mathbf{A}_1, \dots, \mathbf{A}_k$. Their <strong>span</strong>, the set of all linear combinations, is the <strong>column space</strong>:</p>
-<div>$$
-\mathcal{C}(\mathbf{A}) = \Big\{ d_1\mathbf{A}_1 + \dots + d_k \mathbf{A}_k \;:\; d_j \in \mathbb{R} \Big\}
-$$</div>
-<p>It is a <strong>linear subspace</strong> of $\mathbb{R}^m$: a flat surface through the origin (a line, a plane, or a higher-dimensional analogue) that is closed under linear combinations. Its dimension is $\text{rank}(\mathbf{A})$.</p>
-<p><b>When is $\mathbf{A}\mathbf{z} = \mathbf{c}$ solvable?</b> Matrix multiplication gives $\mathbf{A}\mathbf{z} = z_1\mathbf{A}_1 + \dots + z_k\mathbf{A}_k$, so every $\mathbf{A}\mathbf{z}$ is a point of $\mathcal{C}(\mathbf{A})$. A solution exists if and only if $\mathbf{c} \in \mathcal{C}(\mathbf{A})$, and it is unique if and only if the columns are linearly independent.</p>
-<p><b>The closest point.</b> If $\mathbf{c} \notin \mathcal{C}(\mathbf{A})$, we settle for the point $\hat{\mathbf{c}} \in \mathcal{C}(\mathbf{A})$ nearest to $\mathbf{c}$. That point is the <strong>orthogonal projection</strong>: if $\mathbf{c} - \hat{\mathbf{c}}$ is perpendicular to the subspace, then for any other $\mathbf{w} \in \mathcal{C}(\mathbf{A})$, Pythagoras gives</p>
-<div>$$
-\|\mathbf{c} - \mathbf{w}\|^2 = \|\mathbf{c} - \hat{\mathbf{c}}\|^2 + \|\hat{\mathbf{c}} - \mathbf{w}\|^2 \ge \|\mathbf{c} - \hat{\mathbf{c}}\|^2
-$$</div>
-<p><b>Finding it.</b> Write $\hat{\mathbf{c}} = \mathbf{A}\mathbf{z}$. Perpendicular to the subspace means perpendicular to every column, $\mathbf{A}_j^\top(\mathbf{c} - \mathbf{A}\mathbf{z}) = 0$ for all $j$, which stacks into</p>
-<div>$$
-\mathbf{A}^\top(\mathbf{c} - \mathbf{A}\mathbf{z}) = \mathbf{0}
-\quad\Longleftrightarrow\quad
-\mathbf{A}^\top\mathbf{A}\,\mathbf{z} = \mathbf{A}^\top\mathbf{c}
-$$</div>
-<p>The projection $\hat{\mathbf{c}}$ is always unique. The coefficients $\mathbf{z}$ are unique only when $\mathbf{A}^\top\mathbf{A}$ is invertible, i.e. when $\mathbf{A}$ has full column rank.</p>
-<ul class="further-reading">
-<li><a href="https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/">MIT 18.06 Linear Algebra</a> (Gilbert Strang), the lectures on column spaces and projections</li>
-<li><a href="https://www.3blue1brown.com/topics/linear-algebra">Essence of Linear Algebra</a> (3Blue1Brown), visual intuition for span and rank</li>
-</ul>
-</aside>
-
-<p>Least squares is a projection problem in disguise: it is the system $\mathbf{X}\boldsymbol{\beta} = \mathbf{y}$, which almost never has an exact solution because $\mathbf{y}$ lives in $\mathbb{R}^n$ while $\mathbf{X}\boldsymbol{\beta}$ can only reach the $(p+1)$-dimensional column space $\mathcal{C}(\mathbf{X})$ <!--card-ref:column-space-->. The best we can do is the point of $\mathcal{C}(\mathbf{X})$ closest to $\mathbf{y}$, which is the orthogonal projection of $\mathbf{y}$. It is characterized by the residual being perpendicular to every column of $\mathbf{X}$:</p>
+<p>Least squares is a projection problem in disguise: it is the system $\mathbf{X}\boldsymbol{\beta} = \mathbf{y}$, which almost never has an exact solution because $\mathbf{y}$ lives in $\mathbb{R}^n$ while $\mathbf{X}\boldsymbol{\beta}$ can only reach the $(p+1)$-dimensional column space $\mathcal{C}(\mathbf{X})$ (<!--note-ref:column-space-->). The best we can do is the point of $\mathcal{C}(\mathbf{X})$ closest to $\mathbf{y}$, which is the orthogonal projection of $\mathbf{y}$. It is characterized by the residual being perpendicular to every column of $\mathbf{X}$:</p>
 
 <div>$$
 \mathbf{X}^\top(\mathbf{y} - \mathbf{X}\boldsymbol{\beta}) = \mathbf{0}
 $$</div>
 
 <p>These are exactly the normal equations we derived by calculus. The name &ldquo;normal&rdquo; is literal: the equations say the residual is <em>normal</em> (perpendicular) to the column space.</p>
+
+<aside class="note" id="column-space" title="Column space and projection" kind="background">
+<p>The <strong>column space</strong> $\mathcal{C}(\mathbf{A})$ is the set of all linear combinations of the columns of $\mathbf{A}$, a flat subspace through the origin of dimension $\text{rank}(\mathbf{A})$. Since $\mathbf{A}\mathbf{z} = z_1\mathbf{A}_1 + \dots + z_k\mathbf{A}_k$, the system $\mathbf{A}\mathbf{z} = \mathbf{c}$ has a solution exactly when $\mathbf{c} \in \mathcal{C}(\mathbf{A})$.</p>
+<p>Otherwise the closest point $\hat{\mathbf{c}} \in \mathcal{C}(\mathbf{A})$ is the orthogonal projection of $\mathbf{c}$: if $\mathbf{c} - \hat{\mathbf{c}}$ is perpendicular to the subspace, then $\|\mathbf{c} - \mathbf{w}\|^2 = \|\mathbf{c} - \hat{\mathbf{c}}\|^2 + \|\hat{\mathbf{c}} - \mathbf{w}\|^2$ for every other $\mathbf{w}$ in it. Writing $\hat{\mathbf{c}} = \mathbf{A}\mathbf{z}$, perpendicularity to each column gives $\mathbf{A}^\top(\mathbf{c} - \mathbf{A}\mathbf{z}) = \mathbf{0}$. The projection is always unique; $\mathbf{z}$ is unique only when $\mathbf{A}$ has full column rank.</p>
+<p>Further reading: <a href="https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/">MIT 18.06 Linear Algebra</a> (Gilbert Strang); <a href="https://www.3blue1brown.com/topics/linear-algebra">Essence of Linear Algebra</a> (3Blue1Brown).</p>
+</aside>
 
 <h2>Least squares is a projection</h2>
 
@@ -383,32 +338,24 @@ $$</div>
 
 <p>Exact rank deficiency is rare outside of coding mistakes. The more common and more insidious problem is <strong>collinearity</strong>: predictors that are <em>highly</em> but not perfectly correlated. Here $\mathbf{X}^\top\mathbf{X}$ is invertible but nearly singular, and the fitted coefficients and their sampling variances can depend heavily on which particular predictors happen to be in the model. The estimates become unstable and unreliable.</p>
 
-<aside class="card" id="fwl" title="Isolating one coefficient: the Frisch-Waugh-Lovell theorem" kind="derivation">
-<p class="summary">$\hat\beta_j$ equals the slope from regressing $\mathbf{y}$ on the part of $X_j$ that the other predictors cannot explain; this single fact gives both the variance inflation factor and the identity $F = t_j^2$.</p>
-<p><b>Setup.</b> Let $\mathbf{X}_{-j}$ be the design matrix without column $\mathbf{x}_j$ (the intercept stays), $\mathbf{H}_{-j}$ its hat matrix, and $\tilde{\mathbf{x}}_j = (\mathbf{I} - \mathbf{H}_{-j})\mathbf{x}_j$ the residual from regressing $X_j$ on the other predictors.</p>
-<p><b>The theorem.</b> $\tilde{\mathbf{x}}_j$ is orthogonal to $\mathcal{C}(\mathbf{X}_{-j})$, and together they span $\mathcal{C}(\mathbf{X})$. Projecting onto two orthogonal pieces separately,</p>
-<div>$$
-\hat{\mathbf{y}} = \mathbf{H}_{-j}\mathbf{y} + \frac{\tilde{\mathbf{x}}_j^\top\mathbf{y}}{\tilde{\mathbf{x}}_j^\top\tilde{\mathbf{x}}_j}\,\tilde{\mathbf{x}}_j
-$$</div>
-<p>Substituting $\tilde{\mathbf{x}}_j = \mathbf{x}_j - \mathbf{H}_{-j}\mathbf{x}_j$ and collecting the $\mathbf{x}_j$ term shows its coefficient is $\hat\beta_j = \tilde{\mathbf{x}}_j^\top\mathbf{y} / \tilde{\mathbf{x}}_j^\top\tilde{\mathbf{x}}_j$.</p>
-<p><b>Variance inflation.</b> Treating $\mathbf{X}$ as fixed, $\text{Var}(\hat\beta_j) = \sigma^2 / \tilde{\mathbf{x}}_j^\top\tilde{\mathbf{x}}_j$, which also shows $[(\mathbf{X}^\top\mathbf{X})^{-1}]_{jj} = 1/\tilde{\mathbf{x}}_j^\top\tilde{\mathbf{x}}_j$. The denominator is the RSS of regressing $X_j$ on the others, i.e. $(1 - R_j^2)\sum_i (x_{ij} - \bar{x}_j)^2$, which gives the formula in the text.</p>
-<p><b>Why $F = t_j^2$.</b> Dropping $X_j$ removes exactly the second term above, so $\text{RSS}_0 - \text{RSS}_a = (\tilde{\mathbf{x}}_j^\top\mathbf{y})^2 / \tilde{\mathbf{x}}_j^\top\tilde{\mathbf{x}}_j = \hat\beta_j^2\, \tilde{\mathbf{x}}_j^\top\tilde{\mathbf{x}}_j$. With one degree of freedom in the numerator,</p>
-<div>$$
-F = \frac{\hat\beta_j^2\, \tilde{\mathbf{x}}_j^\top\tilde{\mathbf{x}}_j}{\hat\sigma^2} = \frac{\hat\beta_j^2}{\hat\sigma^2 / \tilde{\mathbf{x}}_j^\top\tilde{\mathbf{x}}_j} = \frac{\hat\beta_j^2}{\widehat{\text{se}}(\hat\beta_j)^2} = t_j^2
-$$</div>
-<ul class="further-reading">
-<li><a href="https://en.wikipedia.org/wiki/Frisch%E2%80%93Waugh%E2%80%93Lovell_theorem">Frisch&ndash;Waugh&ndash;Lovell theorem</a> (Wikipedia)</li>
-<li><a href="https://en.wikipedia.org/wiki/Variance_inflation_factor">Variance inflation factor</a> (Wikipedia)</li>
-</ul>
-</aside>
-
-<p>One way to see the damage: the variance of the $j$-th coefficient can be written as <!--card-ref:fwl--></p>
+<p>One way to see the damage is the variance of the $j$-th coefficient (derived in <!--note-ref:fwl-->):</p>
 
 <div>$$
 \text{Var}(\hat\beta_j) = \frac{\sigma^2}{\sum_i (x_{ij} - \bar{x}_j)^2} \cdot \frac{1}{1 - R_j^2}
 $$</div>
 
 <p>where $R_j^2$ is the $R^2$ from regressing $X_j$ on all the other predictors. When $X_j$ is nearly a linear combination of the others, $R_j^2 \to 1$ and the variance blows up. The factor $1/(1-R_j^2)$ is known as the variance inflation factor.</p>
+
+<aside class="note" id="fwl" title="The Frisch-Waugh-Lovell theorem" kind="derivation">
+<p>Let $\tilde{\mathbf{x}}_j$ be the residual from regressing $X_j$ on the other columns of $\mathbf{X}$, intercept included. It is orthogonal to those columns and together they span $\mathcal{C}(\mathbf{X})$, so projecting $\mathbf{y}$ onto the two pieces separately gives</p>
+<div>$$
+\hat\beta_j = \frac{\tilde{\mathbf{x}}_j^\top\mathbf{y}}{\tilde{\mathbf{x}}_j^\top\tilde{\mathbf{x}}_j},
+\qquad
+\text{Var}(\hat\beta_j) = \frac{\sigma^2}{\tilde{\mathbf{x}}_j^\top\tilde{\mathbf{x}}_j}
+$$</div>
+<p>The denominator is the RSS of that auxiliary regression, $(1 - R_j^2)\sum_i (x_{ij} - \bar{x}_j)^2$, which gives the variance inflation formula. Dropping $X_j$ removes the $\tilde{\mathbf{x}}_j$ component of $\hat{\mathbf{y}}$, so $\text{RSS}_0 - \text{RSS}_a = \hat\beta_j^2\,\tilde{\mathbf{x}}_j^\top\tilde{\mathbf{x}}_j$, and dividing by $\hat\sigma^2$ gives $F = \hat\beta_j^2 / \widehat{\text{se}}(\hat\beta_j)^2 = t_j^2$.</p>
+<p>Further reading: <a href="https://en.wikipedia.org/wiki/Frisch%E2%80%93Waugh%E2%80%93Lovell_theorem">Frisch&ndash;Waugh&ndash;Lovell theorem</a> and <a href="https://en.wikipedia.org/wiki/Variance_inflation_factor">variance inflation factor</a> (Wikipedia).</p>
+</aside>
 
 <p>Typical symptoms of collinearity include:</p>
 <ul>
@@ -464,22 +411,6 @@ H_a: & \text{full (larger) model with } p_a \text{ coefficients}
 \end{cases}
 $$</div>
 
-<aside class="card" id="t-and-f" title="The chi-squared, t and F distributions">
-<p class="summary">With normal errors, sums of squares in regression are $\sigma^2$ times $\chi^2$ variables; a ratio of two independent $\chi^2$ variables, each divided by its degrees of freedom, follows an $F$ distribution, and $t_d^2 \sim F_{1,d}$.</p>
-<p><b>Definitions.</b> Let $Z, Z_1, \dots, Z_d$ be independent $\mathcal{N}(0, 1)$, and let $V \sim \chi^2_d$, $V_1 \sim \chi^2_{d_1}$, $V_2 \sim \chi^2_{d_2}$ be independent of $Z$ and of each other.</p>
-<ul>
-<li>$\chi^2_d$: the distribution of $Z_1^2 + \dots + Z_d^2$. Mean $d$.</li>
-<li>$t_d$: the distribution of $Z / \sqrt{V/d}$. Symmetric with heavier tails than the normal; tends to $\mathcal{N}(0,1)$ as $d \to \infty$.</li>
-<li>$F_{d_1, d_2}$: the distribution of $\dfrac{V_1/d_1}{V_2/d_2}$. Right-skewed, mean $d_2/(d_2-2)$ for $d_2 > 2$. Squaring a $t_d$ gives $F_{1,d}$.</li>
-</ul>
-<p><b>Why they appear in regression.</b> Assume $\boldsymbol{\varepsilon} \sim \mathcal{N}(\mathbf{0}, \sigma^2\mathbf{I})$ and let the full model have $p_a$ coefficients. The residual is the projection of $\boldsymbol{\varepsilon}$ onto an $(n - p_a)$-dimensional subspace, so $\text{RSS}_a / \sigma^2 \sim \chi^2_{n-p_a}$. Under $H_0$, $\text{RSS}_0 - \text{RSS}_a$ is the squared length of the projection onto a different, orthogonal subspace of dimension $p_a - p_0$, so $(\text{RSS}_0 - \text{RSS}_a)/\sigma^2 \sim \chi^2_{p_a - p_0}$, independent of $\text{RSS}_a$. Dividing each by its degrees of freedom and taking the ratio gives the partial $F$ statistic; the unknown $\sigma^2$ cancels, which is the whole point of using a ratio. The same argument with $\hat\beta_j \sim \mathcal{N}\big(\beta_j, \sigma^2[(\mathbf{X}^\top\mathbf{X})^{-1}]_{jj}\big)$, independent of $\hat\sigma^2$, gives the $t$-statistic.</p>
-<p><b>Critical values.</b> A level-$\alpha$ test rejects when $F$ exceeds the $(1-\alpha)$ quantile of $F_{d_1, d_2}$, e.g. <code>scipy.stats.f.ppf(0.95, 4, 29)</code> $\approx 2.70$, or equivalently when the $p$-value <code>scipy.stats.f.sf(F, d1, d2)</code> is below $\alpha$.</p>
-<ul class="further-reading">
-<li><a href="https://en.wikipedia.org/wiki/F-distribution">F-distribution</a> and <a href="https://en.wikipedia.org/wiki/Student%27s_t-distribution">Student&rsquo;s t-distribution</a> (Wikipedia)</li>
-<li><a href="https://en.wikipedia.org/wiki/Cochran%27s_theorem">Cochran&rsquo;s theorem</a>, why the two sums of squares are independent</li>
-</ul>
-</aside>
-
 <p>Since the reduced model is a special case of the full one, $p_a > p_0$, and its column space is a subspace of the full model&rsquo;s. Projecting onto a smaller subspace leaves a longer residual, so $\text{RSS}_0 \ge \text{RSS}_a$ always. The question is whether the reduction is large relative to the noise level. That is what the <strong>partial $F$ test</strong> measures:</p>
 
 <div class="key-result">
@@ -498,7 +429,13 @@ $$</div>
 
 <!--fig:partial-f-->
 
-<p>(The exact $F$ distribution relies on normal errors <!--card-ref:t-and-f-->; with non-normal errors it holds approximately for large $n$.)</p>
+<p>(The exact $F$ distribution relies on normal errors, see <!--note-ref:t-and-f-->; with non-normal errors it holds approximately for large $n$.)</p>
+
+<aside class="note" id="t-and-f" title="The chi-squared, t and F distributions" kind="background">
+<p>If $Z_1, \dots, Z_d$ are independent standard normals, $\sum_i Z_i^2 \sim \chi^2_d$. For independent $Z \sim \mathcal{N}(0,1)$ and $V \sim \chi^2_d$, $Z / \sqrt{V/d} \sim t_d$; for independent $V_1 \sim \chi^2_{d_1}$ and $V_2 \sim \chi^2_{d_2}$, $(V_1/d_1)/(V_2/d_2) \sim F_{d_1, d_2}$. Hence $t_d^2 \sim F_{1,d}$.</p>
+<p>Under normal errors, $\text{RSS}_a / \sigma^2 \sim \chi^2_{n - p_a}$ and, under $H_0$, $(\text{RSS}_0 - \text{RSS}_a)/\sigma^2 \sim \chi^2_{p_a - p_0}$ independently, since both are squared lengths of projections onto orthogonal subspaces. Their ratio, each scaled by its degrees of freedom, is the partial $F$ statistic, and the unknown $\sigma^2$ cancels. Critical values come from software, e.g. <code>scipy.stats.f.ppf(0.95, 4, 29)</code> $\approx 2.70$.</p>
+<p>Further reading: <a href="https://en.wikipedia.org/wiki/F-distribution">F-distribution</a> (Wikipedia); <a href="https://en.wikipedia.org/wiki/Cochran%27s_theorem">Cochran&rsquo;s theorem</a>, on why the two sums of squares are independent.</p>
+</aside>
 
 <h2>Example: are the father&rsquo;s characteristics useful?</h2>
 
@@ -515,7 +452,7 @@ $$</div>
 
 <h2>Two special cases</h2>
 
-<p><strong>Testing a single coefficient.</strong> Dropping only $X_j$ gives $H_0: \beta_j = 0$ with $p_a - p_0 = 1$. In this case the partial $F$ test is exactly equivalent to the familiar $t$-test <!--card-ref:t-and-f-->,</p>
+<p><strong>Testing a single coefficient.</strong> Dropping only $X_j$ gives $H_0: \beta_j = 0$ with $p_a - p_0 = 1$. In this case the partial $F$ test is exactly equivalent to the familiar $t$-test (<!--note-ref:t-and-f-->),</p>
 
 <div>$$
 t_j = \frac{\hat\beta_j}{\widehat{\text{se}}(\hat\beta_j)} \sim t_{n-p-1},
@@ -523,7 +460,7 @@ t_j = \frac{\hat\beta_j}{\widehat{\text{se}}(\hat\beta_j)} \sim t_{n-p-1},
 \widehat{\text{se}}(\hat\beta_j) = \hat\sigma\sqrt{\big[(\mathbf{X}^\top\mathbf{X})^{-1}\big]_{jj}},
 $$</div>
 
-<p>with $F = t_j^2$ <!--card-ref:fwl-->. This is the $t$-statistic and $p$-value that regression software prints next to each coefficient. Each one tests the effect of a predictor <em>given all the others are in the model</em>, which is why collinear predictors can all look insignificant individually.</p>
+<p>with $F = t_j^2$ (<!--note-ref:fwl-->). This is the $t$-statistic and $p$-value that regression software prints next to each coefficient. Each one tests the effect of a predictor <em>given all the others are in the model</em>, which is why collinear predictors can all look insignificant individually.</p>
 
 <p><strong>Testing all predictors.</strong> Taking the reduced model to be intercept-only, $H_0: Y \sim 1$, gives the <strong>overall $F$ test</strong>. Here $\text{RSS}_0 = \text{TSS}$, and the statistic can be written entirely in terms of $R^2$:</p>
 
@@ -544,7 +481,7 @@ $$</div>
 <li><strong>Normality</strong> (optional): not needed to derive the least squares estimator, but needed for exact finite-sample distributions of $\hat{\boldsymbol{\beta}}$, fitted values and residuals, and therefore for the exact $t$ and $F$ tests and intervals above.</li>
 </ol>
 
-<p>How seriously to take these depends on the goal. If we want to <em>interpret</em> the effects of predictors on the response, all assumptions should be checked with diagnostic plots and tests (residuals vs. fitted values, normal Q-Q plots, scale-location plots, leverage and influence measures <!--card-ref:hat-matrix-->, and so on), with remedies applied when they fail. If the goal is <em>prediction</em>, as it mostly is in statistical learning, the bar is lower: what ultimately matters is performance on held-out data.</p>
+<p>How seriously to take these depends on the goal. If we want to <em>interpret</em> the effects of predictors on the response, all assumptions should be checked with diagnostic plots and tests (residuals vs. fitted values, normal Q-Q plots, scale-location plots, leverage and influence measures as in <!--note-ref:hat-matrix-->, and so on), with remedies applied when they fail. If the goal is <em>prediction</em>, as it mostly is in statistical learning, the bar is lower: what ultimately matters is performance on held-out data.</p>
 
 <h2>Outliers</h2>
 

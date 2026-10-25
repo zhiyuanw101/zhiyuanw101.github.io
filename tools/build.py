@@ -98,7 +98,7 @@ DARK_STYLE = """<style>
 	/* Key results: highlighted boxes for the main conclusions of a post. */
 	.key-result {
 		margin: 24px 0; padding: 14px 22px 2px;
-		background: rgba(59, 125, 221, .09); border-left: 4px solid #6aa7e0; border-radius: var(--radius);
+		background: rgba(59, 125, 221, .09); border-left: 4px solid #6aa7e0;
 		color: #24466b;
 	}
 	.key-result-title { margin-bottom: 2px; font-size: 17px; font-weight: 500; color: #2f5f93; }
@@ -109,44 +109,15 @@ DARK_STYLE = """<style>
 	}
 	.dark .key-result { background: rgba(106, 167, 224, .12); color: #d3e4f7; }
 	.dark .key-result-title { color: #8fbbea; }
-	/* Background-knowledge cards: collapsed to a one-line summary, inline on narrow screens and
-	   floated into the right margin (beside the paragraph that cites them) on wide ones. */
-	.side-card, .card-ref { --card-accent: #3b7ddd; }
-	.side-card--derivation, .card-ref--derivation { --card-accent: #2f9a72; }
-	.side-card--reading, .card-ref--reading { --card-accent: #9b6bcc; }
-	.post-content .side-card-body ul.further-reading { list-style: none; padding: 8px 0 0; margin: 4px 0 0; border-top: 1px dashed var(--tertiary); }
-	.post-content .side-card-body ul.further-reading::before { content: "Further reading"; display: block; margin-bottom: 4px; font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--secondary); }
-	.post-content .side-card-body ul.further-reading li { margin-bottom: 4px; }
-	.side-card {
-		margin: 4px 0 var(--content-gap); padding: 10px 14px;
-		font-size: 14px; line-height: 1.55;
-		background: var(--entry); border: 1px solid var(--border); border-left: 3px solid var(--card-accent);
-		border-radius: var(--radius);
-		transition: box-shadow .3s;
-	}
-	.side-card summary { cursor: pointer; list-style: none; }
-	.side-card summary::-webkit-details-marker { display: none; }
-	.side-card summary:focus-visible { outline: 2px solid var(--card-accent); outline-offset: 4px; }
-	.side-card-head { display: flex; flex-wrap: wrap; gap: 2px 8px; align-items: baseline; }
-	.side-card-num { font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--card-accent); white-space: nowrap; }
-	.side-card-title { font-weight: 600; color: var(--primary); }
-	.side-card-summary { display: block; margin-top: 4px; color: var(--secondary); }
-	.side-card summary::after { content: "Show details ▾"; display: block; margin-top: 6px; font-size: 12px; color: var(--card-accent); }
-	.side-card details[open] summary::after { content: "Hide details ▴"; }
-	.side-card-body { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--tertiary); color: var(--content); }
-	.post-content .side-card-body p, .post-content .side-card-body li { font-size: 14px; }
-	.post-content .side-card-body p { margin-bottom: 10px; }
-	.post-content .side-card-body ul, .post-content .side-card-body ol { padding-inline-start: 18px; margin-bottom: 10px; }
-	.side-card.flash { box-shadow: 0 0 0 3px var(--card-accent); }
-	.post-content a.card-ref {
-		display: inline-block; padding: 0 6px; margin: 0 1px; border-radius: 10px;
-		font-size: 12px; line-height: 18px; font-weight: 600; white-space: nowrap; vertical-align: 1px;
-		color: var(--card-accent); border: 1px solid currentColor; box-shadow: none;
-	}
-	.post-content a.card-ref:hover { background: var(--card-accent); color: #fff; }
-	@media (min-width: 1380px) {
-		.side-card { float: right; clear: right; position: relative; width: 280px; margin: 4px -312px 16px 0; }
-	}
+	/* Collapsible notes: off-main-line material (background, derivations, further reading) that sits
+	   inline, collapsed to its title. Styled after the theme's own ToC <details> and blockquote. */
+	.post-content details.note { margin: -4px 0 var(--content-gap); }
+	.note > summary { cursor: zoom-in; color: var(--secondary); }
+	.note[open] > summary { cursor: zoom-out; }
+	.note-title { color: var(--primary); font-weight: 500; }
+	.note-body { margin-top: 12px; padding: 0 14px; border-inline-start: 3px solid var(--tertiary); }
+	.post-content .note-body > :last-child { margin-bottom: 0; }
+	.note.flash > summary { background: var(--code-bg); transition: background .3s; }
 	/* Floating button back to the Table of Contents; main.js shows it once the ToC has scrolled away. */
 	.toc-link {
 		position: fixed; bottom: 60px; right: 30px; z-index: 99;
@@ -339,63 +310,58 @@ def inline_figures(body):
 	return re.sub(r"<!--fig:([\w-]+)-->", repl, body)
 
 
-CARD_KINDS = {"background": "Background", "derivation": "Derivation", "reading": "Further reading"}
-CARD_RE = re.compile(
-	r'<aside class="card" id="([\w-]+)" title="([^"]+)"(?: kind="(background|derivation|reading)")?>(.*?)</aside>', re.S
+NOTE_KINDS = ("background", "derivation", "reading")
+NOTE_RE = re.compile(
+	r'<aside class="note" id="([\w-]+)" title="([^"]+)"(?: kind="(background|derivation|reading)")?>(.*?)</aside>', re.S
 )
 
 
-def render_cards(body, source):
-	"""Turn background-knowledge cards into numbered side cards and resolve their citations.
+def render_notes(body, source):
+	"""Turn collapsible notes into numbered inline <details> blocks and resolve their citations.
 
 	Author syntax (see AGENTS.md); kind is "background" (default), "derivation" or "reading":
-	  <aside class="card" id="column-space" title="Column space" kind="background">
-	  <p class="summary">One-sentence summary.</p>
-	  ...full explanation...
+	  <aside class="note" id="column-space" title="Column space and projection" kind="background">
+	  ...concise explanation...
 	  </aside>
-	and cite a card from the main text with <!--card-ref:column-space-->.
+	Collapsed, a note shows only "Note N. <title>". Cite it from the main text with
+	<!--note-ref:column-space-->, rendered as a plain "Note N" link (add parentheses in the text).
 	"""
-	cards = {}
+	notes = {}
 
-	def card(m):
-		cid, title, kind, inner = m.group(1), m.group(2), m.group(3) or "background", m.group(4)
-		if cid in cards:
-			raise SystemExit(f"{source}: duplicate card id {cid!r}")
-		sm = re.search(r'<p class="summary">(.*?)</p>', inner, flags=re.S)
-		if not sm:
-			raise SystemExit(f'{source}: card {cid!r} needs a <p class="summary"> one-sentence summary')
+	def note(m):
+		nid, title, kind, inner = m.group(1), m.group(2), m.group(3) or "background", m.group(4)
+		if nid in notes:
+			raise SystemExit(f"{source}: duplicate note id {nid!r}")
+		if 'class="summary"' in inner:
+			raise SystemExit(f"{source}: note {nid!r}: notes show only their title when collapsed; drop the summary")
 		if "$" in title:
-			raise SystemExit(f"{source}: card {cid!r} title must be plain text (no math); it is reused as a tooltip")
+			raise SystemExit(f"{source}: note {nid!r} title must be plain text (no math); it is reused as a tooltip")
 		if re.search(r"<h[1-3][\s>]", inner):
-			raise SystemExit(f"{source}: card {cid!r} must not contain h1-h3 headings (use <h4> or <b>)")
-		n = len(cards) + 1
-		cards[cid] = (n, title, kind)
-		rest = (inner[:sm.start()] + inner[sm.end():]).strip()
-		return f"""<aside class="side-card side-card--{kind}" id="card-{cid}">
-<details>
-<summary>
-<span class="side-card-head"><span class="side-card-num">Card {n} · {CARD_KINDS[kind]}</span><span class="side-card-title">{title}</span></span>
-<span class="side-card-summary">{sm.group(1).strip()}</span>
-</summary>
-<div class="side-card-body">
-{rest}
+			raise SystemExit(f"{source}: note {nid!r} must not contain h1-h3 headings (use <b> run-in labels)")
+		n = len(notes) + 1
+		notes[nid] = (n, title)
+		return f"""<details class="note note--{kind}" id="note-{nid}">
+<summary><span class="note-label">Note {n}.</span> <span class="note-title">{title}</span></summary>
+<div class="note-body">
+{inner.strip()}
 </div>
-</details>
-</aside>"""
+</details>"""
 
-	body = CARD_RE.sub(card, body)
+	body = NOTE_RE.sub(note, body)
 
 	def ref(m):
-		cid = m.group(1)
-		if cid not in cards:
-			raise SystemExit(f"{source}: <!--card-ref:{cid}--> points to an unknown card")
-		n, title, kind = cards[cid]
-		return f'<a class="card-ref card-ref--{kind}" href="#card-{cid}" title="{esc(strip_tags(title))}">Card {n}</a>'
+		nid = m.group(1)
+		if nid not in notes:
+			raise SystemExit(f"{source}: <!--note-ref:{nid}--> points to an unknown note")
+		n, title = notes[nid]
+		return f'<a class="note-ref" href="#note-{nid}" title="{esc(strip_tags(title))}">Note {n}</a>'
 
-	body = re.sub(r"<!--card-ref:([\w-]+)-->", ref, body)
-	unused = set(cards) - set(re.findall(r'href="#card-([\w-]+)"', body))
+	body = re.sub(r"<!--note-ref:([\w-]+)-->", ref, body)
+	unused = set(notes) - set(re.findall(r'href="#note-([\w-]+)"', body))
 	if unused:
-		raise SystemExit(f"{source}: card(s) never cited from the text: {', '.join(sorted(unused))}")
+		raise SystemExit(f"{source}: note(s) never cited from the text: {', '.join(sorted(unused))}")
+	if re.search(r'<aside class="(card|note)"', body):
+		raise SystemExit(f'{source}: malformed note; expected <aside class="note" id="..." title="..." kind="...">')
 	return body
 
 
@@ -480,7 +446,7 @@ def load_posts():
 			"cite_key": meta.get("cite_key"),
 			"url": f"posts/{path.stem}/",
 		}
-		body = render_cards(inline_figures(body), path.relative_to(ROOT))
+		body = render_notes(inline_figures(body), path.relative_to(ROOT))
 		plain = strip_tags(re.sub(r"<figure\b.*?</figure>", " ", body, flags=re.S))
 		words = plain.split()
 		post["minutes"] = max(1, math.ceil(len(words) / WPM))
