@@ -1,5 +1,7 @@
 # Zhiyuan's Log
 
+Agents: start with [AGENTS.md](AGENTS.md); the post workflow is in [.claude/skills/blog-maintain/SKILL.md](.claude/skills/blog-maintain/SKILL.md). All posts are in English.
+
 A static blog with the layout of a Hugo + PaperMod site (home cards, archive, tags, search, FAQ, posts with ToC, citation block and references).
 
 ```

@@ -92,8 +92,15 @@ DARK_STYLE = """<style>
 	.post-content figure svg { display: block; width: 100%; height: auto; color: var(--primary); }
 	.post-content figure svg text { font-family: inherit; }
 	.post-content table.notation td:first-child { white-space: nowrap; }
-	/* The fixed logo sits left of the text column; keep it in the header when there is no room for that. */
-	@media (max-width: 1100px) { .logo { position: static; } }
+	/* Pin the logo in the left margin, right-aligned to the text column, only when the margin is wide
+	   enough to hold it; otherwise it stays in the header and scrolls away. Raise the breakpoint if the
+	   site title gets longer. */
+	.logo { position: static; }
+	.nav { justify-content: space-between; }
+	@media (min-width: 1280px) {
+		.logo { position: fixed; left: auto; right: calc(50vw + var(--main-width) / 2 + var(--gap)); }
+		.nav { justify-content: flex-end; }
+	}
 </style>"""
 
 DARK_INIT = """<script>
@@ -111,6 +118,8 @@ DARK_INIT = """<script>
 </script>"""
 
 WPM = 213  # Hugo's reading-time constant
+# The blog is English-only: CJK ideographs, kana, hangul and full-width punctuation fail the build.
+NON_ENGLISH = re.compile(r"[\u3000-\u303f\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uac00-\ud7af\uff00-\uffef]")
 SUMMARY_WORDS = 70
 
 
@@ -120,6 +129,17 @@ def asset(path):
 	"""Asset path with a short content hash so browsers pick up changes."""
 	digest = hashlib.sha256((STATIC / path).read_bytes()).hexdigest()[:8]
 	return f"{path}?v={digest}"
+
+
+def check_english(text, source):
+	"""Stop the build if visible text contains non-English (CJK) characters."""
+	for line_no, line in enumerate(text.splitlines(), 1):
+		m = NON_ENGLISH.search(line)
+		if m:
+			raise SystemExit(
+				f"{source}:{line_no}: non-English character {m.group()!r} in {line.strip()[:60]!r}. "
+				"Posts must be written in English (see AGENTS.md)."
+			)
 
 
 def esc(s):
@@ -337,6 +357,7 @@ def load_posts():
 		post["minutes"] = max(1, math.ceil(len(words) / WPM))
 		post["summary"] = meta.get("summary") or " ".join(words[:SUMMARY_WORDS])
 		post["plain"] = plain
+		check_english(path.read_text(), path.relative_to(ROOT))
 		cite = citation_block(post)
 		if "<h1>References</h1>" in body:
 			body = body.replace("<h1>References</h1>", cite + "<h1>References</h1>", 1)
@@ -470,6 +491,7 @@ def render_search():
 
 def render_faq():
 	content = (CONTENT / "faq.html").read_text()
+	check_english(content, "content/faq.html")
 	body = f'<header class="page-header"><h1>FAQ</h1></header>\n<div class="post-content">\n{content}\n</div>'
 	return page("FAQ", body, "../", active="FAQ")
 
