@@ -92,6 +92,8 @@ DARK_STYLE = """<style>
 	.post-content figure svg { display: block; width: 100%; height: auto; color: var(--primary); }
 	.post-content figure svg text { font-family: inherit; }
 	.post-content table.notation td:first-child { white-space: nowrap; }
+	/* The fixed logo sits left of the text column; keep it in the header when there is no room for that. */
+	@media (max-width: 1100px) { .logo { position: static; } }
 </style>"""
 
 DARK_INIT = """<script>
