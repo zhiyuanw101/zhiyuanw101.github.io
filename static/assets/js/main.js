@@ -103,3 +103,14 @@ if (searchInput) {
 		}
 	});
 }
+
+// Floating "back to Table of Contents" button on posts.
+const toc = document.getElementById("toc");
+const tocLink = document.getElementById("toc-link");
+if (toc && tocLink) {
+	const update = () => tocLink.classList.toggle("visible", toc.getBoundingClientRect().bottom < 0);
+	window.addEventListener("scroll", update, { passive: true });
+	update();
+	// Re-open the ToC if the reader collapsed it, before the smooth-scroll handler above runs.
+	tocLink.addEventListener("click", () => (toc.querySelector("details").open = true), { capture: true });
+}

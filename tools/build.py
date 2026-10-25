@@ -52,6 +52,7 @@ ICONS = {
 	"linkedin": '<svg version="1.1" viewBox="0 0 512 512" xml:space="preserve"><path d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-288.985,423.278l0,-225.717l-75.04,0l0,225.717l75.04,0Zm270.539,0l0,-129.439c0,-69.333 -37.018,-101.586 -86.381,-101.586c-39.804,0 -57.634,21.891 -67.617,37.266l0,-31.958l-75.021,0c0.995,21.181 0,225.717 0,225.717l75.02,0l0,-126.056c0,-6.748 0.486,-13.492 2.474,-18.315c5.414,-13.475 17.767,-27.434 38.494,-27.434c27.135,0 38.007,20.707 38.007,51.037l0,120.768l75.024,0Zm-307.552,-334.556c-25.674,0 -42.448,16.879 -42.448,39.002c0,21.658 16.264,39.002 41.455,39.002l0.484,0c26.165,0 42.452,-17.344 42.452,-39.002c-0.485,-22.092 -16.241,-38.954 -41.943,-39.002Z" /></svg>',
 	"facebook": '<svg version="1.1" viewBox="0 0 512 512" xml:space="preserve"><path d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-106.468,0l0,-192.915l66.6,0l12.672,-82.621l-79.272,0l0,-53.617c0,-22.603 11.073,-44.636 46.58,-44.636l36.042,0l0,-70.34c0,0 -32.71,-5.582 -63.982,-5.582c-65.288,0 -107.96,39.569 -107.96,111.204l0,62.971l-72.573,0l0,82.621l72.573,0l0,192.915l-191.104,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Z" /></svg>',
 	"search": '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>',
+	"toc": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="9" y1="6" x2="21" y2="6"></line><line x1="9" y1="12" x2="21" y2="12"></line><line x1="9" y1="18" x2="21" y2="18"></line><circle cx="4" cy="6" r="1"></circle><circle cx="4" cy="12" r="1"></circle><circle cx="4" cy="18" r="1"></circle></svg>',
 	"top": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor"><path d="M12 6H0l6-6z" /></svg>',
 }
 
@@ -92,6 +93,21 @@ DARK_STYLE = """<style>
 	.post-content figure svg { display: block; width: 100%; height: auto; color: var(--primary); }
 	.post-content figure svg text { font-family: inherit; }
 	.post-content table.notation td:first-child { white-space: nowrap; }
+	/* Display equations wider than the column scroll sideways instead of being cut off on phones. */
+	.post-content mjx-container[display="true"] { overflow-x: auto; overflow-y: hidden; max-width: 100%; padding: 2px 0; }
+	/* Floating button back to the Table of Contents; main.js shows it once the ToC has scrolled away. */
+	.toc-link {
+		position: fixed; bottom: 60px; right: 30px; z-index: 99;
+		width: 42px; height: 42px; padding: 11px; border-radius: 64px;
+		background: var(--tertiary); color: var(--secondary);
+		visibility: hidden; opacity: 0; transition: visibility .3s, opacity .3s linear;
+	}
+	.toc-link.visible { visibility: visible; opacity: 1; }
+	.toc-link:hover { color: var(--primary); }
+	.toc-link:focus { outline: 0; }
+	.toc-link svg { display: block; width: 100%; height: 100%; }
+	@media (max-width: 768px) { .toc-link { bottom: 24px; right: 16px; } }
+	.toc { scroll-margin-top: 16px; }
 	/* Pin the logo in the left margin, right-aligned to the text column, only when the margin is wide
 	   enough to hold it; otherwise it stays in the header and scrolls away. Raise the breakpoint if the
 	   site title gets longer. */
@@ -308,12 +324,13 @@ def render_toc(toc):
 		out.append(f'<li><a href="#{hid}" aria-label="{label}">{inner}</a>')
 		depth = level
 	out.append("</li>" + "</ul></li>" * (depth - base) + "</ul>")
-	return f"""<div class="toc">
-	<details>
+	return f"""<div class="toc" id="toc">
+	<details open>
 		<summary accesskey="c" title="(Alt + C)"><span class="details">Table of Contents</span></summary>
 		<div class="inner">{"".join(out)}</div>
 	</details>
-</div>"""
+</div>
+<a href="#toc" class="toc-link" id="toc-link" aria-label="back to table of contents" title="Table of Contents (Alt + B)" accesskey="b">{ICONS['toc']}</a>"""
 
 
 def citation_block(post):
