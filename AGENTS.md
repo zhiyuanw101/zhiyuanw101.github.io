@@ -78,10 +78,70 @@ Markup conventions (match the existing post):
 - Vectors and matrices in bold: `\mathbf{y}`, `\mathbf{X}`, `\boldsymbol{\beta}`.
 - Code: `<pre tabindex="0"><code class="language-python">...</code></pre>`; escape `<`, `>`, `&`.
 - Tables: plain `<table><thead>...</thead><tbody>...</tbody></table>`.
+- Side cards (`<aside class="card">`) and key-result boxes (`<div class="key-result">`): see the next two sections.
 - Update notes go first in the body:
   `<p><span class="update">[Updated on YYYY-MM-DD: what changed.]</span></p>`
 - References are the last section: `<h1>References</h1>` followed by
   `<p>[n] Authors. <a href="...">&ldquo;Title.&rdquo;</a> Venue, Year.</p>`.
+
+## Side cards: keep the main line lean
+
+A post has one main line of argument. Material a reader may need but that is **not** part of that
+line goes into a side card. Readers who already know it skip it; everyone else gets enough to keep
+reading. A side card shows its title and a one-sentence summary, and opens to the full content. On
+wide screens (1380px and up) it floats in the right margin beside the paragraph that cites it; on
+narrower screens it sits inline, collapsed.
+
+Three kinds:
+
+| `kind` | Use it for | Example |
+| --- | --- | --- |
+| `background` (default) | Prerequisite theory from another field that the reader may not know | column space and projections; the $\chi^2$, $t$, $F$ distributions |
+| `derivation` | Long or mechanical derivations that establish a result but add no intuition | matrix-calculus gradient of RSS; Frisch-Waugh-Lovell |
+| `reading` | Extension material and further reading beyond what the post needs | more hat-matrix properties (leverage, Cook's distance) with links |
+
+Decide with one question: *could a reader who skips this still follow the rest of the post?* If yes,
+it is a card. Intuition, the key result itself, and anything later sections build on stay in the
+main text. A result stated in the main text can have its proof in a `derivation` card.
+
+Syntax: place the card **immediately before** the paragraph that first cites it, and cite it from
+the text with `<!--card-ref:id-->` (rendered as a "Card N" chip that opens the card):
+
+```html
+<aside class="card" id="column-space" title="Column space, linear systems and projection" kind="background">
+<p class="summary">One sentence that is enough for a reader who will not open the card.</p>
+<p>Full explanation: definitions, the argument, $\LaTeX$ as usual...</p>
+<ul class="further-reading">
+<li><a href="https://...">Source title</a> (publisher or site), what it adds</li>
+</ul>
+</aside>
+
+<p>Least squares is a projection problem in disguise ... <!--card-ref:column-space-->.</p>
+```
+
+Rules (the build enforces the first four): every card has a `<p class="summary">`; the `title` is
+plain text, no math; no `<h1>`-`<h3>` inside a card (use `<b>` run-in labels); every card is cited
+at least once; keep the summary to one sentence; no figures inside cards; the optional
+`<ul class="further-reading">` goes last and holds only links you have opened and checked. Cards
+are numbered automatically in order of appearance.
+
+## Key results
+
+Highlight the few conclusions a reader should take away (the estimator, its distribution, the test
+statistic) with a key-result box. Typically 4-8 per long post; not every equation.
+
+```html
+<div class="key-result">
+<div class="key-result-title">Least squares estimator</div>
+<div>$$
+\hat{\boldsymbol{\beta}} = (\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top\mathbf{y}
+$$</div>
+</div>
+```
+
+The title is short and may contain inline math. An optional `<p>` after the formula can state the
+conditions (e.g. "when $\mathbf{X}$ has full column rank"). Key results belong to the main line, so
+never put one inside a card.
 
 ## Writing style (Lil'Log voice)
 

@@ -95,6 +95,58 @@ DARK_STYLE = """<style>
 	.post-content table.notation td:first-child { white-space: nowrap; }
 	/* Display equations wider than the column scroll sideways instead of being cut off on phones. */
 	.post-content mjx-container[display="true"] { overflow-x: auto; overflow-y: hidden; max-width: 100%; padding: 2px 0; }
+	/* Key results: highlighted boxes for the main conclusions of a post. */
+	.key-result {
+		margin: 24px 0; padding: 14px 22px 2px;
+		background: rgba(59, 125, 221, .09); border-left: 4px solid #6aa7e0; border-radius: var(--radius);
+		color: #24466b;
+	}
+	.key-result-title { margin-bottom: 2px; font-size: 17px; font-weight: 500; color: #2f5f93; }
+	.post-content .key-result p { margin-bottom: 12px; }
+	@media (prefers-color-scheme: dark) {
+		.key-result { background: rgba(106, 167, 224, .12); color: #d3e4f7; }
+		.key-result-title { color: #8fbbea; }
+	}
+	.dark .key-result { background: rgba(106, 167, 224, .12); color: #d3e4f7; }
+	.dark .key-result-title { color: #8fbbea; }
+	/* Background-knowledge cards: collapsed to a one-line summary, inline on narrow screens and
+	   floated into the right margin (beside the paragraph that cites them) on wide ones. */
+	.side-card, .card-ref { --card-accent: #3b7ddd; }
+	.side-card--derivation, .card-ref--derivation { --card-accent: #2f9a72; }
+	.side-card--reading, .card-ref--reading { --card-accent: #9b6bcc; }
+	.post-content .side-card-body ul.further-reading { list-style: none; padding: 8px 0 0; margin: 4px 0 0; border-top: 1px dashed var(--tertiary); }
+	.post-content .side-card-body ul.further-reading::before { content: "Further reading"; display: block; margin-bottom: 4px; font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--secondary); }
+	.post-content .side-card-body ul.further-reading li { margin-bottom: 4px; }
+	.side-card {
+		margin: 4px 0 var(--content-gap); padding: 10px 14px;
+		font-size: 14px; line-height: 1.55;
+		background: var(--entry); border: 1px solid var(--border); border-left: 3px solid var(--card-accent);
+		border-radius: var(--radius);
+		transition: box-shadow .3s;
+	}
+	.side-card summary { cursor: pointer; list-style: none; }
+	.side-card summary::-webkit-details-marker { display: none; }
+	.side-card summary:focus-visible { outline: 2px solid var(--card-accent); outline-offset: 4px; }
+	.side-card-head { display: flex; flex-wrap: wrap; gap: 2px 8px; align-items: baseline; }
+	.side-card-num { font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--card-accent); white-space: nowrap; }
+	.side-card-title { font-weight: 600; color: var(--primary); }
+	.side-card-summary { display: block; margin-top: 4px; color: var(--secondary); }
+	.side-card summary::after { content: "Show details ▾"; display: block; margin-top: 6px; font-size: 12px; color: var(--card-accent); }
+	.side-card details[open] summary::after { content: "Hide details ▴"; }
+	.side-card-body { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--tertiary); color: var(--content); }
+	.post-content .side-card-body p, .post-content .side-card-body li { font-size: 14px; }
+	.post-content .side-card-body p { margin-bottom: 10px; }
+	.post-content .side-card-body ul, .post-content .side-card-body ol { padding-inline-start: 18px; margin-bottom: 10px; }
+	.side-card.flash { box-shadow: 0 0 0 3px var(--card-accent); }
+	.post-content a.card-ref {
+		display: inline-block; padding: 0 6px; margin: 0 1px; border-radius: 10px;
+		font-size: 12px; line-height: 18px; font-weight: 600; white-space: nowrap; vertical-align: 1px;
+		color: var(--card-accent); border: 1px solid currentColor; box-shadow: none;
+	}
+	.post-content a.card-ref:hover { background: var(--card-accent); color: #fff; }
+	@media (min-width: 1380px) {
+		.side-card { float: right; clear: right; position: relative; width: 280px; margin: 4px -312px 16px 0; }
+	}
 	/* Floating button back to the Table of Contents; main.js shows it once the ToC has scrolled away. */
 	.toc-link {
 		position: fixed; bottom: 60px; right: 30px; z-index: 99;
@@ -287,6 +339,66 @@ def inline_figures(body):
 	return re.sub(r"<!--fig:([\w-]+)-->", repl, body)
 
 
+CARD_KINDS = {"background": "Background", "derivation": "Derivation", "reading": "Further reading"}
+CARD_RE = re.compile(
+	r'<aside class="card" id="([\w-]+)" title="([^"]+)"(?: kind="(background|derivation|reading)")?>(.*?)</aside>', re.S
+)
+
+
+def render_cards(body, source):
+	"""Turn background-knowledge cards into numbered side cards and resolve their citations.
+
+	Author syntax (see AGENTS.md); kind is "background" (default), "derivation" or "reading":
+	  <aside class="card" id="column-space" title="Column space" kind="background">
+	  <p class="summary">One-sentence summary.</p>
+	  ...full explanation...
+	  </aside>
+	and cite a card from the main text with <!--card-ref:column-space-->.
+	"""
+	cards = {}
+
+	def card(m):
+		cid, title, kind, inner = m.group(1), m.group(2), m.group(3) or "background", m.group(4)
+		if cid in cards:
+			raise SystemExit(f"{source}: duplicate card id {cid!r}")
+		sm = re.search(r'<p class="summary">(.*?)</p>', inner, flags=re.S)
+		if not sm:
+			raise SystemExit(f'{source}: card {cid!r} needs a <p class="summary"> one-sentence summary')
+		if "$" in title:
+			raise SystemExit(f"{source}: card {cid!r} title must be plain text (no math); it is reused as a tooltip")
+		if re.search(r"<h[1-3][\s>]", inner):
+			raise SystemExit(f"{source}: card {cid!r} must not contain h1-h3 headings (use <h4> or <b>)")
+		n = len(cards) + 1
+		cards[cid] = (n, title, kind)
+		rest = (inner[:sm.start()] + inner[sm.end():]).strip()
+		return f"""<aside class="side-card side-card--{kind}" id="card-{cid}">
+<details>
+<summary>
+<span class="side-card-head"><span class="side-card-num">Card {n} · {CARD_KINDS[kind]}</span><span class="side-card-title">{title}</span></span>
+<span class="side-card-summary">{sm.group(1).strip()}</span>
+</summary>
+<div class="side-card-body">
+{rest}
+</div>
+</details>
+</aside>"""
+
+	body = CARD_RE.sub(card, body)
+
+	def ref(m):
+		cid = m.group(1)
+		if cid not in cards:
+			raise SystemExit(f"{source}: <!--card-ref:{cid}--> points to an unknown card")
+		n, title, kind = cards[cid]
+		return f'<a class="card-ref card-ref--{kind}" href="#card-{cid}" title="{esc(strip_tags(title))}">Card {n}</a>'
+
+	body = re.sub(r"<!--card-ref:([\w-]+)-->", ref, body)
+	unused = set(cards) - set(re.findall(r'href="#card-([\w-]+)"', body))
+	if unused:
+		raise SystemExit(f"{source}: card(s) never cited from the text: {', '.join(sorted(unused))}")
+	return body
+
+
 def add_heading_anchors(body):
 	"""Give h1-h3 ids + hover anchors and collect them for the table of contents."""
 	toc, seen = [], {}
@@ -368,11 +480,12 @@ def load_posts():
 			"cite_key": meta.get("cite_key"),
 			"url": f"posts/{path.stem}/",
 		}
-		body = inline_figures(body)
+		body = render_cards(inline_figures(body), path.relative_to(ROOT))
 		plain = strip_tags(re.sub(r"<figure\b.*?</figure>", " ", body, flags=re.S))
 		words = plain.split()
 		post["minutes"] = max(1, math.ceil(len(words) / WPM))
-		post["summary"] = meta.get("summary") or " ".join(words[:SUMMARY_WORDS])
+		main_text = strip_tags(re.sub(r"<(figure|aside)\b.*?</\1>", " ", body, flags=re.S))
+		post["summary"] = meta.get("summary") or " ".join(main_text.split()[:SUMMARY_WORDS])
 		post["plain"] = plain
 		check_english(path.read_text(), path.relative_to(ROOT))
 		cite = citation_block(post)

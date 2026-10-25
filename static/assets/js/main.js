@@ -114,3 +114,16 @@ if (toc && tocLink) {
 	// Re-open the ToC if the reader collapsed it, before the smooth-scroll handler above runs.
 	tocLink.addEventListener("click", () => (toc.querySelector("details").open = true), { capture: true });
 }
+
+// Background-knowledge cards: a "Card N" citation opens its card and briefly highlights it.
+const openCard = (id) => {
+	const card = document.getElementById(id);
+	if (!card || !card.classList.contains("side-card")) return;
+	card.querySelector("details").open = true;
+	card.classList.add("flash");
+	setTimeout(() => card.classList.remove("flash"), 1600);
+};
+document.querySelectorAll("a.card-ref").forEach((a) => {
+	a.addEventListener("click", () => openCard(a.hash.slice(1)), { capture: true });
+});
+if (location.hash.startsWith("#card-")) openCard(location.hash.slice(1));
