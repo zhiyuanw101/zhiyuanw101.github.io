@@ -42,8 +42,25 @@ $$</div>
 
 <div class="key-result">
 <div class="key-result-title">Decision rule at level $\alpha$</div>
-<p>Reject $H_0$ if $p < \alpha$. Equivalently, reject $H_0$ if $t_{\text{obs}}$ is beyond the <strong>critical value</strong>, the point where the null distribution has tail area $\alpha$.</p>
+<p>Reject $H_0$ if $p < \alpha$. Equivalently, reject $H_0$ if $t_{\text{obs}}$ is beyond the <strong>critical value</strong>.</p>
 </div>
+
+<h4>Critical value</h4>
+
+<p>The <strong>critical value</strong> is the cutoff for the test statistic at level $\alpha$. It is the point where the tail area of the null distribution equals $\alpha$. Thus, under $H_0$, chance alone goes beyond it in a fraction $\alpha$ of studies.</p>
+
+<table>
+<thead>
+<tr><th>Test</th><th>Null distribution</th><th>Critical value at $\alpha = 0.05$</th><th>Observed</th><th>Decision</th></tr>
+</thead>
+<tbody>
+<tr><td>Coin (Example 1)</td><td>Binomial(100, 0.5)</td><td>59 heads: $P(X \ge 59) = 0.044$</td><td>60</td><td>reject</td></tr>
+<tr><td>Bag weights (Example 2)</td><td>$t_{15}$</td><td>$-1.753$</td><td>$-2.33$</td><td>reject</td></tr>
+<tr><td>Partial $F$ (Example 3)</td><td>$F_{4,29}$</td><td>2.70</td><td>0.72</td><td>do not reject</td></tr>
+</tbody>
+</table>
+
+<p>The critical value depends only on $\alpha$ and the null distribution, so it is known before the data are collected. The p-value depends on the data, and it also shows how far the result is from the cutoff.</p>
 
 <p>Whether &ldquo;extreme&rdquo; means large, small or far from the center in both directions depends on $H_a$ (<!--note-ref:sides-->).</p>
 
