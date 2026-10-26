@@ -196,9 +196,45 @@ def fig_partial_f():
 	)
 
 
+# ---------------------------------------------------------------- figure: binomial null distribution (tests post)
+
+def fig_binomial_test():
+	from math import comb
+	n, obs = 100, 60
+	lo_k, hi_k = 30, 70
+	pmf = {k: comb(n, k) / 2 ** n for k in range(lo_k, hi_k + 1)}
+	W, H, L, R, T, B = 640, 330, 50, 20, 30, 50
+	bw = (W - L - R) / (hi_k - lo_k + 1)
+	ymax = 0.085
+	sx = lambda k: L + (k - lo_k) * bw
+	sy = lambda v: H - B - v / ymax * (H - T - B)
+	g = []
+	for v in (0, 0.02, 0.04, 0.06, 0.08):
+		g.append(f'<line x1="{L}" y1="{sy(v):.1f}" x2="{W - R}" y2="{sy(v):.1f}" stroke="currentColor" stroke-opacity="{0.5 if v == 0 else 0.12}"/>')
+		g.append(f'<text x="{L - 8}" y="{sy(v) + 4:.1f}" fill="currentColor" text-anchor="end" font-size="12">{v:.2f}</text>')
+	for k, v in pmf.items():
+		colour = ORANGE if k >= obs else BLUE
+		opacity = 0.9 if k >= obs else 0.45
+		g.append(f'<rect x="{sx(k) + 1:.1f}" y="{sy(v):.1f}" width="{bw - 2:.1f}" height="{sy(0) - sy(v):.1f}" fill="{colour}" fill-opacity="{opacity}"/>')
+	for k in range(lo_k, hi_k + 1, 5):
+		g.append(f'<text x="{sx(k) + bw / 2:.1f}" y="{H - B + 18}" fill="currentColor" text-anchor="middle" font-size="12">{k}</text>')
+	tail = sum(comb(n, k) for k in range(obs, n + 1)) / 2 ** n
+	g.append(f'<line x1="{sx(obs):.1f}" y1="{T}" x2="{sx(obs):.1f}" y2="{sy(0):.1f}" stroke="{ORANGE}" stroke-width="1.5" stroke-dasharray="5 4"/>')
+	g.append(f'<text x="{sx(obs) + 8:.1f}" y="{T + 14}" fill="{ORANGE}">observed: 60 heads</text>')
+	g.append(f'<text x="{sx(obs) + 8:.1f}" y="{T + 34}" fill="{ORANGE}">p = P(X ≥ 60) = {tail:.3f}</text>')
+	g.append(f'<text x="{(L + W - R) / 2}" y="{H - 10}" fill="currentColor" text-anchor="middle">number of heads in 100 flips of a fair coin</text>')
+	return svg(W, H, "\n".join(g), "Binomial null distribution with the p-value tail shaded") + (
+		"<figcaption>The null distribution of the number of heads, Binomial(100, 0.5). The p-value is the total "
+		"probability of the shaded bars: results at least as extreme as the observed 60 heads.</figcaption>\n</figure>\n"
+	)
+
+
 def main():
 	OUT.mkdir(parents=True, exist_ok=True)
-	for name, fn in (("ls-fit", fig_ls_fit), ("ls-geometry", fig_geometry), ("r2-inflation", fig_r2), ("partial-f", fig_partial_f)):
+	for name, fn in (
+		("ls-fit", fig_ls_fit), ("ls-geometry", fig_geometry), ("r2-inflation", fig_r2), ("partial-f", fig_partial_f),
+		("binomial-test", fig_binomial_test),
+	):
 		(OUT / f"{name}.html").write_text(fn())
 		print("wrote", name)
 

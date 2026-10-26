@@ -1,0 +1,143 @@
+<!--
+title: Hypothesis Tests and p-values
+date: 2026-10-25
+tags: Statistics, Hypothesis-Testing
+cite_key: wang2026tests
+-->
+<p>Data are noisy. An observed effect, such as a coin that lands heads more often than tails, can be real or the result of chance. A <strong>hypothesis test</strong> is a fixed procedure that decides whether chance is a sufficient explanation.</p>
+
+<p>This post gives the procedure, the p-value and the two types of error. Three worked examples follow: a binomial test, a one-sample $t$-test and the partial $F$ test from <a href="../2026-10-25-linear-regression/">Linear Regression Models</a>.</p>
+
+<h1>The Procedure</h1>
+
+<p>Every test has the same five parts:</p>
+<ol>
+<li><strong>Null hypothesis</strong> $H_0$: the default claim, usually &ldquo;no effect&rdquo;. It must be precise, so that probabilities under it can be calculated.</li>
+<li><strong>Alternative hypothesis</strong> $H_a$: the claim to accept if the data reject $H_0$.</li>
+<li><strong>Test statistic</strong> $T$: a number calculated from the data that measures the evidence against $H_0$.</li>
+<li><strong>Null distribution</strong>: the distribution of $T$ when $H_0$ is true. It shows which values chance alone produces.</li>
+<li><strong>Decision rule</strong>: before looking at the data, choose a <strong>significance level</strong> $\alpha$, usually 0.05. Reject $H_0$ if the p-value is less than $\alpha$.</li>
+</ol>
+
+<p>The data are random, so $T$ is random. Calculated from one data set, $T$ is one number. Across repeated studies, $T$ varies, and the null distribution describes that variation under $H_0$.</p>
+
+<h1>The p-value</h1>
+
+<div class="key-result">
+<div class="key-result-title">p-value</div>
+<p>The probability, if $H_0$ is true, of a test statistic at least as extreme as the observed value $t_{\text{obs}}$. When large values of $T$ are evidence against $H_0$:</p>
+<div>$$
+p = P\big(T \ge t_{\text{obs}} \mid H_0\big)
+$$</div>
+</div>
+
+<p>Thus the p-value is the area of the null distribution beyond the observed value (Fig. 1). A small p-value means that chance rarely produces a result like the observed one. A large p-value means that chance produces such results often.</p>
+
+<!--fig:binomial-test-->
+
+<div class="key-result">
+<div class="key-result-title">Decision rule at level $\alpha$</div>
+<p>Reject $H_0$ if $p < \alpha$. Equivalently, reject $H_0$ if $t_{\text{obs}}$ is beyond the <strong>critical value</strong>, the point where the null distribution has tail area $\alpha$.</p>
+</div>
+
+<p>Whether &ldquo;extreme&rdquo; means large, small or far from the center in both directions depends on $H_a$ (<!--note-ref:sides-->).</p>
+
+<aside class="note" id="sides" title="One-sided and two-sided tests" kind="background">
+<p>A <strong>one-sided</strong> alternative states a direction, for example &ldquo;the coin favors heads&rdquo;. Only one tail of the null distribution counts as extreme. A <strong>two-sided</strong> alternative, &ldquo;the coin is not fair&rdquo;, counts both tails.</p>
+<p>For 60 heads in 100 flips, the one-sided p-value is $P(X \ge 60) = 0.028$. The two-sided p-value is $P(|X - 50| \ge 10) = 0.057$. At $\alpha = 0.05$, the one-sided test rejects $H_0$, but the two-sided test does not. Choose the alternative before you look at the data; a choice made after the data invalidates the p-value.</p>
+</aside>
+
+<h4>What a p-value is not</h4>
+<ul>
+<li>It is not the probability that $H_0$ is true. $p = 0.03$ does not mean a 3% chance of no effect.</li>
+<li>It is not the size or the importance of an effect. With a large sample, a negligible effect can give a small p-value.</li>
+<li>A large p-value does not prove $H_0$. It means that the data give no evidence against $H_0$; the sample can be too small to detect a real effect.</li>
+</ul>
+
+<h1>Two Types of Error</h1>
+
+<table>
+<thead>
+<tr><th></th><th>$H_0$ is true</th><th>$H_0$ is false</th></tr>
+</thead>
+<tbody>
+<tr><td>Reject $H_0$</td><td><strong>Type I error</strong> (probability $\alpha$)</td><td>correct decision (probability = power)</td></tr>
+<tr><td>Do not reject $H_0$</td><td>correct decision</td><td><strong>Type II error</strong></td></tr>
+</tbody>
+</table>
+
+<p>The level $\alpha$ is the probability of a Type I error: if $H_0$ is true, a test at $\alpha = 0.05$ rejects it in 5% of studies. The <strong>power</strong> is the probability of rejecting a false $H_0$. Power increases with the sample size and with the size of the real effect.</p>
+
+<h1>Examples</h1>
+
+<h2>Example 1: is a coin fair?</h2>
+
+<p>A coin gives 60 heads in 100 flips. Does it favor heads?</p>
+
+<table>
+<tbody>
+<tr><td>$H_0$</td><td>the coin is fair, $P(\text{heads}) = 0.5$</td></tr>
+<tr><td>$H_a$</td><td>the coin favors heads, $P(\text{heads}) > 0.5$</td></tr>
+<tr><td>Test statistic</td><td>number of heads, $X = 60$</td></tr>
+<tr><td>Null distribution</td><td>$X \sim \text{Binomial}(100, 0.5)$: mean 50, standard deviation 5</td></tr>
+<tr><td>p-value</td><td>$P(X \ge 60) = 0.028$ (Fig. 1)</td></tr>
+<tr><td>Decision</td><td>$0.028 < 0.05$: reject $H_0$. The coin favors heads.</td></tr>
+</tbody>
+</table>
+
+<p>With 53 heads, $p = P(X \ge 53) = 0.31$. A fair coin gives such a result in about one of three studies, so the test does not reject $H_0$.</p>
+
+<h2>Example 2: does a machine underfill bags?</h2>
+
+<p>A machine fills bags labeled 500 g. A sample of $n = 16$ bags has mean $\bar{x} = 497.2$ g and standard deviation $s = 4.8$ g. Assume that the fill weights are normal.</p>
+
+<table>
+<tbody>
+<tr><td>$H_0$</td><td>the mean fill weight is $\mu = 500$ g</td></tr>
+<tr><td>$H_a$</td><td>the machine underfills, $\mu < 500$ g</td></tr>
+<tr><td>Test statistic</td><td>$t = \dfrac{\bar{x} - 500}{s/\sqrt{n}} = \dfrac{497.2 - 500}{4.8/4} = -2.33$</td></tr>
+<tr><td>Null distribution</td><td>$t \sim t_{15}$, the $t$ distribution with $n - 1 = 15$ degrees of freedom</td></tr>
+<tr><td>p-value</td><td>$P(t_{15} \le -2.33) = 0.017$; the critical value is $-1.753$</td></tr>
+<tr><td>Decision</td><td>$0.017 < 0.05$: reject $H_0$. The machine underfills.</td></tr>
+</tbody>
+</table>
+
+<p>The statistic divides the difference from 500 g by its estimated standard error. Thus $t$ measures the difference in units of noise, as the $F$ statistic does in Example 3. A confidence interval gives the same decision and also the size of the effect (<!--note-ref:ci-->).</p>
+
+<aside class="note" id="ci" title="Tests and confidence intervals" kind="reading">
+<p>The 95% confidence interval for $\mu$ is $\bar{x} \pm t_{15,\,0.975}\, s/\sqrt{n} = 497.2 \pm 2.131 \times 1.2 = [494.6,\ 499.8]$ g. It contains exactly the values $\mu_0$ that a two-sided test at $\alpha = 0.05$ does not reject.</p>
+<p>The value 500 g is outside the interval, and the two-sided p-value is $0.034 < 0.05$. The interval also shows the size of the effect: the machine underfills by between 0.2 g and 5.4 g.</p>
+</aside>
+
+<h2>Example 3: do the father&rsquo;s characteristics matter?</h2>
+
+<p>In the birthweight study of <a href="../2026-10-25-linear-regression/#hypothesis-testing-with-the-partial-f-test">Linear Regression Models</a>, a reduced model uses 8 predictors and the full model adds the father&rsquo;s 4 predictors. There are $n = 42$ babies.</p>
+
+<table>
+<tbody>
+<tr><td>$H_0$</td><td>the father&rsquo;s 4 coefficients are 0</td></tr>
+<tr><td>$H_a$</td><td>at least one of the 4 coefficients is not 0</td></tr>
+<tr><td>Test statistic</td><td>$F = \dfrac{(\text{RSS}_0 - \text{RSS}_a)/4}{\text{RSS}_a/29} = 0.7225$</td></tr>
+<tr><td>Null distribution</td><td>$F \sim F_{4,\,29}$</td></tr>
+<tr><td>p-value</td><td>$P(F_{4,29} \ge 0.7225) = 0.58$; the critical value is 2.70</td></tr>
+<tr><td>Decision</td><td>$0.58 > 0.05$: do not reject $H_0$. The data give no evidence that the father&rsquo;s characteristics help.</td></tr>
+</tbody>
+</table>
+
+<p>$F$ is the decrease in RSS per added predictor, divided by the noise level $\hat\sigma^2$. If the added predictors are useless, $F$ is near 1. Here $F = 0.72$, a common value under $H_0$.</p>
+
+<h1>Quick Summary</h1>
+
+<ul>
+<li>A test assumes the precise null hypothesis $H_0$, calculates a test statistic from the data and compares it with the null distribution.</li>
+<li>The p-value is the probability, under $H_0$, of a result at least as extreme as the observed one. Reject $H_0$ if $p < \alpha$.</li>
+<li>A p-value is not the probability that $H_0$ is true, and a large p-value does not prove $H_0$.</li>
+<li>$\alpha$ is the probability of a Type I error; power is the probability of rejecting a false $H_0$.</li>
+<li>Only the statistic and its null distribution change between tests: binomial for counts, $t$ for one mean or coefficient, $F$ for nested regression models.</li>
+</ul>
+
+<h1>References</h1>
+
+<p>[1] Ronald L. Wasserstein &amp; Nicole A. Lazar. <a href="https://doi.org/10.1080/00031305.2016.1154108">&ldquo;The ASA Statement on p-Values: Context, Process, and Purpose.&rdquo;</a> The American Statistician 70(2), 2016.</p>
+<p>[2] George Casella &amp; Roger L. Berger. &ldquo;Statistical Inference.&rdquo; 2nd ed., Duxbury, 2002. Chapter 8.</p>
+<p>[3] Larry Wasserman. &ldquo;All of Statistics.&rdquo; Springer, 2004. Chapter 10.</p>

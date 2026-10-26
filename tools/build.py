@@ -115,7 +115,7 @@ DARK_STYLE = """<style>
 	.dark .key-result { background: rgba(106, 167, 224, .12); color: #d3e4f7; }
 	.dark .key-result-title { color: #8fbbea; }
 	/* Figure numbers are written by the build (number_figures), not by the theme's CSS counter. */
-	figcaption::before { content: none; }
+	.post-content figure figcaption::before { content: none; }  /* the theme nests its rule under .post-content figure */
 	/* Collapsible notes: off-main-line material (background, derivations, further reading) that sits
 	   inline, collapsed to its title. Styled after the theme's own ToC <details> and blockquote. */
 	.post-content details.note { margin: -4px 0 var(--content-gap); }
