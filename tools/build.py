@@ -96,6 +96,10 @@ DARK_STYLE = """<style>
 	.post-content table.notation td:first-child { white-space: nowrap; }
 	/* Display equations wider than the column scroll sideways instead of being cut off on phones. */
 	.post-content mjx-container[display="true"] { overflow-x: auto; overflow-y: hidden; max-width: 100%; padding: 2px 0; }
+	/* Minor headings (h4): a highlighted label for a short subsection such as a list of properties. */
+	.post-content h4 { margin: 22px 0 10px; font-size: 17px; font-weight: 600; color: #2f5f93; }
+	@media (prefers-color-scheme: dark) { .post-content h4 { color: #8fbbea; } }
+	.dark .post-content h4 { color: #8fbbea; }
 	/* Key results: highlighted boxes for the main conclusions of a post. */
 	.key-result {
 		margin: 24px 0; padding: 14px 22px 2px;
@@ -410,7 +414,7 @@ def number_figures(body):
 
 
 def add_heading_anchors(body):
-	"""Give h1-h3 ids + hover anchors and collect them for the table of contents."""
+	"""Give h1-h4 ids + hover anchors and collect h1-h3 for the table of contents."""
 	toc, seen = [], {}
 
 	def repl(m):
@@ -422,13 +426,14 @@ def add_heading_anchors(body):
 			hid = f"{hid}-{seen[hid]}"
 		else:
 			seen[hid] = 0
-		toc.append((level, hid, inner.strip()))
+		if level <= 3:  # h4 are highlighted minor headings: anchored, but not in the ToC
+			toc.append((level, hid, inner.strip()))
 		return (
 			f'<h{level} id="{hid}">{inner}'
 			f'<a hidden class="anchor" aria-hidden="true" href="#{hid}">#</a></h{level}>'
 		)
 
-	body = re.sub(r"<h([1-3])((?:\s[^>]*)?)>(.*?)</h\1>", repl, body, flags=re.S)
+	body = re.sub(r"<h([1-4])((?:\s[^>]*)?)>(.*?)</h\1>", repl, body, flags=re.S)
 	return body, toc
 
 

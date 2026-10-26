@@ -158,12 +158,16 @@ $$</div>
 $$</div>
 </div>
 
-<p>The $n\times n$ matrix $\mathbf{H} = \mathbf{X}(\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top$ is the <strong>hat matrix</strong>: it maps $\mathbf{y}$ to $\hat{\mathbf{y}}$ (&ldquo;y-hat&rdquo;). Three of its properties are used below (more in <!--note-ref:hat-matrix-->):</p>
+<p>The $n\times n$ matrix $\mathbf{H} = \mathbf{X}(\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top$ is the <strong>hat matrix</strong>: it maps $\mathbf{y}$ to $\hat{\mathbf{y}}$ (&ldquo;y-hat&rdquo;).</p>
+
+<h4>Properties of the hat matrix</h4>
 <ul>
 <li><strong>Symmetric</strong>: $\mathbf{H}^\top = \mathbf{H}$.</li>
 <li><strong>Idempotent</strong>: $\mathbf{H}^2 = \mathbf{H}$. Projecting twice gives the same result as projecting once (see the <a href="#the-geometry-of-least-squares">next section</a>).</li>
 <li><strong>Trace equals rank</strong>: $\text{tr}(\mathbf{H}) = \text{tr}\big((\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top\mathbf{X}\big) = \text{tr}(\mathbf{I}_{p+1}) = p+1$, using the cyclic property of the trace (<!--note-ref:quadratic-form-->).</li>
 </ul>
+
+<p>Leverage, residual variances and influence measures also come from $\mathbf{H}$ (<!--note-ref:hat-matrix-->).</p>
 
 <aside class="note" id="hat-matrix" title="More on the hat matrix" kind="reading">
 <p>Since $\hat{y}_i = \sum_j h_{ij} y_j$, the diagonal entry $h_{ii}$, the <strong>leverage</strong> of observation $i$, measures how strongly $y_i$ pulls its own fitted value. With an intercept, leverages lie in $[1/n, 1]$ and sum to $\text{tr}(\mathbf{H}) = p+1$; a common rule flags $h_{ii} > 2(p+1)/n$, twice the average.</p>
@@ -187,7 +191,7 @@ $$</div>
 
 <p>The extra &ldquo;$1+$&rdquo; under the square root is the irreducible noise $\sigma^2$ of the new observation itself. Thus the prediction interval is always wider, and it does not shrink to zero with more training data.</p>
 
-<h2>Residuals and their properties</h2>
+<h2>Residuals</h2>
 
 <p>The <strong>residual</strong> at observation $i$ is $r_i = y_i - \hat{y}_i$. As a vector,</p>
 
@@ -195,7 +199,9 @@ $$</div>
 \mathbf{r} = \mathbf{y} - \hat{\mathbf{y}} = \mathbf{y} - \mathbf{H}\mathbf{y} = (\mathbf{I} - \mathbf{H})\,\mathbf{y}
 $$</div>
 
-<p>Because $\hat{\boldsymbol{\beta}}$ solves the normal equations, $\mathbf{X}^\top(\mathbf{y} - \mathbf{X}\hat{\boldsymbol{\beta}}) = \mathbf{0}$, the residuals have two orthogonality properties:</p>
+<h4>Properties of the residuals</h4>
+
+<p>Because $\hat{\boldsymbol{\beta}}$ solves the normal equations, $\mathbf{X}^\top(\mathbf{y} - \mathbf{X}\hat{\boldsymbol{\beta}}) = \mathbf{0}$, the residuals are orthogonal to two things:</p>
 
 <ol>
 <li>The residual vector is orthogonal to every column of $\mathbf{X}$:
@@ -299,7 +305,7 @@ $$</div>
 
 <p>This is the Pythagorean identity again, now around the mean. Write $y_i - \bar{y} = (\hat{y}_i - \bar{y}) + r_i$ and square: the cross term is $2\sum_i r_i(\hat{y}_i - \bar{y}) = 2\big(\sum_i r_i \hat{y}_i - \bar{y}\sum_i r_i\big) = 0$, because residuals are orthogonal to the fitted values and, with an intercept, sum to zero.</p>
 
-<h2>Properties of $R^2$</h2>
+<h4>Properties of $R^2$</h4>
 <ul>
 <li>$0 \le R^2 \le 1$ (for a model with an intercept).</li>
 <li>$R^2$ is invariant to location and scale changes of $Y$ and of the predictors.</li>
@@ -359,7 +365,7 @@ $$</div>
 <p>Further reading: <a href="https://en.wikipedia.org/wiki/Frisch%E2%80%93Waugh%E2%80%93Lovell_theorem">Frisch&ndash;Waugh&ndash;Lovell theorem</a> and <a href="https://en.wikipedia.org/wiki/Variance_inflation_factor">variance inflation factor</a> (Wikipedia).</p>
 </aside>
 
-<p>Symptoms of collinearity:</p>
+<h4>Symptoms of collinearity</h4>
 <ul>
 <li>high pairwise sample correlations among predictors;</li>
 <li>a relatively large $R^2$;</li>
@@ -487,7 +493,9 @@ $$</div>
 
 <h2>Outliers</h2>
 
-<p>With a modest sample, test for outliers formally, e.g. with leave-one-out prediction errors. In large data sets, some points always look extreme, so adjust for multiple comparisons. Remedies:</p>
+<p>With a modest sample, test for outliers formally, e.g. with leave-one-out prediction errors. In large data sets, some points always look extreme, so adjust for multiple comparisons.</p>
+
+<h4>Remedies for outliers</h4>
 <ul>
 <li>check the range of each variable for impossible or miscoded values;</li>
 <li>apply a log, square-root or other variance-stabilizing transformation to right-skewed predictors or to the response;</li>
