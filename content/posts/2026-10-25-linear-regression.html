@@ -394,7 +394,17 @@ $$</div>
 
 <h1>Categorical Predictors</h1>
 
-<p>A categorical predictor with $k$ levels enters a linear model through binary indicator columns. There are two common coding schemes.</p>
+<p>A categorical predictor with $k$ levels enters a linear model through binary indicator columns.</p>
+
+<h4>Why not integer codes</h4>
+
+<p>Codes such as 0, 1, 2, 3 are labels, but a linear model treats them as quantities. One column $Z$ with one coefficient $\beta$ assumes that the levels are ordered and equally spaced. Each step from one code to the next changes the mean response by the same $\beta$.</p>
+
+<p>For example, consider a hypothetical blood-type predictor. The mean birthweights are 3.0 kg (A), 3.4 kg (B), 3.1 kg (AB) and 3.6 kg (O). With the codes A = 0, B = 1, AB = 2, O = 3, the means go up, down and up, and no straight line fits them. A different assignment of codes gives a different fit for the same data.</p>
+
+<p>Indicator columns give each level its own coefficient, so the model can fit any mean for each level. Integer codes are acceptable only for two levels, or for levels with a real and equal spacing, such as a count.</p>
+
+<p>There are two common coding schemes.</p>
 
 <p><strong>One-hot encoding</strong> creates $k$ indicators, one per level:</p>
 
