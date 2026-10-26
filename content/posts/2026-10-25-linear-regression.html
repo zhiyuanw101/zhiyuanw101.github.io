@@ -283,15 +283,14 @@ $$</div>
 $$</div>
 </div>
 
-<h4>Pythagorean theorem for vectors</h4>
+<p>Because the two pieces are perpendicular, their squared lengths add (<!--note-ref:pythagoras-->): $\|\mathbf{y}\|^2 = \|\hat{\mathbf{y}}\|^2 + \|\mathbf{r}\|^2$.</p>
 
+<aside class="note" id="pythagoras" title="Pythagorean theorem for vectors" kind="background">
 <p>For any vectors $\mathbf{a}$ and $\mathbf{b}$, $\|\mathbf{a} + \mathbf{b}\|^2 = \|\mathbf{a}\|^2 + 2\,\mathbf{a}^\top\mathbf{b} + \|\mathbf{b}\|^2$. If $\mathbf{a}$ and $\mathbf{b}$ are perpendicular, $\mathbf{a}^\top\mathbf{b} = 0$, and the squared lengths add:</p>
-
 <div>$$
 \|\mathbf{a} + \mathbf{b}\|^2 = \|\mathbf{a}\|^2 + \|\mathbf{b}\|^2
 $$</div>
-
-<p>Applied to $\mathbf{y} = \hat{\mathbf{y}} + \mathbf{r}$, this gives $\|\mathbf{y}\|^2 = \|\hat{\mathbf{y}}\|^2 + \|\mathbf{r}\|^2$.</p>
+</aside>
 
 <p>Several later results follow directly from this decomposition: the $R^2$ decomposition, invariance to reparameterization and the uniqueness of $\hat{\mathbf{y}}$ under rank deficiency.</p>
 
@@ -313,7 +312,7 @@ $$</div>
 \underbrace{\sum_i (y_i - \hat{y}_i)^2}_{\text{error (RSS)}}
 $$</div>
 
-<p>This decomposition follows from the <a href="#pythagorean-theorem-for-vectors">Pythagorean theorem for vectors</a>, applied to deviations from the mean. Write $y_i - \bar{y} = (\hat{y}_i - \bar{y}) + r_i$ and square: the cross term is $2\sum_i r_i(\hat{y}_i - \bar{y}) = 2\big(\sum_i r_i \hat{y}_i - \bar{y}\sum_i r_i\big) = 0$, because residuals are orthogonal to the fitted values and, with an intercept, sum to zero.</p>
+<p>This decomposition follows from the Pythagorean theorem for vectors (<!--note-ref:pythagoras-->), applied to deviations from the mean. Write $y_i - \bar{y} = (\hat{y}_i - \bar{y}) + r_i$ and square: the cross term is $2\sum_i r_i(\hat{y}_i - \bar{y}) = 2\big(\sum_i r_i \hat{y}_i - \bar{y}\sum_i r_i\big) = 0$, because residuals are orthogonal to the fitted values and, with an intercept, sum to zero.</p>
 
 <h4>Properties of $R^2$</h4>
 <ul>
