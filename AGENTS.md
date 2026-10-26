@@ -17,6 +17,7 @@ content/figures/<name>.html          figure fragments (<figure><svg>...</svg><fi
 content/faq.html                     body of the FAQ page
 static/                              copied verbatim into public/ (PaperMod CSS, main.js, images)
 tools/build.py                       the generator: site config (SITE), page templates, ToC, citation, tags, RSS, search index
+                                     (home page = profile card from SITE; post list = posts/index.html)
 tools/figures.py                     regenerates the SVG figure fragments (stdlib only)
 .github/workflows/deploy.yml         builds and deploys to GitHub Pages on every push to master
 public/                              build output (git-ignored, never commit it)

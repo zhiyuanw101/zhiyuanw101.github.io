@@ -45,7 +45,7 @@ SITE = {
 }
 
 MENU = [
-	("Posts", ""),
+	("Posts", "posts/"),
 	("Archive", "archives/"),
 	("Search", "search/"),
 	("Tags", "tags/"),
@@ -585,7 +585,8 @@ def render_post(post, newer, older):
 
 # ---------------------------------------------------------------- list pages
 
-def render_home(posts):
+def render_home():
+	"""Home page: the profile card only. The post list is at posts/ (render_post_list)."""
 	root = ""
 	links = [("linkedin", "LinkedIn", "linkedin_profile"), ("github", "Github", "github")]
 	social = "\n".join(
@@ -604,8 +605,14 @@ def render_home(posts):
 		<div class="social-icons">{social}</div>
 	</footer>
 </article>"""
+	return page(SITE["title"], intro, root, path="", body_class="list")
+
+
+def render_post_list(posts):
+	root = "../"
 	entries = "\n".join(post_entry(p, root) for p in posts)
-	return page(SITE["title"], intro + "\n" + entries, root, path="", body_class="list", math=True, active="Posts")
+	body = f'<header class="page-header"><h1>Posts</h1></header>\n{entries}'
+	return page("Posts", body, root, path="posts/", body_class="list", math=True, active="Posts")
 
 
 def render_archives(posts):
@@ -734,7 +741,8 @@ def main():
 	shutil.copytree(STATIC, OUT)
 	posts = load_posts()
 	files = {
-		"index.html": render_home(posts),
+		"index.html": render_home(),
+		"posts/index.html": render_post_list(posts),
 		"archives/index.html": render_archives(posts),
 		"search/index.html": render_search(),
 		"faq/index.html": render_faq(),

@@ -43,7 +43,7 @@ own words, correctness), the post markup and the writing style. This skill is th
 
 - Site name, author, `base_url`, menu and templates live in `tools/build.py` (`SITE`, `MENU`, `page()`).
 - CSS overrides go in the `DARK_STYLE` block in `tools/build.py`; don't edit the upstream stylesheet.
-- Check the change on the home page, a post, Archive, Tags, Search and FAQ, at widths of 375, 1100
+- Check the change on the home page, the Posts page, a post, Archive, Tags, Search and FAQ, at widths of 375, 1100
   and 1440 px, in light and dark mode.
 
 ## D. Verify
@@ -55,7 +55,7 @@ python3 tools/serve.py                 # staging server; rebuilds and reloads on
 
 In a browser at http://localhost:8765:
 
-- The post opens from the home page card, the Archive and its tag pages, and Search finds it.
+- The post opens from its card on the Posts page (`/posts/`), the Archive and its tag pages, and Search finds it.
 - MathJax renders with no errors: `document.querySelectorAll('mjx-merror').length === 0`.
 - Every in-page link resolves:
   `[...document.querySelectorAll('.post-content a[href^="#"]')].filter(a => !document.getElementById(decodeURIComponent(a.hash.slice(1))))`
