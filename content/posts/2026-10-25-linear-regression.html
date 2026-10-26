@@ -438,7 +438,7 @@ $$</div>
 
 <h1>Hypothesis Testing with the Partial $F$ Test</h1>
 
-<p>Two questions are frequent: are some predictors significant, and is a larger model better than a smaller one? Both are comparisons of <strong>nested models</strong>:</p>
+<p>Two questions are frequent: are some predictors significant, and is a larger model better than a smaller one? Both are comparisons of <strong>nested models</strong>, decided with a hypothesis test (<!--note-ref:tests-post-->):</p>
 
 <div>$$
 \begin{cases}
@@ -446,6 +446,11 @@ H_0: & \text{reduced model with } p_0 \text{ coefficients} \\
 H_a: & \text{full (larger) model with } p_a \text{ coefficients}
 \end{cases}
 $$</div>
+
+<aside class="note" id="tests-post" title="Hypothesis tests and p-values" kind="reading">
+<p>The partial $F$ test follows the general procedure of a hypothesis test: null hypothesis, test statistic, null distribution, p-value and decision. These terms, the critical value and the two types of error are explained in a separate post.</p>
+<p>Further reading: <a href="../2026-10-25-hypothesis-tests/">Hypothesis Tests and p-values</a>, where this test is Example 3.</p>
+</aside>
 
 <p>Since the reduced model is a special case of the full one, $p_a > p_0$, and its column space is a subspace of the full model&rsquo;s. Projecting onto a smaller subspace leaves a longer residual, so $\text{RSS}_0 \ge \text{RSS}_a$ always. The question is whether the reduction is large relative to the noise level. That is what the <strong>partial $F$ test</strong> measures:</p>
 
