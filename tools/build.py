@@ -14,6 +14,7 @@ import hashlib
 import html
 import json
 import math
+import os
 import re
 import shutil
 from datetime import datetime
@@ -158,6 +159,34 @@ DARK_INIT = """<script>
 	}
 </script>"""
 
+# Local staging (tools/serve.py sets BLOG_DEV=1): pages poll the build status, reload after a
+# rebuild and show build errors in a banner. Never set for the published build.
+DEV = os.environ.get("BLOG_DEV") == "1"
+DEV_SCRIPT = """<script>
+(() => {
+	let last = null;
+	const banner = document.createElement("pre");
+	banner.style.cssText = "position:fixed;left:0;right:0;bottom:0;z-index:999;margin:0;max-height:40vh;overflow:auto;"
+		+ "padding:12px 16px;background:#b3261e;color:#fff;font-size:13px;white-space:pre-wrap;display:none";
+	document.body.appendChild(banner);
+	const poll = async () => {
+		try {
+			const s = await (await fetch("__ROOT____build_status.json", { cache: "no-store" })).json();
+			if (s.error) {
+				banner.textContent = "Build failed; showing the last good build.\\n\\n" + s.error;
+				banner.style.display = "block";
+			} else {
+				banner.style.display = "none";
+				if (last !== null && s.id !== last) location.reload();
+			}
+			last = s.id;
+		} catch (e) {}
+		setTimeout(poll, 1000);
+	};
+	poll();
+})();
+</script>"""
+
 WPM = 213  # Hugo's reading-time constant
 # The blog is English-only: CJK ideographs, kana, hangul and full-width punctuation fail the build.
 NON_ENGLISH = re.compile(r"[\u3000-\u303f\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uac00-\ud7af\uff00-\uffef]")
@@ -273,6 +302,7 @@ def page(title, body, root, *, body_class="", description=None, math=False, code
 </footer>
 <a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">{ICONS['top']}</a>
 <script src="{root}{asset('assets/js/main.js')}"></script>
+{DEV_SCRIPT.replace("__ROOT__", root) if DEV else ""}
 </body>
 </html>
 """

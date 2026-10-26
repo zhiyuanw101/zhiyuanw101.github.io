@@ -17,7 +17,7 @@ Build and preview:
 
     python3 tools/figures.py
     python3 tools/build.py
-    python3 -m http.server 8000 -d public
+    python3 tools/serve.py        # staging at http://localhost:8765, rebuilds and reloads on change
 
 ## Publishing
 
@@ -27,4 +27,5 @@ The previous Jekyll blog is kept on the `jekyll-archive` branch.
 
 Write a new post by adding another file to `content/posts/` (use `<h1>` for sections, `<h2>`/`<h3>` for subsections,
 `$...$` / `$$...$$` for math, and end with `<h1>References</h1>`; the citation block is inserted automatically).
-Then commit and `git push`; the post is live a minute or two later.
+Review it on the staging server and commit locally. `git push` to `master` publishes the site, so
+push only when the post is ready; it is live a minute or two later.

@@ -1,6 +1,6 @@
 ---
 name: blog-maintain
-description: Write, update, fix or publish posts on Zhiyuan's Log (this repo's Lil'Log-style blog). Use when asked to turn a source (course chapter, paper, blog, notes) into a new post, revise or extend an existing post, add or fix a figure, change the site's layout or config, or publish/deploy the blog. Posts are always written in English, whatever language the request is in.
+description: Write, update, fix, stage or publish posts on Zhiyuan's Log (this repo's Lil'Log-style blog). Use when asked to turn a source (course chapter, paper, blog, notes) into a new post, revise or extend an existing post, add or fix a figure, change the site's layout or config, or publish/deploy the blog. Posts are always written in English, whatever language the request is in.
 ---
 
 # Blog maintenance
@@ -50,7 +50,7 @@ own words, correctness), the post markup and the writing style. This skill is th
 
 ```bash
 python3 tools/build.py                 # must print "Built N post(s)"; fails on non-English text
-python3 -m http.server 8765 -d public
+python3 tools/serve.py                 # staging server; rebuilds and reloads on change
 ```
 
 In a browser at http://localhost:8765:
@@ -69,14 +69,17 @@ In a browser at http://localhost:8765:
   the ASD-STE100 rules in AGENTS.md: one word per concept, factual verbs, no signposting, side
   proofs and simulations in notes. Fix the meaning, not only the measured limits.
 
-## E. Publish
+## E. Stage, then publish on approval
+
+Iterate on the staging server (`python3 tools/serve.py`, http://localhost:8765) and commit locally.
+Do **not** push: a push to `master` publishes the site. Tell the owner what changed and where to
+look, and wait. Publish only after the owner explicitly says the work is ready:
 
 ```bash
-git add -A
-git commit -m "Add post: <title>"
 git push origin master
 gh run list -R zhiyuanw101/zhiyuanw101.github.io --limit 1     # wait for "completed success"
 ```
 
 Then open `https://zhiyuanw101.github.io/posts/<slug>/` and spot-check it. If the run fails, read
-`gh run view <id> --log-failed`, fix, and push again. Never commit `public/` or force-push `master`.
+`gh run view <id> --log-failed`, fix, and ask again before the next push. Never commit `public/` or
+force-push `master`.
