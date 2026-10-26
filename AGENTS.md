@@ -20,6 +20,8 @@ tools/build.py                       the generator: site config (SITE), page tem
 tools/figures.py                     regenerates the SVG figure fragments (stdlib only)
 .github/workflows/deploy.yml         builds and deploys to GitHub Pages on every push to master
 public/                              build output (git-ignored, never commit it)
+.staging/                            staging build from tools/serve.py (git-ignored)
+tools/serve.py                       local staging server: dev build, auto-rebuild, page reload
 ```
 
 The previous Jekyll blog lives on the `jekyll-archive` branch. Leave it alone.
@@ -203,7 +205,7 @@ reference them from the post as `../../images/<post-slug>/file.png`.
 ## Staging and publishing
 
 1. Run `python3 tools/serve.py` (or the `blog` entry in `.claude/launch.json`). It builds in dev
-   mode, serves http://localhost:8765, rebuilds when anything in `content/`, `static/` or `tools/`
+   mode into `.staging/`, serves http://localhost:8765, rebuilds when anything in `content/`, `static/` or `tools/`
    changes, and reloads open pages. A failed build shows its error in a red banner on the page.
 2. Make changes and let the owner review them on localhost. Commit locally; do not push.
 3. Before asking for approval: `python3 tools/build.py` passes, and the page has no MathJax errors

@@ -24,7 +24,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 CONTENT = ROOT / "content"
 STATIC = ROOT / "static"
-OUT = ROOT / "public"
+OUT = Path(os.environ.get("BLOG_OUT", ROOT / "public"))  # tools/serve.py builds into .staging/ instead
 
 SITE = {
 	"title": "Zhiyuan's Log",
@@ -698,7 +698,7 @@ def main():
 		dest = OUT / rel
 		dest.parent.mkdir(parents=True, exist_ok=True)
 		dest.write_text(text)
-	print(f"Built {len(posts)} post(s), {len(files)} files -> {OUT.relative_to(ROOT)}/")
+	print(f"Built {len(posts)} post(s), {len(files)} files -> {OUT}/")
 
 
 if __name__ == "__main__":

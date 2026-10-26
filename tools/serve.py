@@ -6,7 +6,7 @@ Usage:  python3 tools/serve.py [port]        # default port 8765, then open http
 Watches content/, static/ and tools/. Each change runs tools/build.py in dev mode (BLOG_DEV=1),
 which adds a small script to every page. The script polls /__build_status.json, reloads the page
 after a successful rebuild, and shows a banner with the error after a failed one (the previous
-build stays in public/). Nothing is published: publishing is a push to master (see AGENTS.md).
+build stays in .staging/). Nothing is published: publishing is a push to master (see AGENTS.md).
 """
 
 import functools
@@ -20,7 +20,7 @@ import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-PUBLIC = ROOT / "public"
+PUBLIC = ROOT / ".staging"  # separate from public/, so a manual build does not replace staging
 WATCH = [ROOT / "content", ROOT / "static", ROOT / "tools"]
 STATUS = "__build_status.json"
 
@@ -38,7 +38,7 @@ def build():
 	started = time.strftime("%H:%M:%S")
 	result = subprocess.run(
 		[sys.executable, str(ROOT / "tools" / "build.py")],
-		env={**os.environ, "BLOG_DEV": "1"},
+		env={**os.environ, "BLOG_DEV": "1", "BLOG_OUT": str(PUBLIC)},
 		capture_output=True,
 		text=True,
 	)
