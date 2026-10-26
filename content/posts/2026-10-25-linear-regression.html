@@ -486,8 +486,9 @@ $$</div>
 <p>Further reading: <a href="https://en.wikipedia.org/wiki/F-distribution">F-distribution</a> (Wikipedia); <a href="https://en.wikipedia.org/wiki/Cochran%27s_theorem">Cochran&rsquo;s theorem</a>, on why the two sums of squares are independent.</p>
 </aside>
 
-<h2>Example: are the father&rsquo;s characteristics useful?</h2>
+<p>The birthweight data give a worked example (<!--note-ref:father-example-->). The $t$-test for one coefficient and the overall $F$ test are special cases of the partial $F$ test (<!--note-ref:special-cases-->).</p>
 
+<aside class="note" id="father-example" title="Example: are the father's characteristics useful?" kind="reading">
 <p>In the birthweight data, predictors $X_9$ to $X_{12}$ describe the father (age, years of education, cigarettes per day, height). To test whether they are jointly significant, compare</p>
 
 <div>$$
@@ -498,10 +499,11 @@ H_a: & Y \sim 1 + \beta_1 X_1 + \dots + \beta_8 X_8 + \beta_9 X_9 + \dots + \bet
 $$</div>
 
 <p>Here $p_0 = 8 + 1 = 9$ and $p_a = 12 + 1 = 13$, counting the intercept. With $n = 42$ babies, the reference distribution is $F_{4,\,29}$. Computing $\text{RSS}_0$ and $\text{RSS}_a$ from the two fits gives $F = 0.7225$, below the 5% critical value $F_{4,29} \approx 2.70$. We do not reject $H_0$ and prefer the smaller model: once the mother&rsquo;s and baby&rsquo;s characteristics are known, the father&rsquo;s add no detectable information.</p>
+</aside>
 
-<h2>Two special cases</h2>
-
-<p><strong>Testing a single coefficient.</strong> Dropping only $X_j$ gives $H_0: \beta_j = 0$ with $p_a - p_0 = 1$. Then the partial $F$ test is equivalent to the $t$-test (<!--note-ref:t-and-f-->),</p>
+<aside class="note" id="special-cases" title="Two special cases: the t-test and the overall F test" kind="reading">
+<h4>Testing a single coefficient</h4>
+<p>Dropping only $X_j$ gives $H_0: \beta_j = 0$ with $p_a - p_0 = 1$. Then the partial $F$ test is equivalent to the $t$-test (<!--note-ref:t-and-f-->),</p>
 
 <div>$$
 t_j = \frac{\hat\beta_j}{\widehat{\text{se}}(\hat\beta_j)} \sim t_{n-p-1},
@@ -511,13 +513,15 @@ $$</div>
 
 <p>with $F = t_j^2$ (<!--note-ref:fwl-->). This is the $t$-statistic and $p$-value that regression software prints next to each coefficient. Each one tests a predictor <em>given all the others in the model</em>. Thus, collinear predictors can all look insignificant individually.</p>
 
-<p><strong>Testing all predictors.</strong> Taking the reduced model to be intercept-only, $H_0: Y \sim 1$, gives the <strong>overall $F$ test</strong>. Here $\text{RSS}_0 = \text{TSS}$, and the statistic can be written entirely in terms of $R^2$:</p>
+<h4>Testing all predictors</h4>
+<p>Taking the reduced model to be intercept-only, $H_0: Y \sim 1$, gives the <strong>overall $F$ test</strong>. Here $\text{RSS}_0 = \text{TSS}$, and the statistic can be written entirely in terms of $R^2$:</p>
 
 <div>$$
 F = \frac{(\text{TSS} - \text{RSS})/p}{\text{RSS}/(n-p-1)} = \frac{R^2 / p}{(1 - R^2)/(n - p - 1)}
 $$</div>
 
 <p>It asks whether the model as a whole explains anything beyond the mean, and can be viewed as a goodness-of-fit test for the regression.</p>
+</aside>
 
 <h1>Model Assumptions and Diagnostics</h1>
 
