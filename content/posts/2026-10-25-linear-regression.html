@@ -30,7 +30,7 @@ $$</div>
 <tr><td>$\hat{\mathbf{y}}, \mathbf{r}$</td><td>Fitted values $\mathbf{X}\hat{\boldsymbol{\beta}}$ and residuals $\mathbf{y} - \hat{\mathbf{y}}$.</td></tr>
 <tr><td>$\mathbf{H}$</td><td>Hat matrix $\mathbf{X}(\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top$.</td></tr>
 <tr><td>$\mathcal{C}(\mathbf{X})$</td><td>Column space of $\mathbf{X}$, the span of its columns.</td></tr>
-<tr><td>RSS, TSS</td><td>Residual sum of squares $\|\mathbf{y}-\hat{\mathbf{y}}\|^2$ and total sum of squares $\|\mathbf{y}-\bar{y}\mathbf{1}\|^2$.</td></tr>
+<tr><td>RSS, TSS</td><td>Residual sum of squares $\sum_i (y_i - \hat{y}_i)^2$ and total sum of squares $\sum_i (y_i - \bar{y})^2$.</td></tr>
 </tbody>
 </table>
 
@@ -202,7 +202,7 @@ $$</div>
 $$
 \mathbf{X}^\top\mathbf{r} = \mathbf{X}^\top\mathbf{y} - (\mathbf{X}^\top\mathbf{X})(\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top\mathbf{y} = \mathbf{0}
 $$
-Since the first column of $\mathbf{X}$ is $\mathbf{1}$, a direct corollary is that residuals sum to zero whenever the model has an intercept.</li>
+Since the intercept column of $\mathbf{X}$ is all ones, a direct corollary is that residuals sum to zero, $\sum_i r_i = 0$, whenever the model has an intercept.</li>
 <li>The residual vector is orthogonal to the fitted values:
 $$
 \hat{\mathbf{y}}^\top\mathbf{r} = \hat{\boldsymbol{\beta}}^\top\mathbf{X}^\top\mathbf{r} = 0
@@ -275,6 +275,8 @@ $$</div>
 $$</div>
 </div>
 
+<p>Because the two pieces are perpendicular, their squared lengths add, just as in the Pythagorean theorem: $\|\mathbf{y}\|^2 = \|\hat{\mathbf{y}}\|^2 + \|\mathbf{r}\|^2$. In general, $\|\mathbf{a} + \mathbf{b}\|^2 = \|\mathbf{a}\|^2 + 2\,\mathbf{a}^\top\mathbf{b} + \|\mathbf{b}\|^2$, and orthogonality kills the cross term.</p>
+
 <p>Many results in the rest of this post (the $R^2$ decomposition, invariance to linear reparameterization, uniqueness of $\hat{\mathbf{y}}$ under rank deficiency) are one-line consequences of this picture.</p>
 
 <h1>Goodness of Fit: $R^2$</h1>
@@ -282,21 +284,20 @@ $$</div>
 <p>A standard measure of how well the model fits is the <strong>$R$-square</strong>, also called the coefficient of determination or the fraction of variance explained:</p>
 
 <div>$$
-\begin{aligned}
-R^2 &= \frac{\sum_i (\hat{y}_i - \bar{y})^2}{\sum_i (y_i - \bar{y})^2} = \frac{\|\hat{\mathbf{y}} - \bar{y}\mathbf{1}\|^2}{\|\mathbf{y} - \bar{y}\mathbf{1}\|^2} \\
-&= \frac{\|\mathbf{y} - \bar{y}\mathbf{1}\|^2 - \|\mathbf{y} - \hat{\mathbf{y}}\|^2}{\|\mathbf{y} - \bar{y}\mathbf{1}\|^2} = 1 - \frac{\text{RSS}}{\text{TSS}}
-\end{aligned}
+R^2 = \frac{\sum_i (\hat{y}_i - \bar{y})^2}{\sum_i (y_i - \bar{y})^2} = 1 - \frac{\text{RSS}}{\text{TSS}}
 $$</div>
 
-<p>The numerator of the first line is the distance of the model from the grand mean; the denominator is the distance of the observations from the grand mean. The second line uses the Pythagorean decomposition, which holds because $\hat{\mathbf{y}} - \bar{y}\mathbf{1}$ lies in $\mathcal{C}(\mathbf{X})$ (the intercept puts $\mathbf{1}$ there) while $\mathbf{r}$ is orthogonal to it:</p>
+<p>The numerator measures how far the fitted values spread around the mean; the denominator, how far the observations do. The two forms agree because the total variation splits into a part the model explains and a part it does not:</p>
 
 <div>$$
-\underbrace{\|\mathbf{y} - \bar{y}\mathbf{1}\|^2}_{\text{total variation (TSS)}}
+\underbrace{\sum_i (y_i - \bar{y})^2}_{\text{total (TSS)}}
 =
-\underbrace{\|\hat{\mathbf{y}} - \bar{y}\mathbf{1}\|^2}_{\text{model variation around the mean}}
+\underbrace{\sum_i (\hat{y}_i - \bar{y})^2}_{\text{explained by the model}}
 +
-\underbrace{\|\mathbf{y} - \hat{\mathbf{y}}\|^2}_{\text{error (RSS)}}
+\underbrace{\sum_i (y_i - \hat{y}_i)^2}_{\text{error (RSS)}}
 $$</div>
+
+<p>This is the Pythagorean identity again, now around the mean. Write $y_i - \bar{y} = (\hat{y}_i - \bar{y}) + r_i$ and square: the cross term is $2\sum_i r_i(\hat{y}_i - \bar{y}) = 2\big(\sum_i r_i \hat{y}_i - \bar{y}\sum_i r_i\big) = 0$, because residuals are orthogonal to the fitted values and, with an intercept, sum to zero.</p>
 
 <p>Some properties of $R^2$ to keep in mind:</p>
 <ul>
@@ -396,7 +397,7 @@ $$</div>
 <p>How do the two schemes compare?</p>
 <ul>
 <li><strong>Dummy coding</strong> uses $k-1$ indicators and keeps $\mathbf{X}$ full rank when an intercept is present. This is the standard approach in classical linear regression.</li>
-<li><strong>One-hot encoding</strong> uses $k$ indicators. Combined with an intercept, the $k$ columns sum to the constant vector $\mathbf{1}$, which is exactly the intercept column. That is perfect collinearity: $\mathbf{X}^\top\mathbf{X}$ is singular and the OLS estimator is not unique (the <a href="#rank-deficiency">rank deficiency</a> case above). One-hot encoding is fine without an intercept, or with a penalty that restores uniqueness.</li>
+<li><strong>One-hot encoding</strong> uses $k$ indicators. Combined with an intercept, the $k$ columns add up to a column of ones, which is exactly the intercept column. That is perfect collinearity: $\mathbf{X}^\top\mathbf{X}$ is singular and the OLS estimator is not unique (the <a href="#rank-deficiency">rank deficiency</a> case above). One-hot encoding is fine without an intercept, or with a penalty that restores uniqueness.</li>
 <li><strong>Fitted and predicted values are identical</strong> under both codings, since both span the same column space. Only the interpretation of individual coefficients changes. Which level serves as the reference is usually a matter of subject-matter convenience, not statistics.</li>
 </ul>
 
