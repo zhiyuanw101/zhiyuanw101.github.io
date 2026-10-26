@@ -176,7 +176,7 @@ def fig_partial_f():
 	g.append(f'<rect x="{L}" y="{y0}" width="{a - L}" height="{h}" fill="{BLUE}" fill-opacity="0.75"/>')
 	g.append(f'<rect x="{a}" y="{y0}" width="{b - a}" height="{h}" fill="{GREEN}" fill-opacity="0.85"/>')
 	g.append(f'<rect x="{b}" y="{y0}" width="{R - b}" height="{h}" fill="{GREY}" fill-opacity="0.45"/>')
-	g.append(f'<text x="{(L + a) / 2}" y="{y0 + 28}" fill="#fff" text-anchor="middle">explained by reduced model</text>')
+	g.append(f'<text x="{(L + a) / 2}" y="{y0 + 28}" fill="#fff" text-anchor="middle">TSS − RSS<tspan baseline-shift="sub" font-size="10">0</tspan>: explained by reduced model</text>')
 	g.append(f'<text x="{(b + R) / 2}" y="{y0 + 28}" fill="currentColor" text-anchor="middle" font-style="italic">RSS<tspan baseline-shift="sub" font-size="10">a</tspan></text>')
 
 	def brace(x1, x2, yb, up, label, colour):
@@ -185,14 +185,16 @@ def fig_partial_f():
 		ty = yb + (-26 if up else 36)
 		g.append(f'<text x="{(x1 + x2) / 2}" y="{ty}" fill="{colour}" text-anchor="middle" font-style="italic">{label}</text>')
 
-	brace(L, R, y0 - 6, True, "TSS = ‖y − ȳ‖²", "currentColor")
+	brace(L, R, y0 - 6, True, 'TSS = Σ<tspan baseline-shift="sub" font-size="10">i</tspan> (y<tspan baseline-shift="sub" font-size="10">i</tspan> − ȳ)²', "currentColor")
 	brace(a, R, y0 + h + 6, False, 'RSS<tspan baseline-shift="sub" font-size="10">0</tspan> (reduced model)', GREY)
 	g.append(f'<line x1="{(a + b) / 2}" y1="{y0 + h + 4}" x2="{(a + b) / 2}" y2="{y0 + h + 62}" stroke="{GREEN}" stroke-dasharray="3 3"/>')
 	g.append(f'<text x="{(a + b) / 2}" y="{y0 + h + 80}" fill="{GREEN}" text-anchor="middle" font-style="italic">RSS<tspan baseline-shift="sub" font-size="10">0</tspan> − RSS<tspan baseline-shift="sub" font-size="10">a</tspan>: extra variation captured by the full model</text>')
 	return svg(W, H, "\n".join(g), "Decomposition behind the partial F test") + (
-		"<figcaption>The partial $F$ test compares $RSS_0 - RSS_a$, the extra variation that the full model "
-		"explains, with $RSS_a$, the variation that it does not explain. Each term is scaled by its degrees "
-		"of freedom.</figcaption>\n</figure>\n"
+		"<figcaption>The bar is TSS, the total variation of $Y$ around its mean. "
+		"Blue: $\\text{TSS} - \\text{RSS}_0$, the part that the reduced model explains. "
+		"Green: $\\text{RSS}_0 - \\text{RSS}_a$, the extra part that the full model explains. "
+		"Grey: $\\text{RSS}_a$, the part that the full model does not explain. "
+		"The partial $F$ test compares green with grey, each scaled by its degrees of freedom.</figcaption>\n</figure>\n"
 	)
 
 
