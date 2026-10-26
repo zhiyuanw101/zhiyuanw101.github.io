@@ -499,7 +499,8 @@ def load_posts():
 		plain = strip_tags(re.sub(r"<figure\b.*?</figure>", " ", body, flags=re.S))
 		words = plain.split()
 		post["minutes"] = max(1, math.ceil(len(words) / WPM))
-		main_text = strip_tags(re.sub(r"<(figure|aside)\b.*?</\1>", " ", body, flags=re.S))
+		main_text = re.sub(r'<div class="key-result-title">.*?</div>', " ", body, flags=re.S)
+		main_text = strip_tags(re.sub(r"<(figure|aside)\b.*?</\1>", " ", main_text, flags=re.S))
 		post["summary"] = meta.get("summary") or " ".join(main_text.split()[:SUMMARY_WORDS])
 		post["plain"] = plain
 		check_english(path.read_text(), path.relative_to(ROOT))
