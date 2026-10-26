@@ -34,7 +34,8 @@ SITE = {
 	"base_url": "https://zhiyuanw101.github.io/",  # used for citations, share links and RSS
 	"description": "Document my learning notes.",
 	"welcome_title": "Zhiyuan Wang",
-	"welcome_text": [  # one <p> per line on the home page
+	"avatar": "images/avatar.jpg",  # in static/; GitHub avatar, also used as og:image
+	"welcome_text": [  # one line each under the name on the home page
 		"Previously at Meta MSL. Now Member of Technical Staff at Hark.",
 		"Interested in agent post-training, agentic RL, RL environments and agent evaluations.",
 	],
@@ -273,6 +274,8 @@ def page(title, body, root, *, path, body_class="", description=None, math=False
 		f'<meta property="og:type" content="{"article" if post else "website"}">',
 		'<meta name="twitter:card" content="summary">',
 	]
+	if SITE["avatar"]:
+		seo.append(f'<meta property="og:image" content="{esc(SITE["base_url"] + SITE["avatar"])}">')
 	if post:
 		seo.append(f'<meta property="article:published_time" content="{post["date"]:%Y-%m-%d}">')
 		seo += [f'<meta property="article:tag" content="{esc(t)}">' for t in post["tags"]]
@@ -594,17 +597,20 @@ def render_home():
 		for key, title, icon in links if SITE[key]
 	)
 	social += f'\n<a href="index.xml" target="_blank" rel="noopener noreferrer me" title="Rss">{ICONS["rss"]}</a>'
-	intro = f"""<article class="first-entry home-info">
-	<header class="entry-header">
+	avatar = (
+		f'<img draggable="false" src="{root}{SITE["avatar"]}" alt="{esc(SITE["welcome_title"])}" '
+		f'title="{esc(SITE["welcome_title"])}" height="150" width="150">'
+		if SITE["avatar"] else ""
+	)
+	# The theme's profile mode: centered avatar, name, subtitle and social icons.
+	intro = f"""<div class="profile">
+	<div class="profile_inner">
+		{avatar}
 		<h1>{esc(SITE['welcome_title'])}</h1>
-	</header>
-	<section class="entry-content">
-		{"".join(f"<p>{esc(line)}</p>" for line in SITE['welcome_text'])}
-	</section>
-	<footer class="entry-footer">
+		<span>{"<br>".join(esc(line) for line in SITE['welcome_text'])}</span>
 		<div class="social-icons">{social}</div>
-	</footer>
-</article>"""
+	</div>
+</div>"""
 	return page(SITE["title"], intro, root, path="", body_class="list")
 
 
