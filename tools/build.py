@@ -36,6 +36,8 @@ SITE = {
 	"welcome_title": "👋 Welcome to Zhiyuan's Log",
 	"welcome_text": "Hi, this is Zhiyuan. I'm documenting my learning notes in this blog.",
 	"github": "https://github.com/zhiyuanw101",
+	# Google Search Console > Add property (URL prefix) > HTML tag: paste only the content="..." value.
+	"google_site_verification": "",
 }
 
 MENU = [
@@ -251,8 +253,27 @@ def post_meta(post):
 
 # ---------------------------------------------------------------- layout
 
-def page(title, body, root, *, body_class="", description=None, math=False, code=False, active=None):
+def page(title, body, root, *, path, body_class="", description=None, math=False, code=False, active=None,
+		post=None, index=True):
+	"""Render a full page. `path` is the page URL relative to the site root ("" for home, "faq/", ...)."""
 	full_title = title if title == SITE["title"] else f"{title} | {SITE['title']}"
+	desc = description or SITE["description"]
+	url = SITE["base_url"] + path
+	seo = [
+		f'<link rel="canonical" href="{esc(url)}">',
+		f'<meta property="og:site_name" content="{esc(SITE["title"])}">',
+		f'<meta property="og:title" content="{esc(title)}">',
+		f'<meta property="og:description" content="{esc(desc)}">',
+		f'<meta property="og:url" content="{esc(url)}">',
+		f'<meta property="og:type" content="{"article" if post else "website"}">',
+		'<meta name="twitter:card" content="summary">',
+	]
+	if post:
+		seo.append(f'<meta property="article:published_time" content="{post["date"]:%Y-%m-%d}">')
+		seo += [f'<meta property="article:tag" content="{esc(t)}">' for t in post["tags"]]
+	if SITE["google_site_verification"]:
+		seo.append(f'<meta name="google-site-verification" content="{esc(SITE["google_site_verification"])}">')
+	seo = "\n".join(seo)
 	head_extra = []
 	if math:
 		head_extra.append(MATHJAX)
@@ -270,12 +291,13 @@ def page(title, body, root, *, body_class="", description=None, math=False, code
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="robots" content="index, follow">
+<meta name="robots" content="{"index, follow" if index else "noindex, follow"}">
 <title>{esc(full_title)}</title>
-<meta name="description" content="{esc(description or SITE['description'])}">
+<meta name="description" content="{esc(desc)}">
 <meta name="author" content="{esc(SITE['author'])}">
 <link rel="stylesheet" href="{root}{asset('assets/css/stylesheet.css')}">
 <link rel="alternate" type="application/rss+xml" href="{root}index.xml" title="{esc(SITE['title'])}">
+{seo}
 {DARK_STYLE}
 {head_extra}
 </head>
@@ -550,7 +572,10 @@ def render_post(post, newer, older):
 {share}
 	</footer>
 </article>"""
-	return page(post["title"], body, root, description=post["summary"], math=True, code="<pre" in post["body"])
+	return page(
+		post["title"], body, root, path=post["url"], description=post["summary"], math=True,
+		code="<pre" in post["body"], post=post,
+	)
 
 
 # ---------------------------------------------------------------- list pages
@@ -572,7 +597,7 @@ def render_home(posts):
 	</footer>
 </article>"""
 	entries = "\n".join(post_entry(p, root) for p in posts)
-	return page(SITE["title"], intro + "\n" + entries, root, body_class="list", math=True, active="Posts")
+	return page(SITE["title"], intro + "\n" + entries, root, path="", body_class="list", math=True, active="Posts")
 
 
 def render_archives(posts):
@@ -595,7 +620,7 @@ def render_archives(posts):
 </div>""")
 			out.append("</div>\n</div>")
 		out.append("</div>")
-	return page("Archive", "\n".join(out), root, body_class="list", active="Archive")
+	return page("Archive", "\n".join(out), root, path="archives/", body_class="list", active="Archive")
 
 
 def render_tags(posts):
@@ -611,14 +636,14 @@ def render_tags(posts):
 	pages["tags/index.html"] = page(
 		"Tags",
 		f'<header class="page-header"><h1>Tags</h1></header>\n<ul class="terms-tags">\n{items}\n</ul>',
-		"../", body_class="list", active="Tags",
+		"../", path="tags/", body_class="list", active="Tags",
 	)
 	for slug, (name, ps) in tags.items():
 		root = "../../"
 		entries = "\n".join(post_entry(p, root, "tag-entry") for p in ps)
 		pages[f"tags/{slug}/index.html"] = page(
 			name, f'<header class="page-header"><h1>{esc(name)}</h1></header>\n{entries}',
-			root, body_class="list", math=True, active="Tags",
+			root, path=f"tags/{slug}/", body_class="list", math=True, active="Tags",
 		)
 	return pages
 
@@ -632,14 +657,14 @@ def render_search():
 	<input id="searchInput" data-root="../" autofocus placeholder="Search ↵" aria-label="search" type="search" autocomplete="off">
 	<ul id="searchResults" aria-label="search results"></ul>
 </div>"""
-	return page("Search", body, "../", body_class="list", active="Search")
+	return page("Search", body, "../", path="search/", body_class="list", active="Search", index=False)
 
 
 def render_faq():
 	content = (CONTENT / "faq.html").read_text()
 	check_english(content, "content/faq.html")
 	body = f'<header class="page-header"><h1>FAQ</h1></header>\n<div class="post-content">\n{content}\n</div>'
-	return page("FAQ", body, "../", active="FAQ")
+	return page("FAQ", body, "../", path="faq/", active="FAQ")
 
 
 def render_rss(posts):
@@ -678,6 +703,22 @@ def check_style():
 		raise SystemExit("\n".join(errors) + f"\n{len(errors)} style error(s); see 'Writing style' in AGENTS.md.")
 
 
+def render_sitemap(files, posts):
+	"""sitemap.xml for search engines: every indexable page, with the post date as lastmod."""
+	latest = max(p["date"] for p in posts) if posts else datetime.now()
+	post_dates = {f"{p['url']}index.html": p["date"] for p in posts}
+	urls = []
+	for rel in sorted(files):
+		if not rel.endswith("index.html") or rel.startswith("search/"):
+			continue
+		loc = SITE["base_url"] + rel[: -len("index.html")]
+		urls.append(f"\t<url><loc>{esc(loc)}</loc><lastmod>{post_dates.get(rel, latest):%Y-%m-%d}</lastmod></url>")
+	return (
+		'<?xml version="1.0" encoding="UTF-8"?>\n'
+		'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + "\n".join(urls) + "\n</urlset>\n"
+	)
+
+
 def main():
 	check_style()
 	if OUT.exists():
@@ -700,6 +741,8 @@ def main():
 		newer = posts[i - 1] if i > 0 else None
 		older = posts[i + 1] if i + 1 < len(posts) else None
 		files[f"{p['url']}index.html"] = render_post(p, newer, older)
+	files["sitemap.xml"] = render_sitemap(files, posts)
+	files["robots.txt"] = f"User-agent: *\nAllow: /\n\nSitemap: {SITE['base_url']}sitemap.xml\n"
 	for rel, text in files.items():
 		dest = OUT / rel
 		dest.parent.mkdir(parents=True, exist_ok=True)
