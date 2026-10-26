@@ -33,8 +33,11 @@ SITE = {
 	"author_first": "Zhiyuan",
 	"base_url": "https://zhiyuanw101.github.io/",  # used for citations, share links and RSS
 	"description": "Document my learning notes.",
-	"welcome_title": "👋 Welcome to Zhiyuan's Log",
-	"welcome_text": "Hi, this is Zhiyuan. I'm documenting my learning notes in this blog.",
+	"welcome_title": "Zhiyuan Wang",
+	"welcome_text": [  # one <p> per line on the home page
+		"Previously at Meta MSL. Now Member of Technical Staff at Hark.",
+		"Interested in agent post-training, agentic RL, RL environments and agent evaluations.",
+	],
 	"github": "https://github.com/zhiyuanw101",
 	# Google Search Console > Add property (URL prefix) > HTML tag: paste only the content="..." value.
 	"google_site_verification": "4qPmcYIY_N_V3Nu-CBC_0Eb50okqpkQOKiIAugmmoKA",
@@ -590,7 +593,7 @@ def render_home(posts):
 		<h1>{esc(SITE['welcome_title'])}</h1>
 	</header>
 	<section class="entry-content">
-		<p>{esc(SITE['welcome_text'])}</p>
+		{"".join(f"<p>{esc(line)}</p>" for line in SITE['welcome_text'])}
 	</section>
 	<footer class="entry-footer">
 		<div class="social-icons">{social}</div>
