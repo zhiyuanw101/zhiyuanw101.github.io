@@ -338,11 +338,20 @@ $$</div>
 
 <p>If the $n\times(p+1)$ design matrix does not have full column rank, some column is an exact linear combination of others. Then $\mathbf{X}^\top\mathbf{X}$ is singular, and the normal equations have infinitely many solutions. If $\hat{\boldsymbol{\beta}}$ is one solution and $\mathbf{X}\mathbf{v} = \mathbf{0}$, then $\hat{\boldsymbol{\beta}} + \mathbf{v}$ is another. The coefficients are not <em>identifiable</em>.</p>
 
+<h4>Common causes of rank deficiency</h4>
+<ul>
+<li><strong>More coefficients than observations</strong>, $p+1 > n$. The matrix $\mathbf{X}$ has only $n$ rows, so $\text{rank}(\mathbf{X}) \le n < p+1$.</li>
+<li><strong>A constant predictor.</strong> If $x_{ij} = c$ for all $i$, column $X_j$ equals $c$ times the intercept column.</li>
+<li><strong>Redundant predictors</strong>, for example length in centimeters and in inches, or one-hot encoding with an intercept (see <a href="#categorical-predictors">Categorical Predictors</a>).</li>
+</ul>
+
+<p>Uniqueness depends only on $\mathbf{X}$. A constant response $Y$ does not change the rank. Predictors that are strongly, but not exactly, correlated still give a unique solution (see <a href="#collinearity">Collinearity</a>).</p>
+
 <p>But the column space $\mathcal{C}(\mathbf{X})$ and the orthogonal projection onto it are still well defined. Thus $\hat{\mathbf{y}}$ is unique even though $\hat{\boldsymbol{\beta}}$ is not. R&rsquo;s <code>lm</code> drops aliased columns and reports <code>NA</code> for their coefficients; <code>numpy.linalg.lstsq</code> returns the minimum-norm solution. The model is still valid for prediction, but individual coefficients have no unique interpretation.</p>
 
 <h2>Collinearity</h2>
 
-<p>Exact rank deficiency is rare, except after coding mistakes. A more common problem is <strong>collinearity</strong>: predictors that are strongly, but not exactly, correlated. Then $\mathbf{X}^\top\mathbf{X}$ is invertible but nearly singular. The coefficients and their variances depend strongly on which predictors are in the model, and the estimates become unstable.</p>
+<p>When $n > p+1$, exact rank deficiency is rare, except after coding mistakes. A more common problem is <strong>collinearity</strong>: predictors that are strongly, but not exactly, correlated. Then $\mathbf{X}^\top\mathbf{X}$ is invertible but nearly singular. The coefficients and their variances depend strongly on which predictors are in the model, and the estimates become unstable.</p>
 
 <p>The variance of the $j$-th coefficient shows the effect (derivation in <!--note-ref:fwl-->):</p>
 
