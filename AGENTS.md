@@ -176,6 +176,8 @@ Not checked automatically, but required:
   imperative ("Reject $H_0$ when...").
 - **No signposting.** Do not announce content ("Some properties to keep in mind:"); give it a
   heading (`<h2>Properties of $R^2$</h2>`) or state it directly.
+- **Definitions and examples in separate paragraphs.** A definition paragraph states only what the
+  term is. Put the illustration in its own paragraph that starts with "For example".
 - **Keep articles and short function words** ("the", "a", "that"); do not write telegraphically.
 - **Main line only.** Prerequisites, long or mechanical proofs, simulations and extensions go in a
   collapsible note.
