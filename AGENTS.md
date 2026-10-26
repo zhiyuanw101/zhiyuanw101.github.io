@@ -143,30 +143,43 @@ The title is short and may contain inline math. An optional `<p>` after the form
 conditions (e.g. "when $\mathbf{X}$ has full column rank"). Key results belong to the main line, so
 never put one inside a note.
 
-## Writing style: brevity and clarity
+## Writing style: ASD-STE100 technical English
 
-These are notes for understanding. Balance clarity and rigor, and cut every word that carries no
-information about the topic.
+Posts use the writing rules of **ASD-STE100 Simplified Technical English**, adapted for
+mathematical text. The goal is academic, factual prose: brief, clear, and free of feelings.
+`tools/style_lint.py` checks the measurable rules, and `tools/build.py` stops on any error.
 
-- **No filler.** Delete throat-clearing and signposting: "Some properties of X to keep in mind",
-  "It is worth pausing on", "Let us restate", "To keep things concrete", "In other words",
-  "a nice / beautiful property", "How do the two compare?", "Everything fits in a few lines".
-  Say the content directly: "Least squares estimates $\boldsymbol{\beta}$ by minimizing RSS:".
-- **Structure instead of lead-ins.** When a list of facts follows, give it a heading
-  (`<h2>Properties of $R^2$</h2>`), not a sentence that announces it.
-- **Short sentences, one idea each.** Prefer the plain word; drop "simply", "really", "of course".
-- **Main line only.** Side material (prerequisites, long or mechanical proofs, simulations,
-  extensions) goes in a collapsible note, not in the main text.
-- **Notation: light over pedantic.** Use the lighter standard form when it is unambiguous, e.g.
-  $\sum_i (y_i - \bar y)^2$ rather than $\|\mathbf{y} - \bar y\mathbf{1}\|^2$. Define every symbol
-  you use.
-- Open with one or two short paragraphs (what the topic is, what the post covers), then, for
-  math-heavy posts, a **Notation** table.
-- Intuition before formulas. Show the step a reader would get stuck on; skip trivial algebra. Bold a
-  term the first time it is defined.
-- Every figure is referenced as "(Fig. N)"; captions are one or two plain sentences.
-- One running example through the whole post. Close long posts with a **Quick Summary**.
-- First person is fine but sparing. American English, no emoji, no marketing tone.
+Checked by the linter (prose only; math, code and References are skipped):
+
+- **Sentences: 25 words or fewer.** A formula counts as one word. Split long sentences; do not
+  join clauses with semicolons to avoid the limit.
+- **Paragraphs: 6 sentences or fewer**, one topic per paragraph.
+- **No emotive words, intensifiers, idioms or filler.** Examples: perfectly, at all, really, very,
+  simply, just, clearly, beautiful, nice, insidious, misbehaves, damage, blows up, in disguise,
+  for free, fair game, let us, worth, keep in mind, note that, in other words. The full list is
+  `BANNED` in `tools/style_lint.py`; add words to it when you find more.
+
+Not checked automatically, but required:
+
+- **One word, one meaning.** Use the same term for the same concept everywhere (for example
+  "predictor", not alternately "feature", "input" and "variable"). Define a term before use.
+- **Factual verbs, not figurative ones.** "The variance increases without bound", not "blows up";
+  "is not in the subspace", not "lies off it"; "remove", not "drop". Avoid phrasal verbs
+  ("use up", "plug in") when a single verb exists.
+- **Simple tenses, active voice where possible.** Present tense for facts. Instructions use the
+  imperative ("Reject $H_0$ when...").
+- **No signposting.** Do not announce content ("Some properties to keep in mind:"); give it a
+  heading (`<h2>Properties of $R^2$</h2>`) or state it directly.
+- **Keep articles and short function words** ("the", "a", "that"); do not write telegraphically.
+- **Main line only.** Prerequisites, long or mechanical proofs, simulations and extensions go in a
+  collapsible note.
+- **Light notation.** Use the lighter standard form when it is unambiguous, e.g.
+  $\sum_i (y_i - \bar y)^2$ rather than $\|\mathbf{y} - \bar y\mathbf{1}\|^2$. Define every symbol.
+
+Structure: one or two short opening paragraphs (topic and scope), a **Notation** table for
+math-heavy posts, intuition before formulas, one running example, every figure referenced as
+"(Fig. N)", and a **Quick Summary** at the end of long posts. Bold a term where it is defined.
+American English, no emoji, no first-person narrative beyond "we" in derivations.
 
 ## Figures
 

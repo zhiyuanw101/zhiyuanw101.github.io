@@ -4,7 +4,7 @@ date: 2026-10-25
 tags: Statistics, Regression, Math-Heavy
 cite_key: wang2026linreg
 -->
-<p>Linear regression is the usual baseline in statistical learning, and the ideas behind fancier models (projections, degrees of freedom, nested model comparison, collinearity) show up most cleanly in the linear case.</p>
+<p>Linear regression is the usual baseline in statistical learning. Many ideas behind more complex models are easiest to see in the linear case: projections, degrees of freedom, nested model comparison and collinearity.</p>
 
 <p>A <em>regression model</em> describes the conditional expectation of a response $Y$ given predictors (features). A <strong>linear</strong> regression model assumes it is linear in the inputs $X_1, \dots, X_p$:</p>
 
@@ -12,7 +12,7 @@ cite_key: wang2026linreg
 \mathbb{E}(Y \mid \mathbf{X} = \mathbf{x}) = \beta_0 + \beta_1 x_1 + \dots + \beta_p x_p
 $$</div>
 
-<p>This post covers the multiple linear regression (MLR) model: fitting by least squares, least squares as a projection, what $R^2$ does and does not tell us, rank deficiency and collinearity, categorical predictors, and the partial $F$ test for nested models. It follows the linear regression chapter of the <em>Practical Statistical Learning</em> course notes (<a href="#references">Chronopoulou</a>), with some derivations filled in.</p>
+<p>This post covers the multiple linear regression (MLR) model: least squares and its geometry, $R^2$, rank deficiency, collinearity, categorical predictors and the partial $F$ test. It follows the linear regression chapter of the <em>Practical Statistical Learning</em> course notes (<a href="#references">Chronopoulou</a>), with some derivations filled in.</p>
 
 <h1>Notation</h1>
 
@@ -36,7 +36,7 @@ $$</div>
 
 <h1>The Multiple Linear Regression Model</h1>
 
-<p>Running example: the <strong>birthweight</strong> study, which predicts a newborn&rsquo;s birthweight, particularly for premature babies, from features of the baby (length, head circumference, gestation period) and of the parents (height, age, smoking, the mother&rsquo;s pre-pregnancy weight).</p>
+<p>The running example is the <strong>birthweight</strong> study. It predicts the birthweight of newborns, particularly premature babies. The predictors describe the baby (length, head circumference, gestation period) and the parents (height, age, smoking, the mother&rsquo;s pre-pregnancy weight).</p>
 
 <p>Predictors can be:</p>
 <ul>
@@ -56,7 +56,7 @@ Y = \beta_0 + \beta_1 X_1 + \dots + \beta_p X_p + \varepsilon
 $$</div>
 </div>
 
-<p>where $\beta_0$ is the intercept, $\beta_j$ is the coefficient associated with predictor $X_j$, and $\varepsilon$ is an error term. The standard assumption is that the errors are independent and identically distributed with mean zero and constant variance, $\varepsilon \sim \text{IID}(0, \sigma^2)$. Note that normality is <em>not</em> part of this assumption; we only need it later for exact tests and intervals.</p>
+<p>where $\beta_0$ is the intercept, $\beta_j$ is the coefficient associated with predictor $X_j$, and $\varepsilon$ is an error term. The standard assumption is that the errors are independent and identically distributed with mean zero and constant variance, $\varepsilon \sim \text{IID}(0, \sigma^2)$. This assumption does not include normality. Normality is necessary only for the exact tests and intervals later in the post.</p>
 
 <h2>Matrix form</h2>
 
@@ -96,7 +96,7 @@ $$</div>
 
 <!--fig:ls-fit-->
 
-<p>Least squares assumes little: the pairs $(\mathbf{x}_i, y_i)$ need only be draws from some population, with no distribution assumed for the response and no requirement that the truth be linear. It finds the best linear approximation; if the truth is nonlinear, the remaining distance from the regression surface measures lack of fit.</p>
+<p>Least squares needs few assumptions. The pairs $(\mathbf{x}_i, y_i)$ must be draws from a population, but the response can have any distribution and the true relation need not be linear. Least squares finds the best linear approximation. If the true relation is nonlinear, the remaining distance from the regression surface measures the lack of fit.</p>
 
 <h2>The normal equations</h2>
 
@@ -125,7 +125,7 @@ $$</div>
 (\mathbf{X}^\top\mathbf{X})\,\boldsymbol{\beta} = \mathbf{X}^\top\mathbf{y}
 $$</div>
 
-<p>If $\mathbf{X}$ has full column rank, $\text{rank}(\mathbf{X}) = p+1$ (no column is a linear combination of the others), then $\mathbf{X}^\top\mathbf{X}$ is invertible and we get the familiar <strong>least squares estimator</strong>:</p>
+<p>If $\mathbf{X}$ has full column rank, $\text{rank}(\mathbf{X}) = p+1$, no column is a linear combination of the others. Then $\mathbf{X}^\top\mathbf{X}$ is invertible, which gives the <strong>least squares estimator</strong>:</p>
 
 <div class="key-result">
 <div class="key-result-title">Least squares estimator</div>
@@ -134,7 +134,7 @@ $$</div>
 $$</div>
 </div>
 
-<p>Under the model $\mathbf{y} = \mathbf{X}\boldsymbol{\beta} + \boldsymbol{\varepsilon}$, plugging in shows $\hat{\boldsymbol{\beta}} = \boldsymbol{\beta} + (\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top\boldsymbol{\varepsilon}$. Treating $\mathbf{X}$ as fixed, the estimator is therefore unbiased, and its covariance follows directly from $\text{Cov}(\boldsymbol{\varepsilon}) = \sigma^2\mathbf{I}$:</p>
+<p>Under the model $\mathbf{y} = \mathbf{X}\boldsymbol{\beta} + \boldsymbol{\varepsilon}$, substitution gives $\hat{\boldsymbol{\beta}} = \boldsymbol{\beta} + (\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top\boldsymbol{\varepsilon}$. Treating $\mathbf{X}$ as fixed, the estimator is therefore unbiased, and its covariance follows directly from $\text{Cov}(\boldsymbol{\varepsilon}) = \sigma^2\mathbf{I}$:</p>
 
 <div class="key-result">
 <div class="key-result-title">Mean and covariance of the estimator</div>
@@ -158,10 +158,10 @@ $$</div>
 $$</div>
 </div>
 
-<p>The $n\times n$ matrix $\mathbf{H} = \mathbf{X}(\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top$ is called the <strong>hat matrix</strong> because it &ldquo;puts the hat on $\mathbf{y}$&rdquo;. Three of its properties are used below (more in <!--note-ref:hat-matrix-->):</p>
+<p>The $n\times n$ matrix $\mathbf{H} = \mathbf{X}(\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top$ is the <strong>hat matrix</strong>: it maps $\mathbf{y}$ to $\hat{\mathbf{y}}$ (&ldquo;y-hat&rdquo;). Three of its properties are used below (more in <!--note-ref:hat-matrix-->):</p>
 <ul>
 <li><strong>Symmetric</strong>: $\mathbf{H}^\top = \mathbf{H}$.</li>
-<li><strong>Idempotent</strong>: $\mathbf{H}^2 = \mathbf{H}$. Projecting twice is the same as projecting once, a hint of the geometry coming in the <a href="#the-geometry-of-least-squares">next section</a>.</li>
+<li><strong>Idempotent</strong>: $\mathbf{H}^2 = \mathbf{H}$. Projecting twice gives the same result as projecting once (see the <a href="#the-geometry-of-least-squares">next section</a>).</li>
 <li><strong>Trace equals rank</strong>: $\text{tr}(\mathbf{H}) = \text{tr}\big((\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top\mathbf{X}\big) = \text{tr}(\mathbf{I}_{p+1}) = p+1$, using the cyclic property of the trace (<!--note-ref:quadratic-form-->).</li>
 </ul>
 
@@ -174,7 +174,7 @@ $$</div>
 <p>Further reading: <a href="https://en.wikipedia.org/wiki/Leverage_(statistics)">Leverage</a> and <a href="https://en.wikipedia.org/wiki/Cook%27s_distance">Cook&rsquo;s distance</a> (Wikipedia); <a href="https://www.statsmodels.org/stable/diagnostic.html">regression diagnostics in statsmodels</a>; <a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/plot.lm.html">R&rsquo;s <code>plot.lm</code></a>.</p>
 </aside>
 
-<p>The <strong>predicted value</strong> at a new point $\mathbf{x}^* = (x_1^*, \dots, x_p^*)$ is computed the same way, $\hat{y}^* = \hat\beta_0 + \hat\beta_1 x_1^* + \dots + \hat\beta_p x_p^*$, or $\hat{\mathbf{y}}^* = \mathbf{X}^*\hat{\boldsymbol{\beta}}$ for a batch of new points. The formula is identical, but the distinction matters: a fitted value is evaluated at a feature vector that is part of the training data, while a predicted value is evaluated at an unseen $\mathbf{x}^*$ that is independent of the training data.</p>
+<p>The <strong>predicted value</strong> at a new point $\mathbf{x}^* = (x_1^*, \dots, x_p^*)$ is computed the same way, $\hat{y}^* = \hat\beta_0 + \hat\beta_1 x_1^* + \dots + \hat\beta_p x_p^*$, or $\hat{\mathbf{y}}^* = \mathbf{X}^*\hat{\boldsymbol{\beta}}$ for a batch of new points. The formula is the same, but the input is different. A fitted value uses a predictor vector from the training data. A predicted value uses a new $\mathbf{x}^*$ that is independent of the training data.</p>
 
 <p>At a new point $\mathbf{x}^*$ (with a leading 1 for the intercept), assuming normal errors and with $\hat\sigma$ the residual standard error defined below:</p>
 
@@ -185,7 +185,7 @@ $$</div>
 \end{aligned}
 $$</div>
 
-<p>The extra &ldquo;$1+$&rdquo; under the square root is the irreducible noise $\sigma^2$ of the new observation itself. That is why the prediction interval is always wider, and why it does not shrink to zero even with infinite training data.</p>
+<p>The extra &ldquo;$1+$&rdquo; under the square root is the irreducible noise $\sigma^2$ of the new observation itself. Thus the prediction interval is always wider, and it does not shrink to zero with more training data.</p>
 
 <h2>Residuals and their properties</h2>
 
@@ -195,14 +195,14 @@ $$</div>
 \mathbf{r} = \mathbf{y} - \hat{\mathbf{y}} = \mathbf{y} - \mathbf{H}\mathbf{y} = (\mathbf{I} - \mathbf{H})\,\mathbf{y}
 $$</div>
 
-<p>Because $\hat{\boldsymbol{\beta}}$ solves the normal equations, $\mathbf{X}^\top(\mathbf{y} - \mathbf{X}\hat{\boldsymbol{\beta}}) = \mathbf{0}$, the residuals inherit two orthogonality properties:</p>
+<p>Because $\hat{\boldsymbol{\beta}}$ solves the normal equations, $\mathbf{X}^\top(\mathbf{y} - \mathbf{X}\hat{\boldsymbol{\beta}}) = \mathbf{0}$, the residuals have two orthogonality properties:</p>
 
 <ol>
 <li>The residual vector is orthogonal to every column of $\mathbf{X}$:
 $$
 \mathbf{X}^\top\mathbf{r} = \mathbf{X}^\top\mathbf{y} - (\mathbf{X}^\top\mathbf{X})(\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top\mathbf{y} = \mathbf{0}
 $$
-Since the intercept column of $\mathbf{X}$ is all ones, a direct corollary is that residuals sum to zero, $\sum_i r_i = 0$, whenever the model has an intercept.</li>
+The intercept column of $\mathbf{X}$ is all ones. Thus, in a model with an intercept, the residuals sum to zero: $\sum_i r_i = 0$.</li>
 <li>The residual vector is orthogonal to the fitted values:
 $$
 \hat{\mathbf{y}}^\top\mathbf{r} = \hat{\boldsymbol{\beta}}^\top\mathbf{X}^\top\mathbf{r} = 0
@@ -235,13 +235,13 @@ $$</div>
 <p>Further reading: <a href="https://en.wikipedia.org/wiki/Quadratic_form_(statistics)">Quadratic form (statistics)</a> (Wikipedia).</p>
 </aside>
 
-<p>Each estimated coefficient uses up one dimension, leaving $n-p-1$ dimensions for the residuals to live in. Dividing by $n-p-1$ makes $\hat\sigma^2$ unbiased.</p>
+<p>Each estimated coefficient uses one dimension, which leaves $n-p-1$ dimensions for the residuals. Dividing by $n-p-1$ makes $\hat\sigma^2$ unbiased.</p>
 
 <h1>The Geometry of Least Squares</h1>
 
 <p>The minimizers of $\|\mathbf{y} - \mathbf{X}\boldsymbol{\beta}\|^2$ are exactly the solutions of the normal equations, unique if and only if $\text{rank}(\mathbf{X}) = p+1$. Geometrically, the normal equations describe a projection.</p>
 
-<p>Least squares is a projection problem in disguise: it is the system $\mathbf{X}\boldsymbol{\beta} = \mathbf{y}$, which almost never has an exact solution because $\mathbf{y}$ lives in $\mathbb{R}^n$ while $\mathbf{X}\boldsymbol{\beta}$ can only reach the $(p+1)$-dimensional column space $\mathcal{C}(\mathbf{X})$ (<!--note-ref:column-space-->). The best we can do is the point of $\mathcal{C}(\mathbf{X})$ closest to $\mathbf{y}$, which is the orthogonal projection of $\mathbf{y}$. It is characterized by the residual being perpendicular to every column of $\mathbf{X}$:</p>
+<p>Least squares is a projection problem. The system $\mathbf{X}\boldsymbol{\beta} = \mathbf{y}$ almost never has an exact solution. The reason is that $\mathbf{y}$ is in $\mathbb{R}^n$, but $\mathbf{X}\boldsymbol{\beta}$ is always in the $(p+1)$-dimensional column space $\mathcal{C}(\mathbf{X})$ (<!--note-ref:column-space-->). The best approximation is the point of $\mathcal{C}(\mathbf{X})$ closest to $\mathbf{y}$: the orthogonal projection of $\mathbf{y}$. At this point, the residual is perpendicular to every column of $\mathbf{X}$:</p>
 
 <div>$$
 \mathbf{X}^\top(\mathbf{y} - \mathbf{X}\boldsymbol{\beta}) = \mathbf{0}
@@ -251,16 +251,16 @@ $$</div>
 
 <aside class="note" id="column-space" title="Column space and projection" kind="background">
 <p>The <strong>column space</strong> $\mathcal{C}(\mathbf{A})$ is the set of all linear combinations of the columns of $\mathbf{A}$, a flat subspace through the origin of dimension $\text{rank}(\mathbf{A})$. Since $\mathbf{A}\mathbf{z} = z_1\mathbf{A}_1 + \dots + z_k\mathbf{A}_k$, the system $\mathbf{A}\mathbf{z} = \mathbf{c}$ has a solution exactly when $\mathbf{c} \in \mathcal{C}(\mathbf{A})$.</p>
-<p>Otherwise the closest point $\hat{\mathbf{c}} \in \mathcal{C}(\mathbf{A})$ is the orthogonal projection of $\mathbf{c}$: if $\mathbf{c} - \hat{\mathbf{c}}$ is perpendicular to the subspace, then $\|\mathbf{c} - \mathbf{w}\|^2 = \|\mathbf{c} - \hat{\mathbf{c}}\|^2 + \|\hat{\mathbf{c}} - \mathbf{w}\|^2$ for every other $\mathbf{w}$ in it. Writing $\hat{\mathbf{c}} = \mathbf{A}\mathbf{z}$, perpendicularity to each column gives $\mathbf{A}^\top(\mathbf{c} - \mathbf{A}\mathbf{z}) = \mathbf{0}$. The projection is always unique; $\mathbf{z}$ is unique only when $\mathbf{A}$ has full column rank.</p>
+<p>If not, the closest point $\hat{\mathbf{c}} \in \mathcal{C}(\mathbf{A})$ is the orthogonal projection of $\mathbf{c}$. If $\mathbf{c} - \hat{\mathbf{c}}$ is perpendicular to the subspace, then $\|\mathbf{c} - \mathbf{w}\|^2 = \|\mathbf{c} - \hat{\mathbf{c}}\|^2 + \|\hat{\mathbf{c}} - \mathbf{w}\|^2$ for every other $\mathbf{w}$ in it. Writing $\hat{\mathbf{c}} = \mathbf{A}\mathbf{z}$, perpendicularity to each column gives $\mathbf{A}^\top(\mathbf{c} - \mathbf{A}\mathbf{z}) = \mathbf{0}$. The projection is always unique; $\mathbf{z}$ is unique only when $\mathbf{A}$ has full column rank.</p>
 <p>Further reading: <a href="https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/">MIT 18.06 Linear Algebra</a> (Gilbert Strang); <a href="https://www.3blue1brown.com/topics/linear-algebra">Essence of Linear Algebra</a> (3Blue1Brown).</p>
 </aside>
 
 <h2>Least squares is a projection</h2>
 
-<p>Translating back to regression (Fig. 2):</p>
+<p>In regression terms (Fig. 2):</p>
 <ul>
 <li>$\mathcal{C}(\mathbf{X})$ is the subspace of $\mathbb{R}^n$ spanned by the intercept column and the predictors $X_1, \dots, X_p$.</li>
-<li>The response $\mathbf{y}$ generally lies off this subspace. The fitted vector $\hat{\mathbf{y}} = \mathbf{H}\mathbf{y}$ is its orthogonal projection onto $\mathcal{C}(\mathbf{X})$; $\mathbf{H}$ is the projection matrix, which explains why it is symmetric and idempotent.</li>
+<li>The response $\mathbf{y}$ is usually not in this subspace. The fitted vector $\hat{\mathbf{y}} = \mathbf{H}\mathbf{y}$ is its orthogonal projection onto $\mathcal{C}(\mathbf{X})$; $\mathbf{H}$ is the projection matrix, which explains why it is symmetric and idempotent.</li>
 <li>The residual $\mathbf{r} = \mathbf{y} - \hat{\mathbf{y}}$ is orthogonal to $\hat{\mathbf{y}}$ and to the entire subspace $\mathcal{C}(\mathbf{X})$.</li>
 </ul>
 
@@ -275,9 +275,9 @@ $$</div>
 $$</div>
 </div>
 
-<p>Because the two pieces are perpendicular, their squared lengths add, just as in the Pythagorean theorem: $\|\mathbf{y}\|^2 = \|\hat{\mathbf{y}}\|^2 + \|\mathbf{r}\|^2$. In general, $\|\mathbf{a} + \mathbf{b}\|^2 = \|\mathbf{a}\|^2 + 2\,\mathbf{a}^\top\mathbf{b} + \|\mathbf{b}\|^2$, and orthogonality kills the cross term.</p>
+<p>Because the two pieces are perpendicular, their squared lengths add, as in the Pythagorean theorem: $\|\mathbf{y}\|^2 = \|\hat{\mathbf{y}}\|^2 + \|\mathbf{r}\|^2$. In general, $\|\mathbf{a} + \mathbf{b}\|^2 = \|\mathbf{a}\|^2 + 2\,\mathbf{a}^\top\mathbf{b} + \|\mathbf{b}\|^2$, and orthogonality makes the cross term zero.</p>
 
-<p>Many results in the rest of this post (the $R^2$ decomposition, invariance to linear reparameterization, uniqueness of $\hat{\mathbf{y}}$ under rank deficiency) are one-line consequences of this picture.</p>
+<p>Several later results follow directly from this decomposition: the $R^2$ decomposition, invariance to reparameterization and the uniqueness of $\hat{\mathbf{y}}$ under rank deficiency.</p>
 
 <h1>Goodness of Fit: $R^2$</h1>
 
@@ -304,23 +304,23 @@ $$</div>
 <li>$0 \le R^2 \le 1$ (for a model with an intercept).</li>
 <li>$R^2$ is invariant to location and scale changes of $Y$ and of the predictors.</li>
 <li>$R^2$ alone says little about the quality of the fit. A small $R^2$ does not imply a poor model: the response may be noisy while the coefficients are still precisely estimated.</li>
-<li>Adding a predictor never decreases $R^2$, <em>even if it is pure noise</em>: a new column can only enlarge $\mathcal{C}(\mathbf{X})$, and projecting onto a bigger subspace can only bring $\hat{\mathbf{y}}$ closer to $\mathbf{y}$ (<!--note-ref:r2-inflation-->).</li>
+<li>Adding a predictor never decreases $R^2$, <em>even if it is pure noise</em> (<!--note-ref:r2-inflation-->). A new column can only enlarge $\mathcal{C}(\mathbf{X})$, and a projection onto a larger subspace is never farther from $\mathbf{y}$.</li>
 </ul>
 
 <aside class="note" id="r2-inflation" title="Simulation: noise predictors and adjusted R-squared" kind="reading">
-<p>Appending columns of Gaussian noise to a model with two real predictors, $R^2$ keeps rising (Fig. 3). The <strong>adjusted $R^2$</strong>, $1 - \frac{\text{RSS}/(n-p-1)}{\text{TSS}/(n-1)}$, uses variance estimates instead of sums of squares, so each extra predictor costs one degree of freedom, and it drifts down instead.</p>
+<p>When columns of Gaussian noise are added to a model with two real predictors, $R^2$ continues to increase (Fig. 3). The <strong>adjusted $R^2$</strong>, $1 - \frac{\text{RSS}/(n-p-1)}{\text{TSS}/(n-1)}$, uses variance estimates instead of sums of squares. Each extra predictor costs one degree of freedom, and the adjusted $R^2$ decreases.</p>
 <!--fig:r2-inflation-->
 </aside>
 
 <p>Training-set fit overstates performance on new data, a theme that recurs throughout statistical learning.</p>
 
-<h1>When the Design Matrix Misbehaves</h1>
+<h1>Problems with the Design Matrix</h1>
 
 <h2>Linear transformations of the predictors</h2>
 
-<p>Suppose we rescale or shift a predictor, for example converting baby length from centimetres to inches, $\tilde{X}_1 = X_1 / 2.54$, or replacing $x_{i2}$ by $2x_{i2}$ and $x_{i3}$ by $x_{i3}/4$. The fitted values $\hat{\mathbf{y}}$ and $R^2$ do not change at all; only the coefficients $\hat{\boldsymbol{\beta}}$ change.</p>
+<p>Consider a rescaled or shifted predictor, for example baby length in inches instead of centimeters, $\tilde{X}_1 = X_1 / 2.54$. The fitted values $\hat{\mathbf{y}}$ and $R^2$ do not change; only the coefficients $\hat{\boldsymbol{\beta}}$ change.</p>
 
-<p>Any such transformation can be written as $\tilde{\mathbf{X}} = \mathbf{X}\mathbf{A}$ for some invertible $(p+1)\times(p+1)$ matrix $\mathbf{A}$. Then $\mathcal{C}(\tilde{\mathbf{X}}) = \mathcal{C}(\mathbf{X})$: the subspace we project onto is the same, so the projection $\hat{\mathbf{y}}$ is the same. The coefficients simply re-express the same point in a new basis:</p>
+<p>Any such transformation can be written as $\tilde{\mathbf{X}} = \mathbf{X}\mathbf{A}$ for some invertible $(p+1)\times(p+1)$ matrix $\mathbf{A}$. Then $\mathcal{C}(\tilde{\mathbf{X}}) = \mathcal{C}(\mathbf{X})$: the subspace we project onto is the same, so the projection $\hat{\mathbf{y}}$ is the same. The coefficients express the same point in a new basis:</p>
 
 <div>$$
 \tilde{\mathbf{X}}\tilde{\boldsymbol{\beta}} = \mathbf{X}\mathbf{A}\tilde{\boldsymbol{\beta}} = \mathbf{X}\hat{\boldsymbol{\beta}}
@@ -328,28 +328,28 @@ $$</div>
 \tilde{\boldsymbol{\beta}} = \mathbf{A}^{-1}\hat{\boldsymbol{\beta}}
 $$</div>
 
-<p>In the length example, the coefficient on length in inches is $2.54$ times the coefficient on length in centimetres. The statement holds for any linear transformation of the predictors as long as it does not change the rank of $\mathbf{X}$.</p>
+<p>In the length example, the coefficient on length in inches is $2.54$ times the coefficient on length in centimeters. The statement holds for any linear transformation of the predictors as long as it does not change the rank of $\mathbf{X}$.</p>
 
 <h2>Rank deficiency</h2>
 
-<p>If the $n\times(p+1)$ design matrix is <em>not</em> of full column rank, some column is an exact linear combination of others. Then $\mathbf{X}^\top\mathbf{X}$ is singular, cannot be inverted, and the normal equations have infinitely many solutions: if $\hat{\boldsymbol{\beta}}$ is one solution and $\mathbf{X}\mathbf{v} = \mathbf{0}$, then $\hat{\boldsymbol{\beta}} + \mathbf{v}$ is another. The coefficients are not <em>identifiable</em>.</p>
+<p>If the $n\times(p+1)$ design matrix does not have full column rank, some column is an exact linear combination of others. Then $\mathbf{X}^\top\mathbf{X}$ is singular, and the normal equations have infinitely many solutions. If $\hat{\boldsymbol{\beta}}$ is one solution and $\mathbf{X}\mathbf{v} = \mathbf{0}$, then $\hat{\boldsymbol{\beta}} + \mathbf{v}$ is another. The coefficients are not <em>identifiable</em>.</p>
 
-<p>Yet the column space $\mathcal{C}(\mathbf{X})$ is still perfectly well defined, and so is the orthogonal projection onto it. The fitted vector $\hat{\mathbf{y}}$ is therefore unique and computable even though $\hat{\boldsymbol{\beta}}$ is not. Statistical software handles this gracefully: R&rsquo;s <code>lm</code> drops aliased columns (reporting <code>NA</code> for their coefficients), and <code>numpy.linalg.lstsq</code> returns the minimum-norm solution. Either way, the model can still be used for prediction; you just should not interpret individual coefficients.</p>
+<p>But the column space $\mathcal{C}(\mathbf{X})$ and the orthogonal projection onto it are still well defined. Thus $\hat{\mathbf{y}}$ is unique even though $\hat{\boldsymbol{\beta}}$ is not. R&rsquo;s <code>lm</code> drops aliased columns and reports <code>NA</code> for their coefficients; <code>numpy.linalg.lstsq</code> returns the minimum-norm solution. The model is still valid for prediction, but individual coefficients have no unique interpretation.</p>
 
 <h2>Collinearity</h2>
 
-<p>Exact rank deficiency is rare outside of coding mistakes. The more common and more insidious problem is <strong>collinearity</strong>: predictors that are <em>highly</em> but not perfectly correlated. Here $\mathbf{X}^\top\mathbf{X}$ is invertible but nearly singular, and the fitted coefficients and their sampling variances can depend heavily on which particular predictors happen to be in the model. The estimates become unstable and unreliable.</p>
+<p>Exact rank deficiency is rare, except after coding mistakes. A more common problem is <strong>collinearity</strong>: predictors that are strongly, but not exactly, correlated. Then $\mathbf{X}^\top\mathbf{X}$ is invertible but nearly singular. The coefficients and their variances depend strongly on which predictors are in the model, and the estimates become unstable.</p>
 
-<p>The variance of the $j$-th coefficient shows the damage (derivation in <!--note-ref:fwl-->):</p>
+<p>The variance of the $j$-th coefficient shows the effect (derivation in <!--note-ref:fwl-->):</p>
 
 <div>$$
 \text{Var}(\hat\beta_j) = \frac{\sigma^2}{\sum_i (x_{ij} - \bar{x}_j)^2} \cdot \frac{1}{1 - R_j^2}
 $$</div>
 
-<p>where $R_j^2$ is the $R^2$ from regressing $X_j$ on all the other predictors. When $X_j$ is nearly a linear combination of the others, $R_j^2 \to 1$ and the variance blows up. The factor $1/(1-R_j^2)$ is known as the variance inflation factor.</p>
+<p>where $R_j^2$ is the $R^2$ from regressing $X_j$ on all the other predictors. When $X_j$ is nearly a linear combination of the others, $R_j^2 \to 1$ and the variance increases without bound. The factor $1/(1-R_j^2)$ is known as the variance inflation factor.</p>
 
 <aside class="note" id="fwl" title="The Frisch-Waugh-Lovell theorem" kind="derivation">
-<p>Let $\tilde{\mathbf{x}}_j$ be the residual from regressing $X_j$ on the other columns of $\mathbf{X}$, intercept included. It is orthogonal to those columns and together they span $\mathcal{C}(\mathbf{X})$, so projecting $\mathbf{y}$ onto the two pieces separately gives</p>
+<p>Let $\tilde{\mathbf{x}}_j$ be the residual from regressing $X_j$ on the other columns of $\mathbf{X}$, intercept included. It is orthogonal to those columns, and together they span $\mathcal{C}(\mathbf{X})$. A separate projection of $\mathbf{y}$ onto each part gives</p>
 <div>$$
 \hat\beta_j = \frac{\tilde{\mathbf{x}}_j^\top\mathbf{y}}{\tilde{\mathbf{x}}_j^\top\tilde{\mathbf{x}}_j},
 \qquad
@@ -366,7 +366,7 @@ $$</div>
 <li>a significant overall $F$ test while <em>none</em> of the individual predictors is significant. The predictors jointly matter, but the data cannot attribute the effect to any one of them.</li>
 </ul>
 
-<p>The simplest remedy is to drop one or more predictors from each highly correlated group. More principled alternatives include principal component analysis (regress on a few uncorrelated directions instead) and regularization methods based on penalized least squares, such as ridge and lasso.</p>
+<p>The simplest remedy is to remove one or more predictors from each correlated group. Other remedies are principal component regression, which uses a few uncorrelated directions, and penalized least squares such as ridge and lasso.</p>
 
 <h1>Categorical Predictors</h1>
 
@@ -393,18 +393,18 @@ $$</div>
 \begin{pmatrix} 1 & 0 \\ 1 & 0 \\ 0 & 1 \\ 0 & 1 \\ 0 & 1 \\ 0 & 0 \\ 0 & 0 \end{pmatrix}
 $$</div>
 
-<p>In the dummy-coded version, column 1 indicates level $a$ and column 2 indicates level $b$; an observation at level $c$ has zeros in both and is described by the intercept alone. The coefficient on column 1 is then the expected difference in $Y$ between level $a$ and the reference level $c$, holding the other predictors fixed.</p>
+<p>In the dummy-coded version, column 1 indicates level $a$ and column 2 indicates level $b$. An observation at level $c$ has zeros in both columns, so the intercept alone describes it. The coefficient on column 1 is then the expected difference in $Y$ between level $a$ and the reference level $c$, holding the other predictors fixed.</p>
 
 <h2>Dummy coding vs. one-hot encoding</h2>
 <ul>
 <li><strong>Dummy coding</strong> uses $k-1$ indicators and keeps $\mathbf{X}$ full rank when an intercept is present. This is the standard approach in classical linear regression.</li>
 <li><strong>One-hot encoding</strong> uses $k$ indicators. Combined with an intercept, the $k$ columns add up to a column of ones, which is exactly the intercept column. That is perfect collinearity: $\mathbf{X}^\top\mathbf{X}$ is singular and the OLS estimator is not unique (the <a href="#rank-deficiency">rank deficiency</a> case above). One-hot encoding is fine without an intercept, or with a penalty that restores uniqueness.</li>
-<li><strong>Fitted and predicted values are identical</strong> under both codings, since both span the same column space. Only the interpretation of individual coefficients changes. Which level serves as the reference is usually a matter of subject-matter convenience, not statistics.</li>
+<li><strong>Fitted and predicted values are identical</strong> under both codings, since both span the same column space. Only the interpretation of individual coefficients changes. The choice of reference level depends on the application, not on statistics.</li>
 </ul>
 
 <h1>Hypothesis Testing with the Partial $F$ Test</h1>
 
-<p>Whether some predictors are significant, and whether a larger model beats a smaller one, are both comparisons of <strong>nested models</strong>:</p>
+<p>Two questions are frequent: are some predictors significant, and is a larger model better than a smaller one? Both are comparisons of <strong>nested models</strong>:</p>
 
 <div>$$
 \begin{cases}
@@ -422,11 +422,11 @@ F = \frac{(\text{RSS}_0 - \text{RSS}_a)\,/\,(p_a - p_0)}{\text{RSS}_a\,/\,(n - p
 $$</div>
 </div>
 
-<p>We reject $H_0$ when $F$ is large, i.e. larger than the upper-$\alpha$ quantile of $F_{p_a - p_0,\, n - p_a}$: the variation missed by the reduced model is large compared with the error variance (Fig. 4).</p>
+<p>Reject $H_0$ when $F$ is larger than the upper-$\alpha$ quantile of $F_{p_a - p_0,\, n - p_a}$. Then the variation that the reduced model misses is large compared with the error variance (Fig. 4).</p>
 
 <ul>
 <li>The <strong>numerator</strong> is the extra variation in the data that the full model explains but the reduced model does not, per extra parameter.</li>
-<li>The <strong>denominator</strong> is the variation explained by neither model, per residual degree of freedom; it is just $\hat\sigma^2$ from the full model.</li>
+<li>The <strong>denominator</strong> is the variation explained by neither model, per residual degree of freedom; it is $\hat\sigma^2$ from the full model.</li>
 </ul>
 
 <!--fig:partial-f-->
@@ -450,11 +450,11 @@ H_a: & Y \sim 1 + \beta_1 X_1 + \dots + \beta_8 X_8 + \beta_9 X_9 + \dots + \bet
 \end{cases}
 $$</div>
 
-<p>Here $p_0 = 8 + 1 = 9$ and $p_a = 12 + 1 = 13$, counting the intercept. With $n = 42$ babies, the reference distribution is $F_{4,\,29}$. Computing $\text{RSS}_0$ and $\text{RSS}_a$ from the two fits gives $F = 0.7225$, well below the 5% critical value $F_{4,29} \approx 2.70$. We do not reject $H_0$ and prefer the smaller model: once the mother&rsquo;s and baby&rsquo;s characteristics are known, the father&rsquo;s add no detectable information.</p>
+<p>Here $p_0 = 8 + 1 = 9$ and $p_a = 12 + 1 = 13$, counting the intercept. With $n = 42$ babies, the reference distribution is $F_{4,\,29}$. Computing $\text{RSS}_0$ and $\text{RSS}_a$ from the two fits gives $F = 0.7225$, below the 5% critical value $F_{4,29} \approx 2.70$. We do not reject $H_0$ and prefer the smaller model: once the mother&rsquo;s and baby&rsquo;s characteristics are known, the father&rsquo;s add no detectable information.</p>
 
 <h2>Two special cases</h2>
 
-<p><strong>Testing a single coefficient.</strong> Dropping only $X_j$ gives $H_0: \beta_j = 0$ with $p_a - p_0 = 1$. In this case the partial $F$ test is exactly equivalent to the familiar $t$-test (<!--note-ref:t-and-f-->),</p>
+<p><strong>Testing a single coefficient.</strong> Dropping only $X_j$ gives $H_0: \beta_j = 0$ with $p_a - p_0 = 1$. Then the partial $F$ test is equivalent to the $t$-test (<!--note-ref:t-and-f-->),</p>
 
 <div>$$
 t_j = \frac{\hat\beta_j}{\widehat{\text{se}}(\hat\beta_j)} \sim t_{n-p-1},
@@ -462,7 +462,7 @@ t_j = \frac{\hat\beta_j}{\widehat{\text{se}}(\hat\beta_j)} \sim t_{n-p-1},
 \widehat{\text{se}}(\hat\beta_j) = \hat\sigma\sqrt{\big[(\mathbf{X}^\top\mathbf{X})^{-1}\big]_{jj}},
 $$</div>
 
-<p>with $F = t_j^2$ (<!--note-ref:fwl-->). This is the $t$-statistic and $p$-value that regression software prints next to each coefficient. Each one tests the effect of a predictor <em>given all the others are in the model</em>, which is why collinear predictors can all look insignificant individually.</p>
+<p>with $F = t_j^2$ (<!--note-ref:fwl-->). This is the $t$-statistic and $p$-value that regression software prints next to each coefficient. Each one tests a predictor <em>given all the others in the model</em>. Thus, collinear predictors can all look insignificant individually.</p>
 
 <p><strong>Testing all predictors.</strong> Taking the reduced model to be intercept-only, $H_0: Y \sim 1$, gives the <strong>overall $F$ test</strong>. Here $\text{RSS}_0 = \text{TSS}$, and the statistic can be written entirely in terms of $R^2$:</p>
 
@@ -480,14 +480,14 @@ $$</div>
 <li><strong>Linearity</strong>: the conditional mean of $Y$ is a linear function of the predictors.</li>
 <li><strong>Constant variance</strong> (homoscedasticity): every response has the same variance $\sigma^2$.</li>
 <li><strong>Uncorrelated errors</strong>: $\varepsilon_i$ and $\varepsilon_j$ (hence $Y_i$ and $Y_j$) are uncorrelated for $i \neq j$.</li>
-<li><strong>Normality</strong> (optional): not needed to derive the least squares estimator, but needed for exact finite-sample distributions of $\hat{\boldsymbol{\beta}}$, fitted values and residuals, and therefore for the exact $t$ and $F$ tests and intervals above.</li>
+<li><strong>Normality</strong> (optional): not necessary for the least squares estimator. It is necessary for the exact distributions of $\hat{\boldsymbol{\beta}}$, the fitted values and the residuals, and thus for exact tests and intervals.</li>
 </ol>
 
-<p>How seriously to take these depends on the goal. If we want to <em>interpret</em> the effects of predictors on the response, all assumptions should be checked with diagnostic plots and tests (residuals vs. fitted values, normal Q-Q plots, scale-location plots, leverage and influence measures as in <!--note-ref:hat-matrix-->, and so on), with remedies applied when they fail. If the goal is <em>prediction</em>, as it mostly is in statistical learning, the bar is lower: what ultimately matters is performance on held-out data.</p>
+<p>The goal decides which assumptions to check. To <em>interpret</em> the effects of predictors, check all assumptions with diagnostic plots and tests. Examples are residuals vs. fitted values, normal Q-Q plots, scale-location plots and leverage measures (<!--note-ref:hat-matrix-->). For <em>prediction</em>, the usual goal in statistical learning, performance on held-out data is the main criterion.</p>
 
 <h2>Outliers</h2>
 
-<p>With a modest sample, test for outliers formally, e.g. with leave-one-out prediction errors. In very large data sets something always looks extreme, so adjust for multiple comparisons instead. Remedies:</p>
+<p>With a modest sample, test for outliers formally, e.g. with leave-one-out prediction errors. In large data sets, some points always look extreme, so adjust for multiple comparisons. Remedies:</p>
 <ul>
 <li>check the range of each variable for impossible or miscoded values;</li>
 <li>apply a log, square-root or other variance-stabilizing transformation to right-skewed predictors or to the response;</li>
@@ -559,12 +559,12 @@ p_value = stats.f.sf(F, p_a - p_0, n - p_a)
 print(f"R^2 = {r2:.3f}, F = {F:.4f}, p-value = {p_value:.3f}")
 </code></pre>
 
-<p><code>statsmodels</code> (<code>smf.ols(...).fit()</code>, <code>anova_lm(reduced, full)</code>) and R&rsquo;s <code>lm</code> / <code>anova</code> give the same numbers with the standard regression table. For collinearity, the course notes use Faraway&rsquo;s <code>seatpos</code> data, whose predictors are highly correlated.</p>
+<p><code>statsmodels</code> (<code>smf.ols(...).fit()</code>, <code>anova_lm(reduced, full)</code>) and R&rsquo;s <code>lm</code> / <code>anova</code> give the same numbers with the standard regression table. For collinearity, the course notes use Faraway&rsquo;s <code>seatpos</code> data, which has strongly correlated predictors.</p>
 
 <h1>Quick Summary</h1>
 
 <ul>
-<li>The MLR model is $\mathbf{y} = \mathbf{X}\boldsymbol{\beta} + \boldsymbol{\varepsilon}$; &ldquo;linear&rdquo; means linear in $\boldsymbol{\beta}$, so transformed and interacted features are fair game.</li>
+<li>The MLR model is $\mathbf{y} = \mathbf{X}\boldsymbol{\beta} + \boldsymbol{\varepsilon}$; &ldquo;linear&rdquo; means linear in $\boldsymbol{\beta}$, so transformed predictors and interactions are allowed.</li>
 <li>Least squares minimizes RSS and leads to the normal equations $\mathbf{X}^\top\mathbf{X}\boldsymbol{\beta} = \mathbf{X}^\top\mathbf{y}$, with $\hat{\boldsymbol{\beta}} = (\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top\mathbf{y}$ when $\mathbf{X}$ has full column rank. It is unbiased with $\text{Cov}(\hat{\boldsymbol{\beta}}) = \sigma^2(\mathbf{X}^\top\mathbf{X})^{-1}$.</li>
 <li>Geometrically, $\hat{\mathbf{y}} = \mathbf{H}\mathbf{y}$ is the orthogonal projection of $\mathbf{y}$ onto $\mathcal{C}(\mathbf{X})$, and the residual is perpendicular to that space. Use $\hat\sigma^2 = \text{RSS}/(n-p-1)$ to estimate the noise.</li>
 <li>$R^2 = 1 - \text{RSS}/\text{TSS}$ never decreases when predictors are added, even useless ones, so it is not a model selection criterion.</li>

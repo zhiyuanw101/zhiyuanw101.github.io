@@ -632,7 +632,18 @@ def render_rss(posts):
 
 # ---------------------------------------------------------------- main
 
+def check_style():
+	"""Stop the build on ASD-STE100 style errors in posts, figure captions and the FAQ (tools/style_lint.py)."""
+	from style_lint import lint
+	files = sorted((CONTENT / "posts").glob("*.html")) + sorted((CONTENT / "figures").glob("*.html"))
+	files.append(CONTENT / "faq.html")
+	errors = [e for f in files for e in lint(f.read_text(), f.relative_to(ROOT))]
+	if errors:
+		raise SystemExit("\n".join(errors) + f"\n{len(errors)} style error(s); see 'Writing style' in AGENTS.md.")
+
+
 def main():
+	check_style()
 	if OUT.exists():
 		shutil.rmtree(OUT)
 	shutil.copytree(STATIC, OUT)

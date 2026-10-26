@@ -65,9 +65,9 @@ In a browser at http://localhost:8765:
   it. Opened notes read like the main text (same font and size), with no layout breaks.
 - Every further-reading link opens (`curl -sL -o /dev/null -w '%{http_code}' URL` gives 200).
 - No horizontal scrolling at phone width; text is readable in dark mode.
-- Reread the text once for English, accuracy and brevity: delete filler lead-ins ("Some ... to keep
-  in mind", "It is worth noting", "Let us"), turn announced lists into headings, and move side
-  proofs or simulations into notes (see "Writing style" in AGENTS.md).
+- `python3 tools/style_lint.py` passes (the build runs it too). Then reread the text once against
+  the ASD-STE100 rules in AGENTS.md: one word per concept, factual verbs, no signposting, side
+  proofs and simulations in notes. Fix the meaning, not only the measured limits.
 
 ## E. Publish
 

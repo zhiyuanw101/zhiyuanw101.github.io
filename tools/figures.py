@@ -116,7 +116,7 @@ def fig_geometry():
 	return svg(W, H, "\n".join(g), "Least squares as orthogonal projection") + (
 		"<figcaption>Least squares as an orthogonal projection. The fitted vector $\\hat{\\mathbf{y}}$ is the point in "
 		"the column space $\\mathcal{C}(\\mathbf{X})$ closest to $\\mathbf{y}$, and the residual $\\mathbf{r}$ is "
-		"perpendicular to that whole subspace.</figcaption>\n</figure>\n"
+		"perpendicular to the subspace.</figcaption>\n</figure>\n"
 	)
 
 
@@ -159,9 +159,9 @@ def fig_r2():
 	g.append(f'<text x="{sx(K) - 4:.1f}" y="{sy(adj[-1]) + 24:.1f}" fill="{ORANGE}" text-anchor="end">adjusted R²</text>')
 	g.append(f'<text x="{(L + W - R) / 2}" y="{H - 10}" fill="currentColor" text-anchor="middle">number of pure-noise predictors added</text>')
 	return svg(W, H, "\n".join(g), "R squared keeps increasing with noise predictors") + (
-		"<figcaption>One simulated data set ($n=42$, two real predictors). Appending columns of pure noise can only "
-		"lower the RSS, so $R^2$ (blue) climbs monotonically toward 1, while the adjusted $R^2$ (orange) "
-		"penalizes the lost degrees of freedom and drifts down.</figcaption>\n</figure>\n"
+		"<figcaption>One simulated data set ($n=42$, two real predictors). Each column of pure noise can only "
+		"lower the RSS, so $R^2$ (blue) increases toward 1. The adjusted $R^2$ (orange) charges one degree of "
+		"freedom per predictor and decreases.</figcaption>\n</figure>\n"
 	)
 
 
@@ -190,9 +190,9 @@ def fig_partial_f():
 	g.append(f'<line x1="{(a + b) / 2}" y1="{y0 + h + 4}" x2="{(a + b) / 2}" y2="{y0 + h + 62}" stroke="{GREEN}" stroke-dasharray="3 3"/>')
 	g.append(f'<text x="{(a + b) / 2}" y="{y0 + h + 80}" fill="{GREEN}" text-anchor="middle" font-style="italic">RSS<tspan baseline-shift="sub" font-size="10">0</tspan> − RSS<tspan baseline-shift="sub" font-size="10">a</tspan>: extra variation captured by the full model</text>')
 	return svg(W, H, "\n".join(g), "Decomposition behind the partial F test") + (
-		"<figcaption>The partial $F$ test compares the extra variation explained by the full model, "
-		"$RSS_0 - RSS_a$, against what the full model still leaves unexplained, $RSS_a$, each scaled by its "
-		"degrees of freedom.</figcaption>\n</figure>\n"
+		"<figcaption>The partial $F$ test compares $RSS_0 - RSS_a$, the extra variation that the full model "
+		"explains, with $RSS_a$, the variation that it does not explain. Each term is scaled by its degrees "
+		"of freedom.</figcaption>\n</figure>\n"
 	)
 
 
