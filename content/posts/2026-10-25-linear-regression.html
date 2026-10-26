@@ -164,7 +164,7 @@ $$</div>
 <ul>
 <li><strong>Symmetric</strong>: $\mathbf{H}^\top = \mathbf{H}$.</li>
 <li><strong>Idempotent</strong>: $\mathbf{H}^2 = \mathbf{H}$. Projecting twice gives the same result as projecting once (see the <a href="#the-geometry-of-least-squares">next section</a>).</li>
-<li><strong>Trace equals rank</strong>: $\text{tr}(\mathbf{H}) = \text{tr}\big((\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top\mathbf{X}\big) = \text{tr}(\mathbf{I}_{p+1}) = p+1$, using the cyclic property of the trace (<!--note-ref:quadratic-form-->).</li>
+<li><strong>Trace equals rank</strong>: $\text{tr}(\mathbf{H}) = \text{tr}\big((\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top\mathbf{X}\big) = \text{tr}(\mathbf{I}_{p+1}) = p+1$, using the cyclic property of the trace (<!--note-ref:sigma-unbiased-->).</li>
 </ul>
 
 <p>Leverage, residual variances and influence measures also come from $\mathbf{H}$ (<!--note-ref:hat-matrix-->).</p>
@@ -226,22 +226,20 @@ $$</li>
 $$</div>
 </div>
 
-<p>The denominator $n-p-1$ is the <strong>residual degrees of freedom</strong>. Why not divide by $n$? Because $\mathbf{r} = (\mathbf{I}-\mathbf{H})\boldsymbol{\varepsilon}$ (note $(\mathbf{I}-\mathbf{H})\mathbf{X} = \mathbf{0}$), and the expected value of a quadratic form in the errors is $\sigma^2$ times the trace of its matrix (<!--note-ref:quadratic-form-->), so</p>
+<p>The denominator $n-p-1$ is the <strong>residual degrees of freedom</strong>: each estimated coefficient uses one dimension, which leaves $n-p-1$ dimensions for the residuals. With this denominator, $\hat\sigma^2$ is unbiased (<!--note-ref:sigma-unbiased-->).</p>
 
-<div>$$
-\mathbb{E}[\text{RSS}] = \mathbb{E}\big[\boldsymbol{\varepsilon}^\top(\mathbf{I}-\mathbf{H})\boldsymbol{\varepsilon}\big] = \sigma^2\,\text{tr}(\mathbf{I}-\mathbf{H}) = \sigma^2 (n - p - 1)
-$$</div>
-
-<aside class="note" id="quadratic-form" title="Expected value of a quadratic form" kind="background">
-<p>A scalar equals its own trace, and the trace is cyclic, $\text{tr}(\mathbf{A}\mathbf{B}\mathbf{C}) = \text{tr}(\mathbf{C}\mathbf{A}\mathbf{B})$. So for $\boldsymbol{\varepsilon}$ with mean zero and covariance $\sigma^2\mathbf{I}$,</p>
+<aside class="note" id="sigma-unbiased" title="Unbiasedness of the variance estimate" kind="derivation">
+<p>Because $(\mathbf{I}-\mathbf{H})\mathbf{X} = \mathbf{0}$, the residual is $\mathbf{r} = (\mathbf{I}-\mathbf{H})\boldsymbol{\varepsilon}$. The matrix $\mathbf{I}-\mathbf{H}$ is symmetric and idempotent, so $\text{RSS} = \mathbf{r}^\top\mathbf{r} = \boldsymbol{\varepsilon}^\top(\mathbf{I}-\mathbf{H})\boldsymbol{\varepsilon}$.</p>
+<p>A scalar equals its own trace, and the trace is cyclic, $\text{tr}(\mathbf{A}\mathbf{B}\mathbf{C}) = \text{tr}(\mathbf{C}\mathbf{A}\mathbf{B})$. For errors with mean zero and covariance $\sigma^2\mathbf{I}$,</p>
 <div>$$
 \mathbb{E}[\boldsymbol{\varepsilon}^\top\mathbf{A}\boldsymbol{\varepsilon}] = \mathbb{E}\big[\text{tr}(\mathbf{A}\boldsymbol{\varepsilon}\boldsymbol{\varepsilon}^\top)\big] = \text{tr}\big(\mathbf{A}\,\mathbb{E}[\boldsymbol{\varepsilon}\boldsymbol{\varepsilon}^\top]\big) = \sigma^2\,\text{tr}(\mathbf{A})
 $$</div>
-<p>A symmetric idempotent matrix has eigenvalues 0 or 1, so its trace equals its rank: $\text{tr}(\mathbf{H}) = p+1$ and $\text{tr}(\mathbf{I} - \mathbf{H}) = n-p-1$.</p>
+<p>A symmetric idempotent matrix has eigenvalues 0 or 1, so its trace equals its rank. Thus $\text{tr}(\mathbf{I}-\mathbf{H}) = n-p-1$, and</p>
+<div>$$
+\mathbb{E}[\text{RSS}] = \sigma^2 (n-p-1), \qquad \mathbb{E}[\hat\sigma^2] = \sigma^2
+$$</div>
 <p>Further reading: <a href="https://en.wikipedia.org/wiki/Quadratic_form_(statistics)">Quadratic form (statistics)</a> (Wikipedia).</p>
 </aside>
-
-<p>Each estimated coefficient uses one dimension, which leaves $n-p-1$ dimensions for the residuals. Dividing by $n-p-1$ makes $\hat\sigma^2$ unbiased.</p>
 
 <h1>The Geometry of Least Squares</h1>
 
