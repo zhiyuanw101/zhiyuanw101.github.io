@@ -109,6 +109,8 @@ DARK_STYLE = """<style>
 	}
 	.dark .key-result { background: rgba(106, 167, 224, .12); color: #d3e4f7; }
 	.dark .key-result-title { color: #8fbbea; }
+	/* Figure numbers are written by the build (number_figures), not by the theme's CSS counter. */
+	figcaption::before { content: none; }
 	/* Collapsible notes: off-main-line material (background, derivations, further reading) that sits
 	   inline, collapsed to its title. Styled after the theme's own ToC <details> and blockquote. */
 	.post-content details.note { margin: -4px 0 var(--content-gap); }
@@ -365,6 +367,18 @@ def render_notes(body, source):
 	return body
 
 
+def number_figures(body):
+	"""Write "Figure N:" into each caption. The theme's CSS counter skips figures inside closed notes."""
+	count = 0
+
+	def repl(m):
+		nonlocal count
+		count += 1
+		return f'{m.group(1)}<span class="figure-number">Figure {count}:</span> '
+
+	return re.sub(r"(<figcaption[^>]*>)", repl, body)
+
+
 def add_heading_anchors(body):
 	"""Give h1-h3 ids + hover anchors and collect them for the table of contents."""
 	toc, seen = [], {}
@@ -459,7 +473,7 @@ def load_posts():
 			body = body.replace("<h1>References</h1>", cite + "<h1>References</h1>", 1)
 		else:
 			body += cite
-		post["body"], post["toc"] = add_heading_anchors(body)
+		post["body"], post["toc"] = add_heading_anchors(number_figures(body))
 		posts.append(post)
 	posts.sort(key=lambda p: p["date"], reverse=True)
 	return posts

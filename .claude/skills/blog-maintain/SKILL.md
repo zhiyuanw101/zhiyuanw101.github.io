@@ -65,7 +65,9 @@ In a browser at http://localhost:8765:
   it. Opened notes read like the main text (same font and size), with no layout breaks.
 - Every further-reading link opens (`curl -sL -o /dev/null -w '%{http_code}' URL` gives 200).
 - No horizontal scrolling at phone width; text is readable in dark mode.
-- Reread the text once for English, accuracy and tone.
+- Reread the text once for English, accuracy and brevity: delete filler lead-ins ("Some ... to keep
+  in mind", "It is worth noting", "Let us"), turn announced lists into headings, and move side
+  proofs or simulations into notes (see "Writing style" in AGENTS.md).
 
 ## E. Publish
 
