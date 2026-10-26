@@ -108,6 +108,13 @@ DARK_STYLE = """<style>
 	.post-content h4 { margin: 22px 0 10px; font-size: 17px; font-weight: 600; color: #2f5f93; }
 	@media (prefers-color-scheme: dark) { .post-content h4 { color: #8fbbea; } }
 	.dark .post-content h4 { color: #8fbbea; }
+	/* Home profile: avatar left, text right; stacked and centered on narrow screens. */
+	.profile .profile_inner { display: flex; align-items: center; gap: 32px; text-align: left; }
+	.profile .profile_inner img { flex: none; transform: none; }
+	.profile .profile_text h1 { padding: 0 0 8px; }
+	@media (max-width: 560px) {
+		.profile .profile_inner { flex-direction: column; gap: 12px; text-align: center; }
+	}
 	/* Key results: highlighted boxes for the main conclusions of a post. */
 	.key-result {
 		margin: 24px 0; padding: 14px 22px 2px;
@@ -602,13 +609,15 @@ def render_home():
 		f'title="{esc(SITE["welcome_title"])}" height="150" width="150">'
 		if SITE["avatar"] else ""
 	)
-	# The theme's profile mode: centered avatar, name, subtitle and social icons.
+	# The theme's profile mode, with the avatar on the left and the text on the right.
 	intro = f"""<div class="profile">
 	<div class="profile_inner">
 		{avatar}
-		<h1>{esc(SITE['welcome_title'])}</h1>
-		<span>{"<br>".join(esc(line) for line in SITE['welcome_text'])}</span>
-		<div class="social-icons">{social}</div>
+		<div class="profile_text">
+			<h1>{esc(SITE['welcome_title'])}</h1>
+			<span>{"<br>".join(esc(line) for line in SITE['welcome_text'])}</span>
+			<div class="social-icons">{social}</div>
+		</div>
 	</div>
 </div>"""
 	return page(SITE["title"], intro, root, path="", body_class="list")
