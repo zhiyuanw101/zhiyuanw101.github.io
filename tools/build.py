@@ -37,7 +37,7 @@ SITE = {
 	"welcome_text": "Hi, this is Zhiyuan. I'm documenting my learning notes in this blog.",
 	"github": "https://github.com/zhiyuanw101",
 	# Google Search Console > Add property (URL prefix) > HTML tag: paste only the content="..." value.
-	"google_site_verification": "",
+	"google_site_verification": "4qPmcYIY_N_V3Nu-CBC_0Eb50okqpkQOKiIAugmmoKA",
 }
 
 MENU = [
