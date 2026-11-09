@@ -1,0 +1,26 @@
+<figure>
+<svg viewBox="0 0 640 330" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="One training pair: noise, action chunk, interpolated point and target velocity" font-size="14">
+<defs><marker id="ah-fm" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="context-stroke"/></marker></defs>
+<line x1="60" y1="280" x2="610" y2="280" stroke="currentColor"/>
+<line x1="60" y1="280" x2="60" y2="20" stroke="currentColor"/>
+<text x="170.0" y="298" fill="currentColor" text-anchor="middle" font-size="12">-1</text>
+<text x="292.2" y="298" fill="currentColor" text-anchor="middle" font-size="12">0</text>
+<text x="414.4" y="298" fill="currentColor" text-anchor="middle" font-size="12">1</text>
+<text x="536.7" y="298" fill="currentColor" text-anchor="middle" font-size="12">2</text>
+<text x="52" y="266.7" fill="currentColor" text-anchor="end" font-size="12">0.5</text>
+<text x="52" y="180.0" fill="currentColor" text-anchor="end" font-size="12">1.0</text>
+<text x="52" y="93.3" fill="currentColor" text-anchor="end" font-size="12">1.5</text>
+<line x1="170.0" y1="210.7" x2="536.7" y2="89.3" stroke="currentColor" stroke-opacity="0.5" stroke-dasharray="6 4"/>
+<line x1="353.3" y1="150.0" x2="470.7" y2="111.2" stroke="#e8833a" stroke-width="2.4" marker-end="url(#ah-fm)"/>
+<circle cx="170.0" cy="210.7" r="6" fill="#999"/>
+<circle cx="536.7" cy="89.3" r="6" fill="#3b7ddd"/>
+<circle cx="353.3" cy="150.0" r="6" fill="#3aa17e"/>
+<text x="170.0" y="236.7" fill="currentColor" text-anchor="start" dx="-20">noise ε = (−1.0, 0.8), τ = 0</text>
+<text x="536.7" y="73.3" fill="#3b7ddd" text-anchor="middle">action chunk A = (2.0, 1.5), τ = 1</text>
+<text x="343.3" y="136.0" fill="#3aa17e" text-anchor="end">A<tspan baseline-shift="super" font-size="10">τ</tspan> = (0.5, 1.15), τ = 0.5</text>
+<text x="363.3" y="184.0" fill="#e8833a">target u = A − ε = (3.0, 0.7)</text>
+<text x="335.0" y="318" fill="currentColor" text-anchor="middle">action coordinate 1</text>
+<text x="20" y="150.0" fill="currentColor" text-anchor="middle" transform="rotate(-90 20 150.0)">action coordinate 2</text>
+</svg>
+<figcaption>One training pair in two of the 900 action coordinates. The point $\mathbf{A}^\tau$ moves on the straight segment from the noise $\boldsymbol{\epsilon}$ to the data point $\mathbf{A}$. Its velocity with respect to $\tau$ is $\mathbf{A} - \boldsymbol{\epsilon}$ at every $\tau$; the arrow is shortened for display.</figcaption>
+</figure>

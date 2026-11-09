@@ -1,0 +1,40 @@
+<figure>
+<svg viewBox="0 0 640 230" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Inference time of one action chunk" font-size="14">
+<rect x="30.0" y="70" width="81.2" height="40" fill="#999" fill-opacity="0.7"/>
+<line x1="70.6" y1="44" x2="70.6" y2="70" stroke="currentColor" stroke-opacity="0.4"/>
+<text x="70.6" y="40" fill="currentColor" text-anchor="middle" font-size="12">image encoders: 14 ms</text>
+<rect x="111.2" y="70" width="185.6" height="40" fill="#3b7ddd" fill-opacity="0.7"/>
+
+<text x="204.0" y="60" fill="currentColor" text-anchor="middle" font-size="12">observation prefix: 32 ms</text>
+<rect x="296.8" y="70" width="14.2" height="40" fill="#e8833a" fill-opacity="0.8"/>
+<rect x="312.5" y="70" width="14.2" height="40" fill="#e8833a" fill-opacity="0.8"/>
+<rect x="328.1" y="70" width="14.2" height="40" fill="#e8833a" fill-opacity="0.8"/>
+<rect x="343.8" y="70" width="14.2" height="40" fill="#e8833a" fill-opacity="0.8"/>
+<rect x="359.4" y="70" width="14.2" height="40" fill="#e8833a" fill-opacity="0.8"/>
+<rect x="375.1" y="70" width="14.2" height="40" fill="#e8833a" fill-opacity="0.8"/>
+<rect x="390.8" y="70" width="14.2" height="40" fill="#e8833a" fill-opacity="0.8"/>
+<rect x="406.4" y="70" width="14.2" height="40" fill="#e8833a" fill-opacity="0.8"/>
+<rect x="422.1" y="70" width="14.2" height="40" fill="#e8833a" fill-opacity="0.8"/>
+<rect x="437.7" y="70" width="14.2" height="40" fill="#e8833a" fill-opacity="0.8"/>
+<text x="375.1" y="60" fill="currentColor" text-anchor="middle" font-size="12">10 expert steps: 27 ms</text>
+<line x1="30" y1="120" x2="610" y2="120" stroke="currentColor"/>
+<line x1="30.0" y1="120" x2="30.0" y2="125" stroke="currentColor"/>
+<text x="30.0" y="140" fill="currentColor" text-anchor="middle" font-size="12">0 ms</text>
+<line x1="146.0" y1="120" x2="146.0" y2="125" stroke="currentColor"/>
+<text x="146.0" y="140" fill="currentColor" text-anchor="middle" font-size="12">20 ms</text>
+<line x1="262.0" y1="120" x2="262.0" y2="125" stroke="currentColor"/>
+<text x="262.0" y="140" fill="currentColor" text-anchor="middle" font-size="12">40 ms</text>
+<line x1="378.0" y1="120" x2="378.0" y2="125" stroke="currentColor"/>
+<text x="378.0" y="140" fill="currentColor" text-anchor="middle" font-size="12">60 ms</text>
+<line x1="494.0" y1="120" x2="494.0" y2="125" stroke="currentColor"/>
+<text x="494.0" y="140" fill="currentColor" text-anchor="middle" font-size="12">80 ms</text>
+<line x1="610.0" y1="120" x2="610.0" y2="125" stroke="currentColor"/>
+<text x="610.0" y="140" fill="currentColor" text-anchor="middle" font-size="12">100 ms</text>
+<line x1="146.0" y1="68" x2="146.0" y2="170" stroke="#3aa17e" stroke-width="1.5" stroke-dasharray="4 3"/>
+<text x="150.0" y="166" fill="#3aa17e" font-size="12">one control step at 50 Hz</text>
+<line x1="320.0" y1="68" x2="320.0" y2="170" stroke="#3aa17e" stroke-width="1.5" stroke-dasharray="4 3"/>
+<text x="324.0" y="166" fill="#3aa17e" font-size="12">one control step at 20 Hz</text>
+<text x="459.4" y="95.0" fill="currentColor">total 73 ms</text>
+</svg>
+<figcaption>Time to produce one action chunk with three cameras on an RTX 4090, from Table I of the paper. The observation prefix runs once. Only the action expert runs at each of the 10 integration steps. One chunk takes longer than one control step, so the robot executes several actions per chunk.</figcaption>
+</figure>

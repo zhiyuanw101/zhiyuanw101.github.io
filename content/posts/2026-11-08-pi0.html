@@ -1,0 +1,415 @@
+<!--
+title: π0: A Vision-Language-Action Flow Model
+date: 2026-11-08
+tags: Robotics, Generative-Models, Flow-Matching, Paper-Notes, Math-Heavy
+cite_key: wang2026pi0
+-->
+<p>A <strong>robot policy</strong> maps what a robot observes to the actions it takes next. $\pi_0$ (&ldquo;pi-zero&rdquo;) is a general robot policy from Physical Intelligence (<a href="#references">Black et al. 2024</a>). One model controls seven robot configurations and performs long dexterous tasks, such as laundry folding and box assembly.</p>
+
+<p>The model has two parts. A pre-trained vision-language model (VLM) reads the camera images and the instruction. A smaller <strong>action expert</strong> generates the next 50 actions with <strong>flow matching</strong>, a generative method related to diffusion. This post explains the problem setup, the architecture, flow matching from first principles, the training recipe and the main results. It follows the paper [1] and checks implementation details against the open-source code [2].</p>
+
+<h1>Notation</h1>
+
+<table class="notation">
+<thead>
+<tr><th>Symbol</th><th>Meaning</th></tr>
+</thead>
+<tbody>
+<tr><td>$t$</td><td>Robot time: the index of a control step.</td></tr>
+<tr><td>$\mathbf{o}_t$</td><td>Observation at time $t$: camera images, language command and robot state.</td></tr>
+<tr><td>$\mathbf{I}^i_t$</td><td>Image from camera $i$ at time $t$ (two or three cameras per robot).</td></tr>
+<tr><td>$\ell_t$</td><td>Language command, as a sequence of text tokens.</td></tr>
+<tr><td>$\mathbf{q}_t$</td><td>Robot state: joint angles and gripper positions, zero-padded to 18 numbers.</td></tr>
+<tr><td>$\mathbf{a}_t$</td><td>Action at time $t$, zero-padded to 18 numbers.</td></tr>
+<tr><td>$\mathbf{A}_t$</td><td>Action chunk $[\mathbf{a}_t, \dots, \mathbf{a}_{t+H-1}]$ with $H = 50$: a $50 \times 18$ array.</td></tr>
+<tr><td>$\tau$</td><td>Flow matching time in $[0, 1]$: $\tau = 0$ is noise, $\tau = 1$ is data.</td></tr>
+<tr><td>$\boldsymbol{\epsilon}$</td><td>Noise chunk with independent $\mathcal{N}(0, 1)$ entries, the same shape as $\mathbf{A}_t$.</td></tr>
+<tr><td>$\mathbf{A}^\tau_t$</td><td>Noisy action chunk $\tau \mathbf{A}_t + (1 - \tau)\boldsymbol{\epsilon}$.</td></tr>
+<tr><td>$\mathbf{v}_\theta$</td><td>Velocity predicted by the network with parameters $\theta$, a $50 \times 18$ array.</td></tr>
+<tr><td>$\delta$</td><td>Integration step size for sampling; $\pi_0$ uses $\delta = 0.1$.</td></tr>
+</tbody>
+</table>
+
+<h1>The Problem</h1>
+
+<p>At each control step $t$, the policy receives an <strong>observation</strong> $\mathbf{o}_t = [\mathbf{I}^1_t, \dots, \mathbf{I}^n_t, \ell_t, \mathbf{q}_t]$. The images come from two or three cameras at the same instant. The language command $\ell_t$ states the task. The state $\mathbf{q}_t$ holds the joint angles and gripper positions of the robot.</p>
+
+<p>For example, a single UR5e arm has a wrist camera and an over-the-shoulder camera. Its command can be &ldquo;bus the table&rdquo;, and its state has 7 numbers: six joint angles and one gripper position.</p>
+
+<p>The output is an <strong>action chunk</strong> $\mathbf{A}_t = [\mathbf{a}_t, \mathbf{a}_{t+1}, \dots, \mathbf{a}_{t+49}]$, the actions for the next 50 control steps. The robots in the data have between 7 and 17 action dimensions. All state and action vectors are padded with zeros to 18 dimensions, the size of the largest robot. A chunk is therefore a $50 \times 18$ array of 900 numbers.</p>
+
+<p>The model receives only the current observation. It has no earlier images and no earlier actions as input. The images from different cameras have no time order, because they are views of the same instant.</p>
+
+<h2>Why a distribution of actions</h2>
+
+<p>One observation often allows more than one correct action. For example, a robot can move around an obstacle on the left or on the right, and the demonstrations contain both. The policy must therefore model the conditional distribution $p(\mathbf{A}_t \mid \mathbf{o}_t)$ and draw samples from it.</p>
+
+<p>Regression with a squared error does not solve this problem. The squared error is smallest at the conditional mean, and the mean of &ldquo;left&rdquo; and &ldquo;right&rdquo; is a path through the obstacle. A generative model returns one of the two modes instead.</p>
+
+<p>Earlier vision-language-action (VLA) models include OpenVLA (<a href="#references">Kim et al. 2024</a>). OpenVLA puts each action dimension into one of 256 bins and generates the bins as text tokens, one at a time. This approach can represent several modes. However, it generates one token per number, and OpenVLA predicts one action per inference instead of a chunk. The $\pi_0$ paper attributes the low scores of OpenVLA in its experiments to the missing support for action chunks.</p>
+
+<div class="key-result">
+<div class="key-result-title">The policy</div>
+<div>$$
+\mathbf{A}_t \sim p_\theta(\mathbf{A}_t \mid \mathbf{o}_t), \qquad \mathbf{A}_t \in \mathbb{R}^{50 \times 18}
+$$</div>
+<p>One inference draws one sample: a chunk of 50 future actions for the current observation.</p>
+</div>
+
+<h1>Model Architecture</h1>
+
+<h2>One transformer with two sets of weights</h2>
+
+<p>$\pi_0$ is one transformer that processes one sequence of tokens (Fig. 1). In the paper, a <strong>token</strong> is one position in this sequence, for discrete and continuous inputs alike. Image tokens come from the SigLIP image encoder of PaliGemma. Text tokens come from the vocabulary of the language model. A linear layer maps the state $\mathbf{q}_t$ to one token, and a small network maps each noisy action to one token.</p>
+
+<p>Every layer has two sets of weights, and each token uses the set for its type. Image and text tokens use the <strong>VLM weights</strong>, initialized from PaliGemma (<a href="#references">Beyer et al. 2024</a>), a VLM with 3 billion parameters. State and action tokens use the <strong>action expert</strong>, a second set of weights with about 300 million parameters and random initialization. The full model has 3.3 billion parameters.</p>
+
+<!--fig:pi0-architecture-->
+
+<p>The two sets of weights interact only in self-attention. Each set projects its tokens to queries, keys and values of the same shape. There are 18 query heads and one shared key-value head, all of size 256. Attention then runs over all tokens together. After attention, each token goes through the output projection and the MLP of its own set.</p>
+
+<table>
+<thead>
+<tr><th></th><th>VLM weights</th><th>Action expert</th></tr>
+</thead>
+<tbody>
+<tr><td>Tokens</td><td>images, text</td><td>state, 50 actions</td></tr>
+<tr><td>Initialization</td><td>PaliGemma (Gemma 2B language model)</td><td>random</td></tr>
+<tr><td>Width (residual stream)</td><td>2048</td><td>1024</td></tr>
+<tr><td>MLP hidden size</td><td>16,384</td><td>4096</td></tr>
+<tr><td>Layers</td><td>18</td><td>18</td></tr>
+<tr><td>Query heads / key-value heads / head size</td><td>18 / 1 / 256</td><td>18 / 1 / 256</td></tr>
+</tbody>
+</table>
+
+<p>The width and the MLP size can differ between the two sets, because only the attention shapes must agree. The action expert runs 10 times per inference, so the authors made it small for speed.</p>
+
+<p>The design follows Transfusion (<a href="#references">Zhou et al. 2024</a>), which trains one transformer on discrete and continuous tokens together (<!--note-ref:transfusion-->). $\pi_0$ uses only the continuous part, and it adds separate weights for the robot tokens. The authors report that the separate weights improve performance.</p>
+
+<aside class="note" id="transfusion" title="Transfusion and the mixture-of-experts view" kind="reading">
+<p>Transfusion trains one transformer with two losses. Text tokens use the next-token cross-entropy loss. Continuous image latents use a diffusion loss. The model can then generate text and images with the same weights.</p>
+<p>$\pi_0$ keeps the continuous part only: its sole loss is a flow matching loss on the action tokens. The language model in $\pi_0$ produces no text output.</p>
+<p>The authors describe the two sets of weights as a mixture of experts with two experts. In a usual mixture of experts, a learned router selects the expert for each token. In $\pi_0$, the token type selects the expert, and no router is learned.</p>
+</aside>
+
+<h2>The attention mask</h2>
+
+<p>The sequence has three blocks: [images, text], [state] and [50 actions]. A token attends to all tokens in its own block and in earlier blocks. It attends to no token in a later block. This pattern is a <strong>block-causal</strong> attention mask (Fig. 2).</p>
+
+<!--fig:pi0-mask-->
+
+<p>The mask has two purposes. The first block sees only images and text, which is the same input that PaliGemma received in its pre-training. The first two blocks do not depend on the noisy actions. Their keys and values stay the same during the 10 sampling steps, so the model computes them once and caches them.</p>
+
+<p>The 50 action tokens attend to each other in both directions. The model therefore produces the whole chunk at once, and it does not generate the actions from left to right.</p>
+
+<h2>Adding the flow matching time</h2>
+
+<p>Each action token also needs the flow matching time $\tau$, defined in the next section. $\tau$ is not a separate token. For each noisy action $\mathbf{a}^\tau_{t'}$, the token embedding is</p>
+
+<div>$$
+\mathbf{W}_3 \cdot \operatorname{swish}\!\big(\mathbf{W}_2 \cdot \operatorname{concat}(\mathbf{W}_1 \mathbf{a}^\tau_{t'},\ \phi(\tau))\big)
+$$</div>
+
+<p>where $\phi(\tau) \in \mathbb{R}^{w}$ is a sinusoidal encoding of $\tau$, $w = 1024$, $\mathbf{W}_1 \in \mathbb{R}^{w \times 18}$, $\mathbf{W}_2 \in \mathbb{R}^{w \times 2w}$ and $\mathbf{W}_3 \in \mathbb{R}^{w \times w}$. At the output, a linear layer maps each action position back to 18 numbers. The 50 outputs together form the predicted velocity $\mathbf{v}_\theta$, a $50 \times 18$ array.</p>
+
+<h2>Example: the token sequence of a UR5e robot</h2>
+
+<p>A UR5e robot has two cameras. In the open-source code, each image has $224 \times 224$ pixels. The SigLIP encoder cuts it into $14 \times 14$ pixel squares, which gives $16 \times 16 = 256$ tokens per image. The model has three image slots, and the third slot is masked for this robot. The table shows the sequence for a command of five text tokens.</p>
+
+<table>
+<thead>
+<tr><th>Positions</th><th>Content</th><th>Weights</th><th>Block</th></tr>
+</thead>
+<tbody>
+<tr><td>0&ndash;255</td><td>image 1 (wrist camera)</td><td>VLM</td><td>1</td></tr>
+<tr><td>256&ndash;511</td><td>image 2 (shoulder camera)</td><td>VLM</td><td>1</td></tr>
+<tr><td>512&ndash;767</td><td>image slot 3, masked</td><td>VLM</td><td>1</td></tr>
+<tr><td>768&ndash;772</td><td>command, five text tokens</td><td>VLM</td><td>1</td></tr>
+<tr><td>773</td><td>state $\mathbf{q}_t$ (7 numbers + 11 zeros)</td><td>action expert</td><td>2</td></tr>
+<tr><td>774&ndash;823</td><td>noisy actions $\mathbf{a}^\tau_t, \dots, \mathbf{a}^\tau_{t+49}$</td><td>action expert</td><td>3</td></tr>
+</tbody>
+</table>
+
+<h1>Flow Matching</h1>
+
+<h2>Actions as points</h2>
+
+<p>Treat one action chunk as one point in a 900-dimensional space. Each demonstration gives one <strong>data point</strong> $\mathbf{A}$. A <strong>noise point</strong> $\boldsymbol{\epsilon}$ is a list of 900 independent standard normal numbers, a random point in the same space. Flow matching learns to move noise points to data points.</p>
+
+<p>Connect a noise point and a data point with a straight segment. The <strong>flow matching time</strong> $\tau \in [0, 1]$ is the position on this segment. At $\tau = 0$ the point is pure noise, and at $\tau = 1$ it is the demonstrated chunk.</p>
+
+<div class="key-result">
+<div class="key-result-title">Noisy action chunk</div>
+<div>$$
+\mathbf{A}^\tau = \tau \mathbf{A} + (1 - \tau)\boldsymbol{\epsilon}, \qquad \boldsymbol{\epsilon} \sim \mathcal{N}(\mathbf{0}, \mathbf{I}),\ \tau \in [0, 1]
+$$</div>
+</div>
+
+<p>The post uses three kinds of time. The robot time $t$ counts control steps, and one chunk covers the steps $t$ to $t + 49$. The flow matching time $\tau$ measures the progress from noise to data. The integration steps are the 10 updates that move $\tau$ from 0 to 1 during sampling.</p>
+
+<p>Along the segment, the velocity of $\mathbf{A}^\tau$ with respect to $\tau$ is constant (Fig. 3):</p>
+
+<div>$$
+\frac{d\mathbf{A}^\tau}{d\tau} = \mathbf{A} - \boldsymbol{\epsilon} = \frac{\mathbf{A} - \mathbf{A}^\tau}{1 - \tau}
+$$</div>
+
+<p>The second form shows why the network needs $\tau$. From the same point toward the same target, the velocity is larger when less time remains.</p>
+
+<!--fig:fm-path-->
+
+<h2>The training objective</h2>
+
+<p>The network $\mathbf{v}_\theta(\mathbf{A}^\tau, \tau, \mathbf{o}_t)$ predicts this velocity. For each training example, draw one noise chunk $\boldsymbol{\epsilon}$ and one time $\tau$. Then form $\mathbf{A}^\tau$, and penalize the squared distance between the prediction and $\mathbf{A} - \boldsymbol{\epsilon}$.</p>
+
+<div class="key-result">
+<div class="key-result-title">Flow matching loss</div>
+<div>$$
+L(\theta) = \mathbb{E}_{(\mathbf{o}_t, \mathbf{A}_t),\ \boldsymbol{\epsilon},\ \tau} \Big\| \mathbf{v}_\theta(\mathbf{A}^\tau_t, \tau, \mathbf{o}_t) - (\mathbf{A}_t - \boldsymbol{\epsilon}) \Big\|^2
+$$</div>
+<p>The norm sums over the $50 \times 18$ outputs at the action positions. This is the only loss of $\pi_0$.</p>
+</div>
+
+<p>The paper writes this loss without $\tau$ as an input of $\mathbf{v}_\theta$ (<!--note-ref:paper-notation-->). Appendix B of the paper and the code both give $\tau$ to the network.</p>
+
+<aside class="note" id="paper-notation" title="Inconsistencies in the paper" kind="reading">
+<p>Section IV of the paper writes the network as $\mathbf{v}_\theta(\mathbf{A}^\tau_t, \mathbf{o}_t)$ and takes the expectation over $\mathbf{A}_t$ and $\mathbf{A}^\tau_t$ only. The time $\tau$ is an input of the network (Appendix B), and the expectation also runs over $\tau$.</p>
+<p>The paper states the path as $q(\mathbf{A}^\tau_t \mid \mathbf{A}_t) = \mathcal{N}(\tau\mathbf{A}_t, (1-\tau)\mathbf{I})$, which has variance $1 - \tau$. The sampling rule $\tau\mathbf{A}_t + (1-\tau)\boldsymbol{\epsilon}$ in the next sentence gives variance $(1-\tau)^2$. The code uses the sampling rule, so the covariance should read $(1-\tau)^2\mathbf{I}$.</p>
+<p>The paper does not specify the meaning of an action, for example an absolute joint position or a change of position.</p>
+</aside>
+
+<p>The setup is similar to teacher forcing in language models. A language model receives the true prefix of a sentence and predicts the next token with cross-entropy. Here the network receives a partly generated chunk $\mathbf{A}^\tau$, built from the label, and predicts the direction to the label with squared error. The input $\mathbf{A}^\tau$ alone does not determine $\mathbf{A}$, so the network must use the observation.</p>
+
+<p>For example, take one action number with data value $A = 2.0$, noise $\epsilon = -1.0$ and $\tau = 0.3$. The input is $A^\tau = 0.3 \cdot 2.0 + 0.7 \cdot (-1.0) = -0.1$, and the target is $A - \epsilon = 3.0$. A prediction of 2.5 gives a loss of $0.5^2 = 0.25$. With the exact velocity 3.0, ten steps of size 0.1 move the point from $-1.0$ to $2.0$.</p>
+
+<h2>Why random pairs give a consistent flow</h2>
+
+<p>Each training example pairs a random noise point with a data point, so the segments of different pairs cross (Fig. 4, left). Many segments pass through the same position $\mathbf{x}$ at the same time $\tau$, with different directions. At that position, the squared error is smallest when the network outputs the mean of these directions (<!--note-ref:conditional-mean-->).</p>
+
+<div class="key-result">
+<div class="key-result-title">The learned velocity field</div>
+<div>$$
+\mathbf{v}^*(\mathbf{x}, \tau, \mathbf{o}) = \mathbb{E}\big[\mathbf{A} - \boldsymbol{\epsilon} \;\big|\; \mathbf{A}^\tau = \mathbf{x},\ \mathbf{o}\big]
+$$</div>
+<p>The minimizer of the flow matching loss. Its paths carry the noise distribution at $\tau = 0$ to the data distribution $p(\mathbf{A} \mid \mathbf{o})$ at $\tau = 1$.</p>
+</div>
+
+<aside class="note" id="conditional-mean" title="Why the minimizer is a conditional mean" kind="derivation">
+<p>Fix $\tau$, $\mathbf{o}$ and a position $\mathbf{x}$, and let $\mathbf{U} = \mathbf{A} - \boldsymbol{\epsilon}$ be the target. For any output $\mathbf{v}$,</p>
+<div>$$
+\begin{aligned}
+\mathbb{E}\big[\|\mathbf{v} - \mathbf{U}\|^2 \mid \mathbf{x}\big]
+&amp;= \big\|\mathbf{v} - \mathbb{E}[\mathbf{U} \mid \mathbf{x}]\big\|^2 \\
+&amp;\quad + \mathbb{E}\big[\|\mathbf{U} - \mathbb{E}[\mathbf{U} \mid \mathbf{x}]\|^2 \mid \mathbf{x}\big]
+\end{aligned}
+$$</div>
+<p>Only the first term depends on $\mathbf{v}$, and it is zero at $\mathbf{v} = \mathbb{E}[\mathbf{U} \mid \mathbf{x}]$. The second term remains, so the training loss does not decrease to zero.</p>
+<p>For one-dimensional data with the values $-2$ and $+2$ at equal probability, the field has a closed form. Given $A$, the point $A^\tau$ is normal with mean $\tau A$ and standard deviation $s = 1 - \tau$. Bayes&rsquo; rule then gives $\mathbb{E}[A \mid A^\tau = x] = 2\tanh(2\tau x / s^2)$. Because $A - \epsilon = (A - x)/s$, the field is $v^*(x, \tau) = \big(2\tanh(2\tau x / s^2) - x\big)/s$. Figures 4 and 5 use this formula.</p>
+<p>Further reading: <a href="https://arxiv.org/abs/2210.02747">Flow Matching for Generative Modeling</a> (arXiv) and <a href="https://arxiv.org/abs/2209.03003">Flow Straight and Fast</a> (arXiv).</p>
+</aside>
+
+<!--fig:fm-pairs-->
+
+<p>The averaged field defines paths that do not cross (Fig. 4, right). Lipman et al. (<a href="#references">2022</a>) and Liu et al. (<a href="#references">2022</a>) prove that these paths carry the noise distribution to the data distribution. The network thus learns a function $\mathbf{v}_\theta(\mathbf{A}^\tau, \tau, \mathbf{o}_t)$. For the current position, progress and observation, it gives the direction in which the action chunk must change. It does not give the final chunk directly.</p>
+
+<h2>Sampling</h2>
+
+<p>To generate a chunk, start from noise and follow the field with forward Euler steps.</p>
+
+<div class="key-result">
+<div class="key-result-title">Sampling with forward Euler</div>
+<div>$$
+\mathbf{A}^0 = \boldsymbol{\epsilon} \sim \mathcal{N}(\mathbf{0}, \mathbf{I}), \qquad
+\mathbf{A}^{\tau + \delta} = \mathbf{A}^\tau + \delta\, \mathbf{v}_\theta(\mathbf{A}^\tau, \tau, \mathbf{o}_t)
+$$</div>
+<p>$\pi_0$ uses $\delta = 0.1$: ten steps at $\tau = 0, 0.1, \dots, 0.9$.</p>
+</div>
+
+<p>The step size $\delta$ is a step in $\tau$. In one step, the chunk moves by $\delta\,\mathbf{v}_\theta$. The field changes with position, so the paths are curved, and the sampler queries the network again at each step. On a straight path, one step would be sufficient.</p>
+
+<p>Each step updates the whole $50 \times 18$ chunk. The number of steps is 10 for any chunk length. Sampling is therefore an iterative refinement of the full chunk, and it is not autoregressive.</p>
+
+<p>For example, use the two-value data from Fig. 4 and start at $A^0 = 0.3$. The table lists the position before each step and the exact velocity $v^*$ at that position.</p>
+
+<table>
+<thead>
+<tr><th>$\tau$</th><th>$A^\tau$</th><th>$v^*(A^\tau, \tau)$</th></tr>
+</thead>
+<tbody>
+<tr><td>0.0</td><td>0.300</td><td>&minus;0.30</td></tr>
+<tr><td>0.1</td><td>0.270</td><td>&minus;0.15</td></tr>
+<tr><td>0.2</td><td>0.255</td><td>0.08</td></tr>
+<tr><td>0.3</td><td>0.262</td><td>0.51</td></tr>
+<tr><td>0.4</td><td>0.314</td><td>1.49</td></tr>
+<tr><td>0.5</td><td>0.462</td><td>2.88</td></tr>
+<tr><td>0.6</td><td>0.750</td><td>3.12</td></tr>
+<tr><td>0.7</td><td>1.063</td><td>3.12</td></tr>
+<tr><td>0.8</td><td>1.375</td><td>3.12</td></tr>
+<tr><td>0.9</td><td>1.688</td><td>3.12</td></tr>
+<tr><td>1.0</td><td>2.000</td><td>&ndash;</td></tr>
+</tbody>
+</table>
+
+<p>In the first steps, the velocity points toward 0, the middle of the two values. Between $\tau = 0.3$ and $\tau = 0.5$, the sample moves toward $+2$, and it ends at $2.000$. The same procedure from $A^0 = -0.8$ ends at $-2.000$.</p>
+
+<h2>The role of the observation</h2>
+
+<p>The observation selects the distribution, and the starting noise selects one sample from it (Fig. 5). When the scene allows one action, all starting points give nearly the same chunk. When the scene allows several actions, the starting point decides which action the robot executes.</p>
+
+<!--fig:fm-conditions-->
+
+<p>Flow matching belongs to the same family as diffusion models (<!--note-ref:diffusion-->). The paper calls it &ldquo;a variant of diffusion&rdquo;.</p>
+
+<aside class="note" id="diffusion" title="Flow matching and diffusion" kind="reading">
+<p>Diffusion models (Sohl-Dickstein et al. 2015; Ho et al. 2020) are older. They add noise to data in many small steps and train a network to remove it, usually by predicting the noise $\boldsymbol{\epsilon}$. Flow matching and rectified flow (both 2022) use a straight path from noise to data and predict the velocity. Sampling is deterministic after the choice of the starting noise.</p>
+<p>On the straight path, the three prediction targets carry the same information. Given $\mathbf{A}^\tau$ and $\tau$, a velocity $\mathbf{v} = \mathbf{A} - \boldsymbol{\epsilon}$ gives $\mathbf{A} = \mathbf{A}^\tau + (1-\tau)\mathbf{v}$ and $\boldsymbol{\epsilon} = \mathbf{A}^\tau - \tau\mathbf{v}$. A prediction of $\mathbf{A}$ or of $\boldsymbol{\epsilon}$ converts to a velocity in the same way.</p>
+<p>Stable Diffusion 3 uses rectified flow for images (Esser et al. 2024). Diffusion Policy (Chi et al. 2023) and Octo (Octo Model Team 2024), two baselines in the paper, generate actions with diffusion.</p>
+</aside>
+
+<h2>Sampling the time during training</h2>
+
+<p>The original flow matching papers draw $\tau$ from the uniform distribution. Esser et al. (<a href="#references">2024</a>) give more weight to the middle of $[0, 1]$ for image generation. $\pi_0$ gives more weight to the noisy end:</p>
+
+<div>$$
+p(\tau) = \operatorname{Beta}\!\Big(\frac{s - \tau}{s};\ 1.5,\ 1\Big), \qquad s = 0.999
+$$</div>
+
+<p>The density is largest at $\tau = 0$ and decreases to zero at $\tau = s$. Values above $s$ are never drawn. Sampling with step $\delta \ge 0.001$ never evaluates the network above $\tau = 0.999$, so these values are unnecessary.</p>
+
+<p>The authors give a reason for this choice. An observation constrains the possible actions much more than a text label constrains the possible images. The mean action $\mathbb{E}[\mathbf{A}_t \mid \mathbf{o}_t]$ is therefore hard to predict, and the network learns it at the noisy end, where $\mathbf{A}^\tau$ contains little information about $\mathbf{A}$.</p>
+
+<h1>Training and Inference</h1>
+
+<h2>One training step</h2>
+
+<ol>
+<li>Draw an example $(\mathbf{o}_t, \mathbf{A}_t)$ from the data mixture.</li>
+<li>Draw one noise chunk $\boldsymbol{\epsilon}$ ($50 \times 18$) and one time $\tau$ (a scalar) for this example.</li>
+<li>Form $\mathbf{A}^\tau_t = \tau\mathbf{A}_t + (1-\tau)\boldsymbol{\epsilon}$.</li>
+<li>Run one forward pass over the full token sequence.</li>
+<li>Compute the squared error between the 50 action outputs and $\mathbf{A}_t - \boldsymbol{\epsilon}$.</li>
+<li>Back-propagate. The gradient reaches the action expert directly and the VLM weights through attention. Both sets of weights are trained.</li>
+</ol>
+
+<p>Training runs no integration. Each example costs one forward pass, as in language model training.</p>
+
+<p>The open-source code uses the opposite direction of time (<!--note-ref:openpi-time-->). The results are the same.</p>
+
+<aside class="note" id="openpi-time" title="Time conventions in openpi" kind="reading">
+<p>In the code, the time $t_{\text{code}} = 1 - \tau$, so $t_{\text{code}} = 1$ is noise and $t_{\text{code}} = 0$ is data. The noisy input is $t_{\text{code}}\,\boldsymbol{\epsilon} + (1 - t_{\text{code}})\mathbf{A}$, and the target is $\boldsymbol{\epsilon} - \mathbf{A}$. Sampling starts at $t_{\text{code}} = 1$ with the step $-1/10$. A comment in the code states that this convention is the opposite of the paper.</p>
+<p>The code draws $t_{\text{code}} = 0.999\,u + 0.001$ with $u \sim \operatorname{Beta}(1.5, 1)$, one value per example. This expression gives the same distribution of $\tau$ as the formula in the paper. Further reading: <a href="https://github.com/Physical-Intelligence/openpi">openpi</a> (GitHub), file <code>src/openpi/models/pi0.py</code>.</p>
+</aside>
+
+<h2>Inference and action chunks</h2>
+
+<p>One inference encodes the images, runs the observation tokens once, and then runs 10 passes of the action expert over the action tokens (Fig. 6). With three cameras on an NVIDIA RTX 4090 GPU, it takes 73 ms. For the mobile robot, the model runs on a separate computer over Wi-Fi, which adds 13 ms.</p>
+
+<!--fig:pi0-latency-->
+
+<p>The robot executes each chunk open-loop, without new images. Robots at 50 Hz run inference every 0.5 s, after 25 actions. The UR5e and Franka robots run at 20 Hz and run inference every 0.8 s, after 16 actions. The authors also tested temporal ensembling, which averages overlapping chunks, and it reduced performance.</p>
+
+<p>The paper sets $H = 50$ and reports no ablation of this value. One reason follows from the timing: one inference takes 73 ms, but one control step at 50 Hz takes 20 ms. A chunk spreads the cost of one inference over many control steps. ACT (<a href="#references">Zhao et al. 2023</a>) also argues that chunks reduce the accumulation of errors over a long task. The cost of a chunk is that the robot does not react to new images during its open-loop part.</p>
+
+<h1>Data and Training Recipe</h1>
+
+<h2>The pre-training mixture</h2>
+
+<p>Each training example is one time step $(\mathbf{o}_t, \mathbf{A}_t)$, so the paper measures data in time steps. The mixture has two sources, about 10,000 hours of robot data in total:</p>
+
+<ul>
+<li><strong>Own data</strong>: 903M time steps from 7 robot configurations and 68 tasks. Of these, 106M steps come from single-arm robots and 797M from dual-arm robots.</li>
+<li><strong>Open data</strong>: a subset of Open X-Embodiment (OXE), Bridge v2 and DROID. They are 9.1% of the mixture. These robots have one or two cameras and run at 2&ndash;10 Hz.</li>
+</ul>
+
+<p>A task in this data is broad. For example, the &ldquo;bussing&rdquo; task includes many kinds of dishes, cups, utensils and trash items. Earlier work often counts each verb-noun pair, such as &ldquo;pick up the cup&rdquo;, as a separate task.</p>
+
+<table>
+<thead>
+<tr><th>Robot configuration</th><th>Cameras</th><th>State dim.</th><th>Action dim.</th></tr>
+</thead>
+<tbody>
+<tr><td>UR5e</td><td>2</td><td>7</td><td>7</td></tr>
+<tr><td>Bimanual UR5e</td><td>3</td><td>14</td><td>14</td></tr>
+<tr><td>Franka</td><td>2</td><td>8</td><td>8</td></tr>
+<tr><td>Bimanual Trossen</td><td>3</td><td>14</td><td>14</td></tr>
+<tr><td>Bimanual ARX / AgileX</td><td>3</td><td>14</td><td>14</td></tr>
+<tr><td>Mobile Trossen / ARX (nonholonomic base)</td><td>3</td><td>14</td><td>16</td></tr>
+<tr><td>Mobile Fibocom (holonomic base)</td><td>not stated</td><td>14</td><td>17</td></tr>
+</tbody>
+</table>
+
+<p>The data sets differ in size by large factors. Each combination of task and robot gets the sampling weight $n^{0.43}$, where $n$ is its number of samples. For example, a combination with 100 times more samples is drawn only $100^{0.43} \approx 7.2$ times as often.</p>
+
+<p>The language labels have two levels: the task name and segment labels for sub-trajectories of about 2 seconds. With the segment labels, the model can follow short commands, such as &ldquo;pick up the napkin&rdquo;. A separate high-level VLM can then split a long task into such commands, as in SayCan (<a href="#references">Ahn et al. 2022</a>).</p>
+
+<p>The VLM weights start from PaliGemma, and the action expert starts from random values. Pre-training runs for 700k steps. The paper does not report the batch size, the learning rate or the training hardware.</p>
+
+<h2>Post-training</h2>
+
+<p>Post-training fine-tunes the pre-trained model on a smaller, curated data set for one task. The simplest tasks use about 5 hours of data, and the most complex use 100 hours or more. The training method is the same flow matching loss. The paper uses no reinforcement learning.</p>
+
+<p>The two stages have different purposes. Curated data shows a consistent and fluent strategy, but it rarely contains mistakes, so a model trained only on it does not learn to recover. Diverse pre-training data contains mistakes and corrections, but it does not teach a fluent strategy. The combination gives fluent behavior with recovery. This division follows the pre-training and post-training of large language models.</p>
+
+<div class="key-result">
+<div class="key-result-title">Training recipe</div>
+<p>Pre-train on diverse data from many robots and tasks for broad coverage and recovery behavior. Post-train on curated data of one task for a consistent, fluent strategy.</p>
+</div>
+
+<h1>Results</h1>
+
+<p>Each experiment runs 10 episodes per task and method on real robots. The score is the task progress from 0 to 1. For example, the score for bussing is the fraction of objects placed in the correct bin.</p>
+
+<h2>After pre-training only</h2>
+
+<p>The pre-trained model was tested without post-training on five tasks: shirt folding, easy bussing, hard bussing, grocery bagging and taking toast out of a toaster. The baselines are OpenVLA (7B parameters) and Octo (93M parameters, diffusion), both trained on the same mixture. Two more baselines are OpenVLA trained only on UR5e data, and $\pi_0$-small, a 470M model without VLM initialization (<!--note-ref:pi0-small-->).</p>
+
+<aside class="note" id="pi0-small" title="The pi0-small baseline" kind="reading">
+<p>$\pi_0$-small has about 470M parameters and no VLM initialization. It encodes the command with DistilBERT and the images with a small pre-trained ResNet-ViT hybrid, one encoder per camera. Its action expert uses cross-attention to read the outputs of the observation encoder, as in an encoder-decoder transformer. The action expert follows the DiT architecture and adds $\tau$ through AdaLN-Zero layers.</p>
+<p>The comparison changes the initialization and the model size together. The authors state this limitation: without pre-training, a model as large as $\pi_0$ is difficult to train on this data.</p>
+</aside>
+
+<p>$\pi_0$ has the highest score on all five tasks. A &ldquo;parity&rdquo; version of $\pi_0$, trained for 160k steps, received no more training steps than the baselines (160k for OpenVLA, 320k for Octo). This version also scores higher than all baselines. $\pi_0$-small scores higher than OpenVLA and Octo.</p>
+
+<h2>Following language commands</h2>
+
+<p>The fine-tuned $\pi_0$ and $\pi_0$-small were compared on bussing, table setting and grocery bagging. Each received the task name only, step commands from a human, or step commands from a high-level VLM. $\pi_0$ follows the commands more accurately than $\pi_0$-small. Its task progress increases with the human commands and, by a smaller amount, with the VLM commands. $\pi_0$-small does not gain from the VLM commands.</p>
+
+<h2>Learning new tasks</h2>
+
+<p>Five new tasks were fine-tuned with 1, 5 or 10 hours of data. Two tasks are close to the pre-training data: stacking bowls and folding towels. Three need new objects or motions. They are putting a container in a microwave, replacing a paper towel roll, and filling a drawer with a Franka arm.</p>
+
+<p>The baselines are OpenVLA and Octo, fine-tuned from their public checkpoints, and ACT and Diffusion Policy, trained only on the task data. $\pi_0$ generally has the highest scores. The pre-trained $\pi_0$ often scores higher than $\pi_0$ trained from scratch, in some cases twice as high. Among the baselines, the methods trained from scratch score highest.</p>
+
+<h2>Complex multi-stage tasks</h2>
+
+<p>Seven tasks take between 5 and 20 minutes each. They are laundry folding (with a static and a mobile robot), dryer unloading, table bussing, box building, packing a to-go box and packing eggs. The authors could not solve these tasks with other methods. They therefore compare the full recipe with two ablations: pre-training only, and post-training data only.</p>
+
+<p>The full recipe reaches more than half of the maximum score on every task, and it has the best score in all comparisons. Pre-training gives the largest gains on the hardest tasks.</p>
+
+<h1>Quick Summary</h1>
+
+<ul>
+<li>$\pi_0$ models $p(\mathbf{A}_t \mid \mathbf{o}_t)$: from two or three images, a command and the joint state, it samples a chunk of 50 actions, padded to $50 \times 18$.</li>
+<li>The model is one transformer with two sets of weights. Image and text tokens use PaliGemma weights, and state and action tokens use a 300M action expert. The two sets meet only in self-attention.</li>
+<li>A block-causal mask keeps the VLM input the same as in pre-training and lets the model cache the observation during sampling.</li>
+<li>Flow matching trains the network to predict the velocity $\mathbf{A} - \boldsymbol{\epsilon}$ at the point $\tau\mathbf{A} + (1-\tau)\boldsymbol{\epsilon}$. The minimizer is the mean velocity at each point, and its paths carry noise to the data distribution.</li>
+<li>Sampling takes 10 Euler steps from noise. The observation selects the distribution, and the starting noise selects one sample from it.</li>
+<li>One chunk takes 73 ms. The robot executes 16 or 25 actions open-loop, then runs inference again.</li>
+<li>Pre-training on about 10,000 hours from 7 robot configurations gives broad skills and recovery. Post-training on curated task data gives fluent execution.</li>
+</ul>
+
+<h1>References</h1>
+
+<p>[1] Kevin Black, Noah Brown, Danny Driess, et al. <a href="https://arxiv.org/abs/2410.24164">&ldquo;$\pi_0$: A Vision-Language-Action Flow Model for General Robot Control.&rdquo;</a> arXiv:2410.24164, 2024.</p>
+<p>[2] Physical Intelligence. <a href="https://github.com/Physical-Intelligence/openpi">&ldquo;openpi.&rdquo;</a> GitHub repository, file <code>src/openpi/models/pi0.py</code>.</p>
+<p>[3] Lucas Beyer, Andreas Steiner, Andr&eacute; Susano Pinto, et al. <a href="https://arxiv.org/abs/2407.07726">&ldquo;PaliGemma: A versatile 3B VLM for transfer.&rdquo;</a> arXiv:2407.07726, 2024.</p>
+<p>[4] Chunting Zhou, Lili Yu, Arun Babu, et al. <a href="https://arxiv.org/abs/2408.11039">&ldquo;Transfusion: Predict the Next Token and Diffuse Images with One Multi-Modal Model.&rdquo;</a> arXiv:2408.11039, 2024.</p>
+<p>[5] Moo Jin Kim, Karl Pertsch, Siddharth Karamcheti, et al. <a href="https://arxiv.org/abs/2406.09246">&ldquo;OpenVLA: An Open-Source Vision-Language-Action Model.&rdquo;</a> arXiv:2406.09246, 2024.</p>
+<p>[6] Yaron Lipman, Ricky T. Q. Chen, Heli Ben-Hamu, Maximilian Nickel &amp; Matt Le. <a href="https://arxiv.org/abs/2210.02747">&ldquo;Flow Matching for Generative Modeling.&rdquo;</a> ICLR, 2023.</p>
+<p>[7] Xingchao Liu, Chengyue Gong &amp; Qiang Liu. <a href="https://arxiv.org/abs/2209.03003">&ldquo;Flow Straight and Fast: Learning to Generate and Transfer Data with Rectified Flow.&rdquo;</a> ICLR, 2023.</p>
+<p>[8] Jascha Sohl-Dickstein, Eric A. Weiss, Niru Maheswaranathan &amp; Surya Ganguli. <a href="https://arxiv.org/abs/1503.03585">&ldquo;Deep Unsupervised Learning using Nonequilibrium Thermodynamics.&rdquo;</a> ICML, 2015.</p>
+<p>[9] Jonathan Ho, Ajay Jain &amp; Pieter Abbeel. <a href="https://arxiv.org/abs/2006.11239">&ldquo;Denoising Diffusion Probabilistic Models.&rdquo;</a> NeurIPS, 2020.</p>
+<p>[10] Patrick Esser, Sumith Kulal, Andreas Blattmann, et al. <a href="https://arxiv.org/abs/2403.03206">&ldquo;Scaling Rectified Flow Transformers for High-Resolution Image Synthesis.&rdquo;</a> ICML, 2024.</p>
+<p>[11] Tony Z. Zhao, Vikash Kumar, Sergey Levine &amp; Chelsea Finn. <a href="https://arxiv.org/abs/2304.13705">&ldquo;Learning Fine-Grained Bimanual Manipulation with Low-Cost Hardware.&rdquo;</a> RSS, 2023.</p>
+<p>[12] Cheng Chi, Zhenjia Xu, Siyuan Feng, et al. <a href="https://arxiv.org/abs/2303.04137">&ldquo;Diffusion Policy: Visuomotor Policy Learning via Action Diffusion.&rdquo;</a> RSS, 2023.</p>
+<p>[13] Octo Model Team. <a href="https://arxiv.org/abs/2405.12213">&ldquo;Octo: An Open-Source Generalist Robot Policy.&rdquo;</a> RSS, 2024.</p>
+<p>[14] Michael Ahn, Anthony Brohan, Noah Brown, et al. <a href="https://arxiv.org/abs/2204.01691">&ldquo;Do As I Can, Not As I Say: Grounding Language in Robotic Affordances.&rdquo;</a> arXiv:2204.01691, 2022.</p>
