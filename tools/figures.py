@@ -242,27 +242,24 @@ ARROW_DEFS = ('<defs><marker id="{id}" viewBox="0 0 10 10" refX="9" refY="5" mar
 def fig_pi0_architecture():
 	W, H = 640, 400
 	g = [ARROW_DEFS.format(id="ah-arch")]
-	groups = [  # (x0, x1, label, count, expert)
-		(20, 118, "image 1", "256 tokens", 0), (124, 222, "image 2", "256 tokens", 0),
-		(228, 314, "image 3", "masked", 0), (320, 394, "text ℓ", "varies", 0),
-		(404, 446, "q", "1", 1), (452, 620, "actions A" + SUP("τ"), "50 tokens", 1),
+	groups = [  # (x0, x1, label, expert)
+		(20, 236, "camera images", 0), (242, 394, "command ℓ", 0),
+		(404, 456, "state", 1), (462, 620, "noisy actions A" + SUP("τ"), 1),
 	]
 	colour = (BLUE, ORANGE)
 	y0, h = 30, 36
-	for x0, x1, label, count, e in groups:
-		dash = ' stroke-dasharray="5 4" fill-opacity="0.04"' if count == "masked" else ' fill-opacity="0.18"'
-		g.append(f'<rect x="{x0}" y="{y0}" width="{x1 - x0}" height="{h}" rx="4" fill="{colour[e]}" stroke="{colour[e]}"{dash}/>')
+	for x0, x1, label, e in groups:
+		g.append(f'<rect x="{x0}" y="{y0}" width="{x1 - x0}" height="{h}" rx="4" fill="{colour[e]}" fill-opacity="0.18" stroke="{colour[e]}"/>')
 		g.append(f'<text x="{(x0 + x1) / 2}" y="{y0 + 23}" fill="currentColor" text-anchor="middle">{label}</text>')
-		g.append(f'<text x="{(x0 + x1) / 2}" y="{y0 + h + 16}" fill="currentColor" fill-opacity="0.75" text-anchor="middle" font-size="12">{count}</text>')
 	# one layer
 	ly0, ly1 = 104, 300
 	g.append(f'<rect x="12" y="{ly0}" width="616" height="{ly1 - ly0}" rx="8" fill="none" stroke="currentColor" stroke-opacity="0.45" stroke-dasharray="6 4"/>')
-	g.append(f'<text x="22" y="{ly0 + 18}" fill="currentColor" fill-opacity="0.75" font-size="12">one layer (repeated 18 times)</text>')
+	g.append(f'<text x="22" y="{ly0 + 18}" fill="currentColor" fill-opacity="0.75" font-size="12">one transformer layer (repeated)</text>')
 	vx0, vx1, ex0, ex1 = 20, 394, 404, 620
 	for row, (yy, hh, left, right) in enumerate((
 		(ly0 + 28, 40, "Q, K, V projections (VLM weights)", "Q, K, V (expert)"),
 		(ly0 + 82, 40, None, None),
-		(ly0 + 136, 50, "output projection + MLP (VLM weights, width 2048)", "proj. + MLP (width 1024)"),
+		(ly0 + 136, 50, "output projection + MLP (VLM weights)", "proj. + MLP (expert)"),
 	)):
 		if left is None:
 			g.append(f'<rect x="{vx0}" y="{yy}" width="{ex1 - vx0}" height="{hh}" rx="4" fill="{GREEN}" fill-opacity="0.2" stroke="{GREEN}"/>')
@@ -272,60 +269,20 @@ def fig_pi0_architecture():
 			g.append(f'<rect x="{x0}" y="{yy}" width="{x1 - x0}" height="{hh}" rx="4" fill="{c}" fill-opacity="0.18" stroke="{c}"/>')
 			g.append(f'<text x="{(x0 + x1) / 2}" y="{yy + hh / 2 + 5}" fill="currentColor" text-anchor="middle" font-size="13">{text}</text>')
 	for x in ((vx0 + vx1) / 2, (ex0 + ex1) / 2):
-		g.append(f'<line x1="{x}" y1="{y0 + h + 22}" x2="{x}" y2="{ly0 + 26}" stroke="currentColor" stroke-opacity="0.6" marker-end="url(#ah-arch)"/>')
+		g.append(f'<line x1="{x}" y1="{y0 + h + 4}" x2="{x}" y2="{ly0 + 26}" stroke="currentColor" stroke-opacity="0.6" marker-end="url(#ah-arch)"/>')
 	# outputs
 	ax = (ex0 + ex1) / 2
 	g.append(f'<line x1="{ax}" y1="{ly1}" x2="{ax}" y2="{ly1 + 36}" stroke="{ORANGE}" stroke-width="1.6" marker-end="url(#ah-arch)"/>')
-	g.append(f'<text x="{ax}" y="{ly1 + 56}" fill="currentColor" text-anchor="middle">linear → v' + SUB("θ") + ' (50 × 18)</text>')
+	g.append(f'<text x="{ax}" y="{ly1 + 56}" fill="currentColor" text-anchor="middle">linear → v' + SUB("θ") + '</text>')
 	g.append(f'<text x="{(vx0 + vx1) / 2}" y="{ly1 + 30}" fill="currentColor" fill-opacity="0.75" text-anchor="middle" font-size="12">outputs at these positions are not used</text>')
 	g.append(f'<text x="{(vx0 + vx1) / 2}" y="{ly1 + 56}" fill="{BLUE}" text-anchor="middle">VLM: initialized from PaliGemma (3B)</text>')
 	g.append(f'<text x="{ax}" y="{ly1 + 80}" fill="{ORANGE}" text-anchor="middle">action expert: new, ~300M</text>')
 	return svg(W, H, "\n".join(g), "pi0 architecture: one transformer with two sets of weights") + (
 		"<figcaption>The $\\pi_0$ model is one transformer over one token sequence. Image and text tokens (blue) use the "
 		"VLM weights. State and action tokens (orange) use the smaller action expert. The two sets of weights interact "
-		"only inside self-attention (green). Token counts are for a robot with two cameras and $224 \\times 224$ images, "
-		"as in openpi.</figcaption>\n</figure>\n"
+		"only inside self-attention (green). The outputs at the action positions form the velocity "
+		"$\\mathbf{v}_\\theta$.</figcaption>\n</figure>\n"
 	)
-
-
-# ---------------------------------------------------------------- pi0 post: block-causal mask
-
-def fig_pi0_mask():
-	W, H = 640, 300
-	names = ["images + text", "state q", "actions"]
-	L, T, c = 150, 60, 72
-	g = []
-	for j, n in enumerate(names):
-		g.append(f'<text x="{L + j * c + c / 2}" y="{T - 10}" fill="currentColor" text-anchor="middle" font-size="12">{n}</text>')
-		g.append(f'<text x="{L - 10}" y="{T + i_mid(j, c)}" fill="currentColor" text-anchor="end" font-size="12">{n}</text>')
-	for i in range(3):
-		for j in range(3):
-			on = j <= i
-			fill = f'fill="{BLUE}" fill-opacity="0.75"' if on else 'fill="none"'
-			g.append(f'<rect x="{L + j * c + 2}" y="{T + i * c + 2}" width="{c - 4}" height="{c - 4}" {fill} stroke="currentColor" stroke-opacity="0.5"/>')
-	g.append(f'<text x="{L + 1.5 * c}" y="{T - 30}" fill="currentColor" text-anchor="middle">key block (attended to)</text>')
-	qy = T + 1.5 * c
-	g.append(f'<text x="30" y="{qy}" fill="currentColor" text-anchor="middle" transform="rotate(-90 30 {qy})">query block</text>')
-	notes = [
-		"Sees only itself: the same input",
-		"as in PaliGemma pre-training.",
-		"Sees block 1. Blocks 1 and 2 do not",
-		"change, so their K and V are cached.",
-		"Sees every token, including",
-		"the other action tokens.",
-	]
-	for i in range(3):
-		y = T + i * c + c / 2 - 3
-		g.append(f'<text x="{L + 3 * c + 20}" y="{y}" fill="currentColor" font-size="12">{notes[2 * i]}</text>')
-		g.append(f'<text x="{L + 3 * c + 20}" y="{y + 17}" fill="currentColor" font-size="12">{notes[2 * i + 1]}</text>')
-	return svg(W, H, "\n".join(g), "Block-causal attention mask with three blocks") + (
-		"<figcaption>The block-causal attention mask. A filled cell means that tokens in the row block attend to tokens "
-		"in the column block. Attention inside a block is bidirectional.</figcaption>\n</figure>\n"
-	)
-
-
-def i_mid(i, c):
-	return i * c + c / 2 + 4
 
 
 # ---------------------------------------------------------------- pi0 post: one training pair in 2-D
@@ -351,14 +308,14 @@ def fig_fm_path():
 	g.append(f'<circle cx="{sx(eps[0]):.1f}" cy="{sy(eps[1]):.1f}" r="6" fill="{GREY}"/>')
 	g.append(f'<circle cx="{sx(A[0]):.1f}" cy="{sy(A[1]):.1f}" r="6" fill="{BLUE}"/>')
 	g.append(f'<circle cx="{sx(pt[0]):.1f}" cy="{sy(pt[1]):.1f}" r="6" fill="{GREEN}"/>')
-	g.append(f'<text x="{sx(eps[0]):.1f}" y="{sy(eps[1]) + 26:.1f}" fill="currentColor" text-anchor="start" dx="-20">noise ε = (−1.0, 0.8), τ = 0</text>')
-	g.append(f'<text x="{sx(A[0]):.1f}" y="{sy(A[1]) - 16:.1f}" fill="{BLUE}" text-anchor="middle">action chunk A = (2.0, 1.5), τ = 1</text>')
-	g.append(f'<text x="{sx(pt[0]) - 10:.1f}" y="{sy(pt[1]) - 14:.1f}" fill="{GREEN}" text-anchor="end">A' + SUP("τ") + ' = (0.5, 1.15), τ = 0.5</text>')
-	g.append(f'<text x="{sx(pt[0]) + 10:.1f}" y="{sy(pt[1]) + 34:.1f}" fill="{ORANGE}">target u = A − ε = (3.0, 0.7)</text>')
+	g.append(f'<text x="{sx(eps[0]):.1f}" y="{sy(eps[1]) + 26:.1f}" fill="currentColor" text-anchor="start" dx="-20">noise ε (τ = 0)</text>')
+	g.append(f'<text x="{sx(A[0]):.1f}" y="{sy(A[1]) - 16:.1f}" fill="{BLUE}" text-anchor="middle">action chunk A (τ = 1)</text>')
+	g.append(f'<text x="{sx(pt[0]) - 10:.1f}" y="{sy(pt[1]) - 14:.1f}" fill="{GREEN}" text-anchor="end">A' + SUP("τ") + '</text>')
+	g.append(f'<text x="{sx(pt[0]) + 10:.1f}" y="{sy(pt[1]) + 34:.1f}" fill="{ORANGE}">target velocity A − ε</text>')
 	g.append(f'<text x="{(L + W - R) / 2}" y="{H - 12}" fill="currentColor" text-anchor="middle">action coordinate 1</text>')
 	g.append(f'<text x="{L - 40}" y="{(T + H - B) / 2}" fill="currentColor" text-anchor="middle" transform="rotate(-90 {L - 40} {(T + H - B) / 2})">action coordinate 2</text>')
 	return svg(W, H, "\n".join(g), "One training pair: noise, action chunk, interpolated point and target velocity") + (
-		"<figcaption>One training pair in two of the 900 action coordinates. The point $\\mathbf{A}^\\tau$ moves on the "
+		"<figcaption>One training pair in two action coordinates. The point $\\mathbf{A}^\\tau$ moves on the "
 		"straight segment from the noise $\\boldsymbol{\\epsilon}$ to the data point $\\mathbf{A}$. Its velocity with "
 		"respect to $\\tau$ is $\\mathbf{A} - \\boldsymbol{\\epsilon}$ at every $\\tau$; the arrow is shortened for "
 		"display.</figcaption>\n</figure>\n"
@@ -453,48 +410,13 @@ def fig_fm_conditions():
 	)
 
 
-# ---------------------------------------------------------------- pi0 post: inference latency
-
-def fig_pi0_latency():
-	W, H, L, R = 640, 230, 30, 30
-	scale = (W - L - R) / 100  # px per ms, axis 0..100 ms
-	y, h = 70, 40
-	g = []
-	parts = [(14, "image encoders", GREY), (32, "observation prefix", BLUE)]
-	x = L
-	for k, (ms, label, c) in enumerate(parts):
-		g.append(f'<rect x="{x:.1f}" y="{y}" width="{ms * scale:.1f}" height="{h}" fill="{c}" fill-opacity="0.7"/>')
-		ly = y - 30 if k == 0 else y - 10
-		g.append(f'<line x1="{x + ms * scale / 2:.1f}" y1="{ly + 4}" x2="{x + ms * scale / 2:.1f}" y2="{y}" stroke="currentColor" stroke-opacity="0.4"/>' if k == 0 else "")
-		g.append(f'<text x="{x + ms * scale / 2:.1f}" y="{ly}" fill="currentColor" text-anchor="middle" font-size="12">{label}: {ms} ms</text>')
-		x += ms * scale
-	step = 2.7 * scale
-	for k in range(10):
-		g.append(f'<rect x="{x + k * step:.1f}" y="{y}" width="{step - 1.5:.1f}" height="{h}" fill="{ORANGE}" fill-opacity="0.8"/>')
-	g.append(f'<text x="{x + 5 * step:.1f}" y="{y - 10}" fill="currentColor" text-anchor="middle" font-size="12">10 expert steps: 27 ms</text>')
-	g.append(f'<line x1="{L}" y1="{y + h + 10}" x2="{W - R}" y2="{y + h + 10}" stroke="currentColor"/>')
-	for ms in range(0, 101, 20):
-		g.append(f'<line x1="{L + ms * scale:.1f}" y1="{y + h + 10}" x2="{L + ms * scale:.1f}" y2="{y + h + 15}" stroke="currentColor"/>')
-		g.append(f'<text x="{L + ms * scale:.1f}" y="{y + h + 30}" fill="currentColor" text-anchor="middle" font-size="12">{ms} ms</text>')
-	for ms, label in ((20, "one control step at 50 Hz"), (50, "one control step at 20 Hz")):
-		xx = L + ms * scale
-		g.append(f'<line x1="{xx:.1f}" y1="{y - 2}" x2="{xx:.1f}" y2="{y + h + 60}" stroke="{GREEN}" stroke-width="1.5" stroke-dasharray="4 3"/>')
-		g.append(f'<text x="{xx + 4:.1f}" y="{y + h + 56}" fill="{GREEN}" font-size="12">{label}</text>')
-	g.append(f'<text x="{L + 73 * scale + 6:.1f}" y="{y + h / 2 + 5}" fill="currentColor">total 73 ms</text>')
-	return svg(W, H, "\n".join(g), "Inference time of one action chunk") + (
-		"<figcaption>Time to produce one action chunk with three cameras on an RTX 4090, from Table I of the paper. "
-		"The observation prefix runs once. Only the action expert runs at each of the 10 integration steps. "
-		"One chunk takes longer than one control step, so the robot executes several actions per chunk.</figcaption>\n</figure>\n"
-	)
-
-
 def main():
 	OUT.mkdir(parents=True, exist_ok=True)
 	for name, fn in (
 		("ls-fit", fig_ls_fit), ("ls-geometry", fig_geometry), ("r2-inflation", fig_r2), ("partial-f", fig_partial_f),
 		("binomial-test", fig_binomial_test),
-		("pi0-architecture", fig_pi0_architecture), ("pi0-mask", fig_pi0_mask), ("fm-path", fig_fm_path),
-		("fm-pairs", fig_fm_pairs), ("fm-conditions", fig_fm_conditions), ("pi0-latency", fig_pi0_latency),
+		("pi0-architecture", fig_pi0_architecture), ("fm-path", fig_fm_path),
+		("fm-pairs", fig_fm_pairs), ("fm-conditions", fig_fm_conditions),
 	):
 		(OUT / f"{name}.html").write_text(fn())
 		print("wrote", name)

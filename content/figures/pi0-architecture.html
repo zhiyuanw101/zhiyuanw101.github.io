@@ -1,26 +1,16 @@
 <figure>
 <svg viewBox="0 0 640 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="pi0 architecture: one transformer with two sets of weights" font-size="14">
 <defs><marker id="ah-arch" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="context-stroke"/></marker></defs>
-<rect x="20" y="30" width="98" height="36" rx="4" fill="#3b7ddd" stroke="#3b7ddd" fill-opacity="0.18"/>
-<text x="69.0" y="53" fill="currentColor" text-anchor="middle">image 1</text>
-<text x="69.0" y="82" fill="currentColor" fill-opacity="0.75" text-anchor="middle" font-size="12">256 tokens</text>
-<rect x="124" y="30" width="98" height="36" rx="4" fill="#3b7ddd" stroke="#3b7ddd" fill-opacity="0.18"/>
-<text x="173.0" y="53" fill="currentColor" text-anchor="middle">image 2</text>
-<text x="173.0" y="82" fill="currentColor" fill-opacity="0.75" text-anchor="middle" font-size="12">256 tokens</text>
-<rect x="228" y="30" width="86" height="36" rx="4" fill="#3b7ddd" stroke="#3b7ddd" stroke-dasharray="5 4" fill-opacity="0.04"/>
-<text x="271.0" y="53" fill="currentColor" text-anchor="middle">image 3</text>
-<text x="271.0" y="82" fill="currentColor" fill-opacity="0.75" text-anchor="middle" font-size="12">masked</text>
-<rect x="320" y="30" width="74" height="36" rx="4" fill="#3b7ddd" stroke="#3b7ddd" fill-opacity="0.18"/>
-<text x="357.0" y="53" fill="currentColor" text-anchor="middle">text ℓ</text>
-<text x="357.0" y="82" fill="currentColor" fill-opacity="0.75" text-anchor="middle" font-size="12">varies</text>
-<rect x="404" y="30" width="42" height="36" rx="4" fill="#e8833a" stroke="#e8833a" fill-opacity="0.18"/>
-<text x="425.0" y="53" fill="currentColor" text-anchor="middle">q</text>
-<text x="425.0" y="82" fill="currentColor" fill-opacity="0.75" text-anchor="middle" font-size="12">1</text>
-<rect x="452" y="30" width="168" height="36" rx="4" fill="#e8833a" stroke="#e8833a" fill-opacity="0.18"/>
-<text x="536.0" y="53" fill="currentColor" text-anchor="middle">actions A<tspan baseline-shift="super" font-size="10">τ</tspan></text>
-<text x="536.0" y="82" fill="currentColor" fill-opacity="0.75" text-anchor="middle" font-size="12">50 tokens</text>
+<rect x="20" y="30" width="216" height="36" rx="4" fill="#3b7ddd" fill-opacity="0.18" stroke="#3b7ddd"/>
+<text x="128.0" y="53" fill="currentColor" text-anchor="middle">camera images</text>
+<rect x="242" y="30" width="152" height="36" rx="4" fill="#3b7ddd" fill-opacity="0.18" stroke="#3b7ddd"/>
+<text x="318.0" y="53" fill="currentColor" text-anchor="middle">command ℓ</text>
+<rect x="404" y="30" width="52" height="36" rx="4" fill="#e8833a" fill-opacity="0.18" stroke="#e8833a"/>
+<text x="430.0" y="53" fill="currentColor" text-anchor="middle">state</text>
+<rect x="462" y="30" width="158" height="36" rx="4" fill="#e8833a" fill-opacity="0.18" stroke="#e8833a"/>
+<text x="541.0" y="53" fill="currentColor" text-anchor="middle">noisy actions A<tspan baseline-shift="super" font-size="10">τ</tspan></text>
 <rect x="12" y="104" width="616" height="196" rx="8" fill="none" stroke="currentColor" stroke-opacity="0.45" stroke-dasharray="6 4"/>
-<text x="22" y="122" fill="currentColor" fill-opacity="0.75" font-size="12">one layer (repeated 18 times)</text>
+<text x="22" y="122" fill="currentColor" fill-opacity="0.75" font-size="12">one transformer layer (repeated)</text>
 <rect x="20" y="132" width="374" height="40" rx="4" fill="#3b7ddd" fill-opacity="0.18" stroke="#3b7ddd"/>
 <text x="207.0" y="157.0" fill="currentColor" text-anchor="middle" font-size="13">Q, K, V projections (VLM weights)</text>
 <rect x="404" y="132" width="216" height="40" rx="4" fill="#e8833a" fill-opacity="0.18" stroke="#e8833a"/>
@@ -28,16 +18,16 @@
 <rect x="20" y="186" width="600" height="40" rx="4" fill="#3aa17e" fill-opacity="0.2" stroke="#3aa17e"/>
 <text x="320.0" y="211" fill="currentColor" text-anchor="middle">shared self-attention over all tokens (block-causal mask)</text>
 <rect x="20" y="240" width="374" height="50" rx="4" fill="#3b7ddd" fill-opacity="0.18" stroke="#3b7ddd"/>
-<text x="207.0" y="270.0" fill="currentColor" text-anchor="middle" font-size="13">output projection + MLP (VLM weights, width 2048)</text>
+<text x="207.0" y="270.0" fill="currentColor" text-anchor="middle" font-size="13">output projection + MLP (VLM weights)</text>
 <rect x="404" y="240" width="216" height="50" rx="4" fill="#e8833a" fill-opacity="0.18" stroke="#e8833a"/>
-<text x="512.0" y="270.0" fill="currentColor" text-anchor="middle" font-size="13">proj. + MLP (width 1024)</text>
-<line x1="207.0" y1="88" x2="207.0" y2="130" stroke="currentColor" stroke-opacity="0.6" marker-end="url(#ah-arch)"/>
-<line x1="512.0" y1="88" x2="512.0" y2="130" stroke="currentColor" stroke-opacity="0.6" marker-end="url(#ah-arch)"/>
+<text x="512.0" y="270.0" fill="currentColor" text-anchor="middle" font-size="13">proj. + MLP (expert)</text>
+<line x1="207.0" y1="70" x2="207.0" y2="130" stroke="currentColor" stroke-opacity="0.6" marker-end="url(#ah-arch)"/>
+<line x1="512.0" y1="70" x2="512.0" y2="130" stroke="currentColor" stroke-opacity="0.6" marker-end="url(#ah-arch)"/>
 <line x1="512.0" y1="300" x2="512.0" y2="336" stroke="#e8833a" stroke-width="1.6" marker-end="url(#ah-arch)"/>
-<text x="512.0" y="356" fill="currentColor" text-anchor="middle">linear → v<tspan baseline-shift="sub" font-size="10">θ</tspan> (50 × 18)</text>
+<text x="512.0" y="356" fill="currentColor" text-anchor="middle">linear → v<tspan baseline-shift="sub" font-size="10">θ</tspan></text>
 <text x="207.0" y="330" fill="currentColor" fill-opacity="0.75" text-anchor="middle" font-size="12">outputs at these positions are not used</text>
 <text x="207.0" y="356" fill="#3b7ddd" text-anchor="middle">VLM: initialized from PaliGemma (3B)</text>
 <text x="512.0" y="380" fill="#e8833a" text-anchor="middle">action expert: new, ~300M</text>
 </svg>
-<figcaption>The $\pi_0$ model is one transformer over one token sequence. Image and text tokens (blue) use the VLM weights. State and action tokens (orange) use the smaller action expert. The two sets of weights interact only inside self-attention (green). Token counts are for a robot with two cameras and $224 \times 224$ images, as in openpi.</figcaption>
+<figcaption>The $\pi_0$ model is one transformer over one token sequence. Image and text tokens (blue) use the VLM weights. State and action tokens (orange) use the smaller action expert. The two sets of weights interact only inside self-attention (green). The outputs at the action positions form the velocity $\mathbf{v}_\theta$.</figcaption>
 </figure>
