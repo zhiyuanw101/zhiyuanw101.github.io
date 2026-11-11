@@ -1,0 +1,45 @@
+<figure>
+<svg viewBox="0 0 640 330" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="JARVIS-VLA training stages and the parts each stage trains" font-size="14">
+<defs><marker id="ah-jvs" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="context-stroke"/></marker></defs>
+<text x="115.0" y="24" fill="currentColor" text-anchor="middle" font-size="13" font-weight="600">Stage I: language</text>
+<text x="115.0" y="50" fill="currentColor" fill-opacity="0.75" text-anchor="middle" font-size="11">output: text</text>
+<rect x="40" y="62" width="150" height="46" rx="5" fill="#e8833a" fill-opacity="0.25" stroke="#e8833a"/>
+<text x="115.0" y="89.0" fill="currentColor" fill-opacity="1" text-anchor="middle" font-size="12">language model: trained</text>
+<rect x="40" y="120" width="150" height="30" rx="5" fill="#999" fill-opacity="0.06" stroke="#999" stroke-dasharray="4 3"/>
+<text x="115.0" y="139.0" fill="currentColor" fill-opacity="0.6" text-anchor="middle" font-size="12">adapter: frozen</text>
+<rect x="40" y="162" width="150" height="40" rx="5" fill="#999" fill-opacity="0.06" stroke="#999" stroke-dasharray="4 3"/>
+<text x="115.0" y="186.0" fill="currentColor" fill-opacity="0.6" text-anchor="middle" font-size="12">ViT: frozen</text>
+<rect x="30" y="226" width="170" height="66" rx="5" fill="#3aa17e" fill-opacity="0.1" stroke="#3aa17e"/>
+<text x="115.0" y="248.0" fill="currentColor" text-anchor="middle" font-size="12" font-weight="bold">text questions and</text>
+<text x="115.0" y="263.0" fill="currentColor" text-anchor="middle" font-size="12">answers about</text>
+<text x="115.0" y="278.0" fill="currentColor" text-anchor="middle" font-size="12">Minecraft</text>
+<text x="320.0" y="24" fill="currentColor" text-anchor="middle" font-size="13" font-weight="600">Stage II: vision-language</text>
+<text x="320.0" y="50" fill="currentColor" fill-opacity="0.75" text-anchor="middle" font-size="11">output: text</text>
+<rect x="245" y="62" width="150" height="46" rx="5" fill="#e8833a" fill-opacity="0.25" stroke="#e8833a"/>
+<text x="320.0" y="89.0" fill="currentColor" fill-opacity="1" text-anchor="middle" font-size="12">language model: trained</text>
+<rect x="245" y="120" width="150" height="30" rx="5" fill="#9387cf" fill-opacity="0.25" stroke="#9387cf"/>
+<text x="320.0" y="139.0" fill="currentColor" fill-opacity="1" text-anchor="middle" font-size="12">adapter: trained</text>
+<rect x="245" y="162" width="150" height="40" rx="5" fill="#3b7ddd" fill-opacity="0.25" stroke="#3b7ddd"/>
+<text x="320.0" y="186.0" fill="currentColor" fill-opacity="1" text-anchor="middle" font-size="12">ViT: trained</text>
+<rect x="235" y="226" width="170" height="66" rx="5" fill="#3aa17e" fill-opacity="0.1" stroke="#3aa17e"/>
+<text x="320.0" y="248.0" fill="currentColor" text-anchor="middle" font-size="12" font-weight="bold">captions, visual</text>
+<text x="320.0" y="263.0" fill="currentColor" text-anchor="middle" font-size="12">questions, grounding</text>
+<text x="320.0" y="278.0" fill="currentColor" text-anchor="middle" font-size="12">on Minecraft frames</text>
+<line x1="211" y1="132" x2="223" y2="132" stroke="currentColor" stroke-opacity="0.7" stroke-width="1.4" marker-end="url(#ah-jvs)"/>
+<text x="525.0" y="24" fill="currentColor" text-anchor="middle" font-size="13" font-weight="600">Stage III: actions</text>
+<text x="525.0" y="50" fill="currentColor" fill-opacity="0.75" text-anchor="middle" font-size="11">output: action tokens</text>
+<rect x="450" y="62" width="150" height="46" rx="5" fill="#e8833a" fill-opacity="0.25" stroke="#e8833a"/>
+<text x="525.0" y="89.0" fill="currentColor" fill-opacity="1" text-anchor="middle" font-size="12">language model: trained</text>
+<rect x="450" y="120" width="150" height="30" rx="5" fill="#999" fill-opacity="0.06" stroke="#999" stroke-dasharray="4 3"/>
+<text x="525.0" y="139.0" fill="currentColor" fill-opacity="0.6" text-anchor="middle" font-size="12">adapter: frozen</text>
+<rect x="450" y="162" width="150" height="40" rx="5" fill="#999" fill-opacity="0.06" stroke="#999" stroke-dasharray="4 3"/>
+<text x="525.0" y="186.0" fill="currentColor" fill-opacity="0.6" text-anchor="middle" font-size="12">ViT: frozen</text>
+<rect x="440" y="226" width="170" height="66" rx="5" fill="#3aa17e" fill-opacity="0.1" stroke="#3aa17e"/>
+<text x="525.0" y="248.0" fill="currentColor" text-anchor="middle" font-size="12" font-weight="bold">play with actions:</text>
+<text x="525.0" y="263.0" fill="currentColor" text-anchor="middle" font-size="12">humans, agents and</text>
+<text x="525.0" y="278.0" fill="currentColor" text-anchor="middle" font-size="12">synthetic crafting</text>
+<line x1="416" y1="132" x2="428" y2="132" stroke="currentColor" stroke-opacity="0.7" stroke-width="1.4" marker-end="url(#ah-jvs)"/>
+<text x="320.0" y="318" fill="currentColor" fill-opacity="0.8" text-anchor="middle" font-size="12">then fine-tuning on more than 100 trajectories for each test task</text>
+</svg>
+<figcaption>The three post-training stages of JARVIS-VLA (ActVLP). Colored parts are trained and dashed gray parts are frozen. Stages I and II use Minecraft text and images without actions, and stage III uses trajectories. All stages use next-token prediction.</figcaption>
+</figure>

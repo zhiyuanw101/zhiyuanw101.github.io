@@ -1,0 +1,33 @@
+<figure>
+<svg viewBox="0 0 640 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="CombatVLA answer format: action, truncation token, explanation" font-size="14">
+<defs><marker id="ah-cv" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="context-stroke"/></marker></defs>
+<rect x="30" y="34" width="80" height="48" rx="3" fill="#999" fill-opacity="0.18" stroke="currentColor" stroke-opacity="0.55"/>
+<rect x="42" y="44" width="80" height="48" rx="3" fill="#999" fill-opacity="0.18" stroke="currentColor" stroke-opacity="0.55"/>
+<rect x="54" y="54" width="80" height="48" rx="3" fill="#999" fill-opacity="0.18" stroke="currentColor" stroke-opacity="0.55"/>
+<text x="84" y="120" fill="currentColor" fill-opacity="0.75" text-anchor="middle" font-size="11">3 frames, 1008 × 560</text>
+<line x1="138" y1="68" x2="196" y2="68" stroke="currentColor" stroke-opacity="0.7" stroke-width="1.4" marker-end="url(#ah-cv)"/>
+<rect x="200" y="40" width="200" height="56" rx="5" fill="#e8833a" fill-opacity="0.15" stroke="#e8833a"/>
+<text x="300.0" y="64.5" fill="currentColor" text-anchor="middle" font-size="12" font-weight="bold">Qwen2.5-VL 3B</text>
+<text x="300.0" y="79.5" fill="currentColor" text-anchor="middle" font-size="12">one call per step</text>
+<rect x="30.0" y="168" width="150" height="34" rx="5" fill="#3aa17e" fill-opacity="0.22" stroke="#3aa17e"/>
+<text x="105.0" y="189.3" fill="currentColor" text-anchor="middle" font-size="11.5">action: press space</text>
+<rect x="188.0" y="168" width="84" height="34" rx="5" fill="#999" fill-opacity="0.22" stroke="#999"/>
+<text x="230.0" y="189.3" fill="currentColor" text-anchor="middle" font-size="11.5">&lt;TRUNC&gt;</text>
+<rect x="280.0" y="168" width="250" height="34" rx="5" fill="#d97f9f" fill-opacity="0.22" stroke="#d97f9f"/>
+<text x="405.0" y="189.3" fill="currentColor" text-anchor="middle" font-size="11.5">explanation: the enemy is about to attack</text>
+<rect x="538.0" y="168" width="60" height="34" rx="5" fill="#999" fill-opacity="0.22" stroke="#999"/>
+<text x="568.0" y="189.3" fill="currentColor" text-anchor="middle" font-size="11.5">&lt;EOS&gt;</text>
+<path d="M300 96 V128 H105 V166" fill="none" stroke="currentColor" stroke-opacity="0.7" stroke-width="1.4" marker-end="url(#ah-cv)"/>
+<text x="310" y="122" fill="currentColor" fill-opacity="0.75" font-size="11">answer, one token at a time</text>
+<path d="M30 214 V220 H598 V214" fill="none" stroke="#3b7ddd" stroke-width="1.5"/>
+<text x="437.0" y="238" fill="#3b7ddd" text-anchor="middle" font-size="12">training: next-token loss on the whole answer</text>
+<line x1="276" y1="146" x2="276" y2="310" stroke="#e8833a" stroke-width="1.6" stroke-dasharray="5 4"/>
+<text x="282" y="158" fill="#e8833a" font-size="11">inference stops here</text>
+<path d="M30 266 V272 H272 V266" fill="none" stroke="#e8833a" stroke-width="1.5"/>
+<text x="151.0" y="290" fill="#e8833a" text-anchor="middle" font-size="12">inference: generated</text>
+<text x="439.0" y="276" fill="currentColor" fill-opacity="0.6" text-anchor="middle" font-size="12">never generated at play time</text>
+<text x="151.0" y="346" fill="currentColor" fill-opacity="0.8" text-anchor="middle" font-size="12">executor presses the keys</text>
+<line x1="151.0" y1="296" x2="151.0" y2="330" stroke="currentColor" stroke-opacity="0.7" stroke-width="1.4" marker-end="url(#ah-cv)"/>
+</svg>
+<figcaption>One CombatVLA step. The answer is an action, the token &lt;TRUNC&gt;, and a fixed explanation for that action type. Training uses the whole answer. At play time, generation stops at &lt;TRUNC&gt;, and an executor sends the action to the game as keyboard and mouse input.</figcaption>
+</figure>

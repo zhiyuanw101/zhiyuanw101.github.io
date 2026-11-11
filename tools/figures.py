@@ -5,6 +5,7 @@ Usage:  python3 tools/figures.py     # writes content/figures/*.html (figure fra
 Colours use currentColor for ink so the figures follow the light/dark theme.
 """
 
+import math
 import random
 from pathlib import Path
 
@@ -13,6 +14,9 @@ BLUE = "#3b7ddd"
 ORANGE = "#e8833a"
 GREEN = "#3aa17e"
 GREY = "#999"
+YELLOW = "#c2b866"
+PINK = "#d97f9f"
+LAVENDER = "#9387cf"
 
 
 # ---------------------------------------------------------------- tiny linear algebra
@@ -410,6 +414,424 @@ def fig_fm_conditions():
 	)
 
 
+# ---------------------------------------------------------------- game-models post, NitroGen: action labels from input overlays
+
+def box(g, x, y, w, h, lines, colour, size=13, opacity=0.15):
+	g.append(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="5" fill="{colour}" fill-opacity="{opacity}" stroke="{colour}"/>')
+	top = y + h / 2 - (len(lines) - 1) * (size + 3) / 2 + size / 3
+	for k, line in enumerate(lines):
+		weight = ' font-weight="bold"' if k == 0 else ""
+		g.append(f'<text x="{x + w / 2}" y="{top + k * (size + 3):.1f}" fill="currentColor" text-anchor="middle" font-size="{size}"{weight}>{line}</text>')
+
+
+def arrow(g, x1, y1, x2, y2, mid, colour="currentColor", dash=False):
+	d = ' stroke-dasharray="5 4"' if dash else ""
+	g.append(f'<line x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}" stroke="{colour}" stroke-opacity="0.7" stroke-width="1.4"{d} marker-end="url(#{mid})"/>')
+
+
+def fig_ng_pipeline():
+	W, H = 640, 300
+	g = [ARROW_DEFS.format(id="ah-ng")]
+	# a video frame with a gamepad overlay in its corner
+	sx, sy, sw, sh = 20, 20, 190, 110
+	g.append(f'<rect x="{sx}" y="{sy}" width="{sw}" height="{sh}" rx="4" fill="{GREY}" fill-opacity="0.15" stroke="currentColor" stroke-opacity="0.6"/>')
+	g.append(f'<path d="M{sx + 10},{sy + 80} L{sx + 60},{sy + 50} L{sx + 100},{sy + 70} L{sx + 150},{sy + 35} L{sx + 180},{sy + 55}" fill="none" stroke="currentColor" stroke-opacity="0.35" stroke-width="2"/>')
+	px, py = sx + 8, sy + sh - 34
+	g.append(f'<rect x="{px}" y="{py}" width="56" height="28" rx="12" fill="none" stroke="{ORANGE}" stroke-width="1.8"/>')
+	g.append(f'<circle cx="{px + 15}" cy="{py + 14}" r="5" fill="none" stroke="{ORANGE}" stroke-width="1.5"/>')
+	for dx, dy, on in ((40, 9, True), (47, 14, False), (40, 19, False), (33, 14, False)):
+		g.append(f'<circle cx="{px + dx}" cy="{py + dy}" r="2.6" fill="{ORANGE if on else "none"}" stroke="{ORANGE}"/>')
+	g.append(f'<text x="{sx + sw + 16}" y="{sy + 40}" fill="currentColor">Public gameplay video. The creator shows</text>')
+	g.append(f'<text x="{sx + sw + 16}" y="{sy + 60}" fill="currentColor">a live picture of the gamepad <tspan fill="{ORANGE}">(orange)</tspan>,</text>')
+	g.append(f'<text x="{sx + sw + 16}" y="{sy + 80}" fill="currentColor">so the inputs are visible in the pixels.</text>')
+	# stages
+	y, h, w, gap, x0 = 175, 74, 140, 13, 20
+	stages = [
+		(["1. Locate", "template matching", "finds the gamepad"], BLUE),
+		(["2. Parse", "read the buttons", "and the sticks"], BLUE),
+		(["3. Filter", "remove idle play,", "mask the gamepad"], BLUE),
+		(["Training pairs", "frame and", "action chunk"], GREEN),
+	]
+	for k, (lines, c) in enumerate(stages):
+		x = x0 + k * (w + gap)
+		box(g, x, y, w, h, lines, c, size=12)
+		if k:
+			arrow(g, x - gap + 1, y + h / 2, x - 2, y + h / 2, "ah-ng")
+	arrow(g, sx + 40, sy + sh + 2, x0 + 40, y - 3, "ah-ng")
+	# synthetic training data for the parser
+	bx = x0 + (w + gap) + 10
+	g.append(f'<text x="{bx + w / 2 - 10}" y="{y - 32}" fill="currentColor" fill-opacity="0.8" text-anchor="middle" font-size="12">trained on synthetic overlays</text>')
+	g.append(f'<text x="{bx + w / 2 - 10}" y="{y - 16}" fill="currentColor" fill-opacity="0.8" text-anchor="middle" font-size="12">with known inputs</text>')
+	arrow(g, bx + w / 2 - 10, y - 11, bx + w / 2 - 10, y - 3, "ah-ng", dash=True)
+	g.append(f'<text x="{W / 2}" y="{H - 14}" fill="currentColor" fill-opacity="0.8" text-anchor="middle" font-size="12">71,000 hours of raw video → 40,000 hours of labeled data from more than 1,000 games</text>')
+	return svg(W, H, "\n".join(g), "NitroGen data pipeline: action labels from input overlays") + (
+		"<figcaption>The NitroGen data pipeline. Template matching finds the gamepad overlay, a segmentation model "
+		"reads the pressed buttons and the stick positions from it, and filtering removes idle segments. The overlay is "
+		"then masked, so the policy sees only the game.</figcaption>\n</figure>\n"
+	)
+
+
+# ---------------------------------------------------------------- game-models post, NitroGen: model with an attention example
+
+MONO = 'font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5"'
+
+
+def tok_box(g, cx, y, w, h, text, colour, opacity=0.22, size=12, bold=False):
+	g.append(f'<rect x="{cx - w / 2}" y="{y}" width="{w}" height="{h}" rx="5" fill="{colour}" fill-opacity="{opacity}" stroke="{colour}"/>')
+	weight = ' font-weight="600"' if bold else ""
+	g.append(f'<text x="{cx}" y="{y + h / 2 + size / 3 + 0.5:.1f}" fill="currentColor" text-anchor="middle" font-size="{size}"{weight}>{text}</text>')
+
+
+def up(g, x, y1, y2, mid="ah-ngm"):
+	g.append(f'<line x1="{x}" y1="{y1}" x2="{x}" y2="{y2}" stroke="currentColor" stroke-opacity="0.7" stroke-width="1.2" marker-end="url(#{mid})"/>')
+
+
+def weight_line(g, d, wgt):
+	g.append(f'<path d="{d}" fill="none" stroke="{ORANGE}" stroke-width="{0.8 + 9 * wgt:.2f}" stroke-opacity="{0.35 + 1.3 * wgt:.2f}" stroke-linecap="round"/>')
+
+
+def fig_ng_model():
+	W, H = 640, 556
+	g = [ARROW_DEFS.format(id="ah-ngm")]
+	vx = [62, 130, 198, 266]      # one tower per frame patch (4 of N_v shown)
+	ax = [372, 440, 508, 576]     # one tower per action token (4 of H shown)
+	q = 0                         # the example query token a1
+	ty, ts = 466, 40              # input row
+	tok_y = 250                   # frame tokens
+	cy, sy, bh = 352, 262, 28     # cross-attention row, self-attention row
+	# ---- inputs: four patches of one game frame, four noisy action tokens
+	for k, x in enumerate(vx):
+		g.append(f'<rect x="{x - ts / 2}" y="{ty}" width="{ts}" height="{ts}" fill="{GREY}" fill-opacity="0.08" stroke="currentColor" stroke-opacity="0.5"/>')
+		if k in (2, 3):
+			g.append(f'<rect x="{x - ts / 2}" y="{ty + ts - 9}" width="{ts}" height="9" fill="{GREY}" fill-opacity="0.45"/>')
+	g.append(f'<circle cx="{vx[2]}" cy="{ty + 19}" r="8" fill="{GREEN}" fill-opacity="0.9"/>')
+	g.append(f'<circle cx="{vx[3]}" cy="{ty + 19}" r="8" fill="{ORANGE}" fill-opacity="0.9"/>')
+	for k, name in enumerate(("sky", "sky", "player", "enemy")):
+		g.append(f'<text x="{vx[k]}" y="{ty + ts + 16}" fill="currentColor" fill-opacity="0.75" text-anchor="middle" font-size="11">{name}</text>')
+	g.append(f'<text x="{(vx[0] + vx[-1]) / 2}" y="{H - 8}" fill="currentColor" text-anchor="middle" font-size="12" font-weight="600">frame patches (4 of 256)</text>')
+	for k, x in enumerate(ax):
+		tok_box(g, x, ty + 6, 48, 28, "a" + SUB(str(k + 1)), PINK)
+	g.append(f'<text x="{(ax[0] + ax[-1]) / 2}" y="{ty + ts + 16}" fill="currentColor" fill-opacity="0.75" text-anchor="middle" font-size="11">noisy actions A' + SUP("τ") + ', one token per step</text>')
+	g.append(f'<text x="{(ax[0] + ax[-1]) / 2}" y="{H - 8}" fill="currentColor" text-anchor="middle" font-size="12" font-weight="600">action tokens (4 of 18)</text>')
+	# ---- frame encoder: self-attention over all patches, then one frame token per patch
+	ex0, ex1, ey, eh = vx[0] - 34, vx[-1] + 34, 360, 64
+	g.append(f'<rect x="{ex0}" y="{ey}" width="{ex1 - ex0}" height="{eh}" rx="6" fill="{BLUE}" fill-opacity="0.14" stroke="{BLUE}"/>')
+	g.append(f'<text x="{(ex0 + ex1) / 2}" y="{ey + 26}" fill="currentColor" text-anchor="middle" font-size="12" font-weight="600">Image encoder: SigLIP 2 and 4 layers</text>')
+	g.append(f'<text x="{(ex0 + ex1) / 2}" y="{ey + 44}" fill="currentColor" fill-opacity="0.75" text-anchor="middle" font-size="11">self-attention over all patches</text>')
+	for k, x in enumerate(vx):
+		up(g, x, ty - 2, ey + eh + 2)
+		up(g, x, ey, tok_y + 11)
+		g.append(f'<circle cx="{x}" cy="{tok_y}" r="9" fill="{GREEN}" fill-opacity="0.3" stroke="{GREEN}" stroke-width="1.5"/>')
+	g.append(f'<text x="{(vx[0] + vx[-1]) / 2}" y="{tok_y - 36}" fill="{GREEN}" text-anchor="middle" font-size="12" font-weight="600">frame tokens: keys and values</text>')
+	# ---- action embedding with the flow time
+	for x in ax:
+		up(g, x, ty + 6, 454)
+		tok_box(g, x, 430, 56, 22, "MLP", PINK, size=11)
+	g.append(f'<text x="{ax[-1] + 32}" y="445" fill="currentColor" fill-opacity="0.75" font-size="11">+ τ</text>')
+	# ---- DiT: 4 pairs of (cross-attention, self-attention) blocks, drawn once
+	top = 196
+	g.append(f'<rect x="{ax[0] - 40}" y="{top}" width="{ax[-1] - ax[0] + 80}" height="{cy + bh + 16 - top}" rx="9" fill="{GREY}" fill-opacity="0.08" stroke="{GREY}" stroke-opacity="0.6"/>')
+	g.append(f'<text x="{ax[0] - 34}" y="{top + 17}" fill="currentColor" font-size="12" font-weight="600">4×</text>')
+	for x in ax:
+		up(g, x, 430, cy + bh + 2)
+		up(g, x, cy, sy + bh + 2)
+		up(g, x, sy, 162)
+	# cross-attention of a1: one line to each frame token
+	cw = (0.08, 0.12, 0.30, 0.50)
+	for k, wgt in enumerate(cw):
+		weight_line(g, f"M{ax[q] - 28} {cy + bh / 2} L{vx[k] + 7} {tok_y + 5}", wgt)
+		g.append(f'<text x="{vx[k]}" y="{tok_y - 15}" fill="currentColor" fill-opacity="0.85" text-anchor="middle" font-size="10.5">{wgt:.2f}</text>')
+	for k, x in enumerate(ax):
+		tok_box(g, x, cy, 56, bh, "cross", ORANGE, opacity=0.45 if k == q else 0.2, size=11)
+	# self-attention of a1: one arc to each action token
+	sw = (0.34, 0.30, 0.22, 0.14)
+	for k, wgt in enumerate(sw):
+		if k == q:
+			weight_line(g, f"M{ax[q] - 12} {sy} C {ax[q] - 24} {sy - 34}, {ax[q] + 24} {sy - 34}, {ax[q] + 12} {sy}", wgt)
+			g.append(f'<text x="{ax[q] - 30}" y="{sy - 8}" fill="currentColor" fill-opacity="0.85" text-anchor="end" font-size="10.5">{wgt:.2f}</text>')
+			continue
+		h = 30 + 14 * k
+		weight_line(g, f"M{ax[q] + 14} {sy} C {ax[q] + 14} {sy - h}, {ax[k]} {sy - h}, {ax[k]} {sy}", wgt)
+		g.append(f'<text x="{ax[k] + 6}" y="{sy - 5}" fill="currentColor" fill-opacity="0.85" font-size="10.5">{wgt:.2f}</text>')
+	for k, x in enumerate(ax):
+		tok_box(g, x, sy, 56, bh, "self", ORANGE, opacity=0.45 if k == q else 0.2, size=11)
+	# ---- output: one velocity per action token, then the Euler loop
+	for k, x in enumerate(ax):
+		tok_box(g, x, 134, 56, 26, "v" + SUB(str(k + 1)), LAVENDER, size=12)
+	g.append(f'<text x="{(ax[0] + ax[-1]) / 2}" y="118" fill="currentColor" text-anchor="middle" font-size="12" font-weight="600">velocity v' + SUB("θ") + ' for every step of the chunk</text>')
+	g.append(f'<path d="M{ax[-1] + 28} 147 H{W - 8} V{ty + 20} H{ax[-1] + 26}" fill="none" stroke="{BLUE}" stroke-width="1.5" stroke-dasharray="6 4" marker-end="url(#ah-ngm)"/>')
+	g.append(f'<text x="{W - 14}" y="100" fill="{BLUE}" text-anchor="end" font-size="11">16 Euler steps: A' + SUP("τ") + ' ← A' + SUP("τ") + ' + v' + SUB("θ") + ' / 16</text>')
+	# ---- legend for the example
+	g.append(f'<text x="20" y="40" fill="currentColor" font-size="12" font-weight="600">Example: token a' + SUB("1") + ' as the query</text>')
+	g.append(f'<line x1="20" y1="58" x2="44" y2="58" stroke="{ORANGE}" stroke-width="4" stroke-opacity="0.8" stroke-linecap="round"/>')
+	g.append(f'<text x="52" y="62" fill="currentColor" font-size="11">line width = attention weight</text>')
+	g.append(f'<text x="20" y="82" fill="currentColor" fill-opacity="0.8" font-size="11">cross: a' + SUB("1") + ' reads the frame tokens</text>')
+	g.append(f'<text x="20" y="100" fill="currentColor" fill-opacity="0.8" font-size="11">self: a' + SUB("1") + ' reads the action tokens</text>')
+	return svg(W, H, "\n".join(g), "NitroGen model with one tower per token and an attention example") + (
+		"<figcaption>The NitroGen model, read from bottom to top, with one tower per token. The frame encoder turns "
+		"each 16 × 16 pixel square of the frame into a frame token. Each action token then passes 4 pairs of DiT blocks. In a cross-attention block "
+		"it reads the frame tokens, and in a self-attention block it reads the other action tokens. Orange lines show "
+		"these reads for $a_1$; every token does the same, and the weights are illustrative. Each block also has a "
+		"feed-forward layer and an AdaLN layer that adds the flow time $\\tau$.</figcaption>\n</figure>\n"
+	)
+
+
+# ---------------------------------------------------------------- game-models post, NitroGen: transfer to a held-out game
+
+def bar_panel(g, x0, y0, w, h, title, groups, colours=(BLUE, GREY)):
+	sy = lambda v: y0 + h - v / 100 * h
+	g.append(f'<line x1="{x0}" y1="{y0 + h}" x2="{x0 + w}" y2="{y0 + h}" stroke="currentColor"/>')
+	for v in (0, 50, 100):
+		g.append(f'<text x="{x0 - 6}" y="{sy(v) + 4:.1f}" fill="currentColor" text-anchor="end" font-size="12">{v}</text>')
+		if v:
+			g.append(f'<line x1="{x0}" y1="{sy(v):.1f}" x2="{x0 + w}" y2="{sy(v):.1f}" stroke="currentColor" stroke-opacity="0.12"/>')
+	if title:
+		g.append(f'<text x="{x0 + w / 2}" y="{y0 - 12}" fill="currentColor" text-anchor="middle">{title}</text>')
+	gw = w / len(groups)
+	n = len(colours)
+	bw = gw * 0.6 / n
+	for k, (label, *values) in enumerate(groups):
+		cx = x0 + gw * (k + 0.5)
+		for j, (v, c) in enumerate(zip(values, colours)):
+			bx = cx - n * (bw + 4) / 2 + 2 + j * (bw + 4)
+			g.append(f'<rect x="{bx:.1f}" y="{sy(v):.1f}" width="{bw:.1f}" height="{h - (sy(v) - y0):.1f}" fill="{c}" fill-opacity="0.8"/>')
+			g.append(f'<text x="{bx + bw / 2:.1f}" y="{sy(v) - 5:.1f}" fill="currentColor" text-anchor="middle" font-size="11">{v:g}</text>')
+		g.append(f'<text x="{cx:.1f}" y="{y0 + h + 18}" fill="currentColor" text-anchor="middle" font-size="12">{label}</text>')
+
+
+def fig_ng_transfer():
+	W, H = 640, 320
+	g = []
+	bar_panel(g, 50, 60, 250, 200, "Roguelike: data for the new game", [("60 h", 53.0, 48.1), ("120 h", 65.6, 57.8), ("240 h", 81.0, 76.0)])
+	bar_panel(g, 370, 60, 250, 200, "3D action-RPG: 30 h, by task type", [("combat", 73.3, 48.3), ("navigation", 60.0, 48.0), ("game-specific", 66.6, 63.3)])
+	g.append(f'<text x="20" y="{60 + 100}" fill="currentColor" text-anchor="middle" font-size="12" transform="rotate(-90 20 160)">task completion (%)</text>')
+	for k, (label, c) in enumerate((("fine-tuned from NitroGen", BLUE), ("trained from scratch", GREY))):
+		x = 170 + k * 210
+		g.append(f'<rect x="{x}" y="{H - 22}" width="12" height="12" fill="{c}" fill-opacity="0.8"/>')
+		g.append(f'<text x="{x + 18}" y="{H - 12}" fill="currentColor" font-size="13">{label}</text>')
+	return svg(W, H, "\n".join(g), "Fine-tuning from NitroGen versus training from scratch on a held-out game") + (
+		"<figcaption>Transfer to a game held out of pre-training, from Fig. 7 of the paper. Both models have the same "
+		"architecture, data and compute. Left: an isometric roguelike with 60 to 240 hours of its own data. Right: a 3D "
+		"action-RPG with 30 hours, split by task type.</figcaption>\n</figure>\n"
+	)
+
+
+# ---------------------------------------------------------------- game-models post, JARVIS-VLA: model and action tokens
+
+def camera_degrees(b, mu=20, maxval=10):
+	x = (b - 10) / 10
+	return math.copysign(((1 + mu) ** abs(x) - 1) / mu * maxval, x) if x else 0.0
+
+
+def fig_jv_model():
+	W, H = 640, 560
+	g = [ARROW_DEFS.format(id="ah-jv")]
+	# ---- output: one action as five tokens
+	toks = [("[act]", GREY), ("use", GREEN), ("cam 14", BLUE), ("cam 12", BLUE), ("[/act]", GREY)]
+	tw, tg = 62, 10
+	t0 = W / 2 - (len(toks) * tw + (len(toks) - 1) * tg) / 2 + tw / 2
+	tx = [t0 + k * (tw + tg) for k in range(len(toks))]
+	g.append(f'<text x="{W / 2}" y="24" fill="currentColor" text-anchor="middle" font-size="12" font-weight="600">output: one action as 5 tokens, generated one at a time</text>')
+	for x, (t, c) in zip(tx, toks):
+		tok_box(g, x, 36, tw, 26, t, c, size=12)
+		up(g, x, 112, 64, mid="ah-jv")
+	# ---- language model
+	lx0, lx1, ly, lh = 90, 550, 112, 58
+	g.append(f'<rect x="{lx0}" y="{ly}" width="{lx1 - lx0}" height="{lh}" rx="6" fill="{ORANGE}" fill-opacity="0.14" stroke="{ORANGE}"/>')
+	g.append(f'<text x="{W / 2}" y="{ly + 24}" fill="currentColor" text-anchor="middle" font-size="12" font-weight="600">Language model: Qwen2 7B, 28 layers</text>')
+	g.append(f'<text x="{W / 2}" y="{ly + 42}" fill="currentColor" fill-opacity="0.75" text-anchor="middle" font-size="11">next-token prediction over text tokens and action tokens</text>')
+	# ---- input tokens: image tokens from the frames, text tokens from the instruction
+	iy = 212
+	ix = [130, 166, 202, 238, 274]
+	for x in ix:
+		g.append(f'<circle cx="{x}" cy="{iy}" r="9" fill="{GREEN}" fill-opacity="0.3" stroke="{GREEN}" stroke-width="1.5"/>')
+		up(g, x, iy - 11, ly + lh + 2, mid="ah-jv")
+	g.append(f'<text x="{ix[-1] + 18}" y="{iy + 4}" fill="currentColor" fill-opacity="0.75" font-size="11">…</text>')
+	g.append(f'<text x="{ix[0] - 16}" y="{iy + 4}" fill="{GREEN}" text-anchor="end" font-size="11" font-weight="600">image</text>')
+	g.append(f'<text x="{ix[0] - 16}" y="{iy + 18}" fill="{GREEN}" text-anchor="end" font-size="11" font-weight="600">tokens</text>')
+	words = ["Craft", "a", "ladder", "."]
+	wx = [392, 446, 500, 546]
+	for x, w in zip(wx, words):
+		tok_box(g, x, iy - 13, 48 if len(w) > 2 else 30, 26, w, PINK, size=12)
+		up(g, x, iy - 15, ly + lh + 2, mid="ah-jv")
+	g.append(f'<text x="{(wx[0] + wx[-1]) / 2}" y="{iy + 34}" fill="{PINK}" text-anchor="middle" font-size="11" font-weight="600">instruction tokens</text>')
+	# ---- vision path: adapter, ViT, frames
+	vx0, vx1 = 100, 304
+	vc = (vx0 + vx1) / 2
+	g.append(f'<rect x="{vx0}" y="250" width="{vx1 - vx0}" height="34" rx="5" fill="{LAVENDER}" fill-opacity="0.18" stroke="{LAVENDER}"/>')
+	g.append(f'<text x="{vc}" y="271" fill="currentColor" text-anchor="middle" font-size="12">adapter: MLP</text>')
+	up(g, vc, 250, iy + 12, mid="ah-jv")
+	g.append(f'<rect x="{vx0}" y="304" width="{vx1 - vx0}" height="50" rx="5" fill="{BLUE}" fill-opacity="0.14" stroke="{BLUE}"/>')
+	g.append(f'<text x="{vc}" y="325" fill="currentColor" text-anchor="middle" font-size="12" font-weight="600">ViT: 32 layers</text>')
+	g.append(f'<text x="{vc}" y="342" fill="currentColor" fill-opacity="0.75" text-anchor="middle" font-size="11">14 × 14 pixel squares</text>')
+	up(g, vc, 304, 286, mid="ah-jv")
+	for k, (fx, name) in enumerate(((112, "earlier frame"), (212, "current frame"))):
+		g.append(f'<rect x="{fx}" y="376" width="80" height="45" rx="3" fill="{GREY}" fill-opacity="0.12" stroke="currentColor" stroke-opacity="0.55"/>')
+		g.append(f'<path d="M{fx + 6},{376 + 34} L{fx + 30},{376 + 20} L{fx + 50},{376 + 28} L{fx + 74},{376 + 14}" fill="none" stroke="currentColor" stroke-opacity="0.35" stroke-width="1.5"/>')
+		g.append(f'<text x="{fx + 40}" y="438" fill="currentColor" fill-opacity="0.75" text-anchor="middle" font-size="11">{name}</text>')
+		up(g, fx + 40, 376, 356, mid="ah-jv")
+	g.append(f'<text x="{(wx[0] + wx[-1]) / 2}" y="330" fill="currentColor" fill-opacity="0.8" text-anchor="middle" font-size="12">frames: 644 × 364 pixels</text>')
+	g.append(f'<text x="{(wx[0] + wx[-1]) / 2}" y="348" fill="currentColor" fill-opacity="0.8" text-anchor="middle" font-size="12">no change to the architecture</text>')
+	# ---- camera bins on a degree axis
+	ax0, ax1, ay = 80, 560, 506
+	sc = (ax1 - ax0) / 20
+	px = lambda d: W / 2 + d * sc
+	g.append(f'<text x="{ax0}" y="470" fill="currentColor" font-size="12" font-weight="600">camera token: 21 bins per axis, turn in degrees</text>')
+	g.append(f'<line x1="{ax0}" y1="{ay}" x2="{ax1}" y2="{ay}" stroke="currentColor" stroke-opacity="0.6"/>')
+	for b in range(21):
+		x = px(camera_degrees(b))
+		hl = b in (12, 14)
+		g.append(f'<line x1="{x:.1f}" y1="{ay - 8}" x2="{x:.1f}" y2="{ay + 8}" stroke="{BLUE if hl else "currentColor"}" stroke-width="{2 if hl else 1}" stroke-opacity="{1 if hl else 0.6}"/>')
+	for b in (0, 5, 10, 15, 20):
+		x = px(camera_degrees(b))
+		d = camera_degrees(b)
+		g.append(f'<text x="{x:.1f}" y="{ay - 14}" fill="currentColor" fill-opacity="0.8" text-anchor="middle" font-size="11">{b}</text>')
+		deg = "0" if not d else f"{d:+.1f}".replace(".0", "").replace("-", "−")
+		g.append(f'<text x="{x:.1f}" y="{ay + 24}" fill="currentColor" fill-opacity="0.8" text-anchor="middle" font-size="11">{deg}°</text>')
+	g.append(f'<text x="{ax0 - 28}" y="{ay - 14}" fill="currentColor" fill-opacity="0.8" text-anchor="end" font-size="11">bin</text>')
+	g.append(f'<text x="{ax0 - 28}" y="{ay + 24}" fill="currentColor" fill-opacity="0.8" text-anchor="end" font-size="11">turn</text>')
+	return svg(W, H, "\n".join(g), "JARVIS-VLA: a vision-language model that writes actions as tokens") + (
+		"<figcaption>The JARVIS-VLA model, read from bottom to top. The ViT and the adapter turn each frame into image tokens. "
+		"The language model reads them with the instruction and writes an action as tokens. Bottom: the 21 bins of one camera "
+		"token on a scale of degrees. The bins are dense near zero, and the bins of the example, 12 and 14, are blue. "
+		"The token format and the bin values come from the released code.</figcaption>\n</figure>\n"
+	)
+
+
+def fig_jv_stages():
+	W, H = 640, 330
+	g = []
+	stages = [
+		("Stage I: language", ("LM",), "text", ["text questions and", "answers about", "Minecraft"]),
+		("Stage II: vision-language", ("LM", "adapter", "ViT"), "text", ["captions, visual", "questions, grounding", "on Minecraft frames"]),
+		("Stage III: actions", ("LM",), "action tokens", ["play with actions:", "humans, agents and", "synthetic crafting"]),
+	]
+	cw, gap, x0 = 190, 15, 20
+	colours = {"LM": ORANGE, "adapter": LAVENDER, "ViT": BLUE}
+	for k, (title, trained, out, data) in enumerate(stages):
+		x = x0 + k * (cw + gap)
+		cx = x + cw / 2
+		g.append(f'<text x="{cx}" y="24" fill="currentColor" text-anchor="middle" font-size="13" font-weight="600">{title}</text>')
+		g.append(f'<text x="{cx}" y="50" fill="currentColor" fill-opacity="0.75" text-anchor="middle" font-size="11">output: {out}</text>')
+		for j, (name, y, h) in enumerate((("LM", 62, 46), ("adapter", 120, 30), ("ViT", 162, 40))):
+			on = name in trained
+			c = colours[name] if on else GREY
+			dash = "" if on else ' stroke-dasharray="4 3"'
+			g.append(f'<rect x="{x + 20}" y="{y}" width="{cw - 40}" height="{h}" rx="5" fill="{c}" fill-opacity="{0.25 if on else 0.06}" stroke="{c}"{dash}/>')
+			label = {"LM": "language model", "adapter": "adapter", "ViT": "ViT"}[name]
+			state = "trained" if on else "frozen"
+			g.append(f'<text x="{cx}" y="{y + h / 2 + 4}" fill="currentColor" fill-opacity="{1 if on else 0.6}" text-anchor="middle" font-size="12">{label}: {state}</text>')
+		box(g, x + 10, 226, cw - 20, 66, data, GREEN, size=12, opacity=0.1)
+		if k:
+			arrow(g, x - gap + 1, 132, x - 2, 132, "ah-jvs")
+	g.insert(0, ARROW_DEFS.format(id="ah-jvs"))
+	g.append(f'<text x="{W / 2}" y="{H - 12}" fill="currentColor" fill-opacity="0.8" text-anchor="middle" font-size="12">then fine-tuning on more than 100 trajectories for each test task</text>')
+	return svg(W, H, "\n".join(g), "JARVIS-VLA training stages and the parts each stage trains") + (
+		"<figcaption>The three post-training stages of JARVIS-VLA (ActVLP). Colored parts are trained and dashed gray parts "
+		"are frozen. Stages I and II use Minecraft text and images without actions, and stage III uses trajectories. All "
+		"stages use next-token prediction.</figcaption>\n</figure>\n"
+	)
+
+
+def fig_jv_results():
+	W, H = 640, 330
+	g = []
+	colours = (GREY, YELLOW, LAVENDER, BLUE)
+	bar_panel(g, 60, 40, 560, 200, "", [
+		("Mine blocks", 67, 79, 75, 88), ("Kill entities", 52, 84, 86, 95),
+		("Craft items", 57, 60, 65, 77), ("Smelt items", 33, 7, 29, 70),
+	], colours=colours)
+	g.append(f'<text x="20" y="140" fill="currentColor" text-anchor="middle" font-size="12" transform="rotate(-90 20 140)">success rate (%)</text>')
+	labels = ("best earlier agent", "Qwen2-VL: test-task data only", "Qwen2-VL: stage III, no I or II", "JARVIS-VLA: all stages")
+	for k, (label, c) in enumerate(zip(labels, colours)):
+		x, y = 70 + (k % 2) * 290, H - 42 + (k // 2) * 22
+		g.append(f'<rect x="{x}" y="{y - 11}" width="12" height="12" fill="{c}" fill-opacity="0.8"/>')
+		g.append(f'<text x="{x + 18}" y="{y}" fill="currentColor" font-size="13">{label}</text>')
+	return svg(W, H, "\n".join(g), "JARVIS-VLA success rates in four groups of Minecraft tasks") + (
+		"<figcaption>Average success rate in each task group, from Table 1 of the paper. The best earlier agent is the highest "
+		"of VPT, STEVE-1, GROOT and MineDreamer in each group. All Qwen2-VL models are fine-tuned on the same test-task "
+		"trajectories.</figcaption>\n</figure>\n"
+	)
+
+
+# ---------------------------------------------------------------- game-models post, CombatVLA: truncated action-of-thought
+
+def fig_cv_aot():
+	W, H = 640, 360
+	g = [ARROW_DEFS.format(id="ah-cv")]
+	# ---- input frames and the model
+	for k in range(3):
+		x, y = 30 + k * 12, 34 + k * 10
+		g.append(f'<rect x="{x}" y="{y}" width="80" height="48" rx="3" fill="{GREY}" fill-opacity="0.18" stroke="currentColor" stroke-opacity="0.55"/>')
+	g.append(f'<text x="84" y="120" fill="currentColor" fill-opacity="0.75" text-anchor="middle" font-size="11">3 frames, 1008 × 560</text>')
+	arrow(g, 138, 68, 196, 68, "ah-cv")
+	box(g, 200, 40, 200, 56, ["Qwen2.5-VL 3B", "one call per step"], ORANGE, size=12)
+	# ---- the answer as one token sequence
+	ty, th = 168, 34
+	parts = [("action: press space", GREEN, 150), ("&lt;TRUNC&gt;", GREY, 84), ("explanation: the enemy is about to attack", PINK, 250), ("&lt;EOS&gt;", GREY, 60)]
+	x = 30
+	xs = []
+	for text, c, w in parts:
+		tok_box(g, x + w / 2, ty, w, th, text, c, size=11.5)
+		xs.append((x, x + w))
+		x += w + 8
+	g.append(f'<path d="M300 96 V128 H{xs[0][0] + 75} V{ty - 2}" fill="none" stroke="currentColor" stroke-opacity="0.7" stroke-width="1.4" marker-end="url(#ah-cv)"/>')
+	g.append(f'<text x="310" y="122" fill="currentColor" fill-opacity="0.75" font-size="11">answer, one token at a time</text>')
+	cut = xs[1][1] + 4
+	# ---- training covers the whole answer
+	x0, x1 = xs[0][0], xs[-1][1]
+	by = ty + th + 18
+	g.append(f'<path d="M{x0} {by - 6} V{by} H{x1} V{by - 6}" fill="none" stroke="{BLUE}" stroke-width="1.5"/>')
+	g.append(f'<text x="{(cut + x1) / 2}" y="{by + 18}" fill="{BLUE}" text-anchor="middle" font-size="12">training: next-token loss on the whole answer</text>')
+	# ---- inference stops at <TRUNC>
+	g.append(f'<line x1="{cut}" y1="{ty - 22}" x2="{cut}" y2="{H - 50}" stroke="{ORANGE}" stroke-width="1.6" stroke-dasharray="5 4"/>')
+	g.append(f'<text x="{cut + 6}" y="{ty - 10}" fill="{ORANGE}" font-size="11">inference stops here</text>')
+	iy = by + 52
+	g.append(f'<path d="M{x0} {iy - 6} V{iy} H{xs[1][1]} V{iy - 6}" fill="none" stroke="{ORANGE}" stroke-width="1.5"/>')
+	g.append(f'<text x="{(x0 + xs[1][1]) / 2}" y="{iy + 18}" fill="{ORANGE}" text-anchor="middle" font-size="12">inference: generated</text>')
+	g.append(f'<text x="{(xs[2][0] + x1) / 2}" y="{iy + 4}" fill="currentColor" fill-opacity="0.6" text-anchor="middle" font-size="12">never generated at play time</text>')
+	g.append(f'<text x="{(x0 + xs[1][1]) / 2}" y="{H - 14}" fill="currentColor" fill-opacity="0.8" text-anchor="middle" font-size="12">executor presses the keys</text>')
+	arrow(g, (x0 + xs[1][1]) / 2, iy + 24, (x0 + xs[1][1]) / 2, H - 30, "ah-cv")
+	return svg(W, H, "\n".join(g), "CombatVLA answer format: action, truncation token, explanation") + (
+		"<figcaption>One CombatVLA step. The answer is an action, the token &lt;TRUNC&gt;, and a fixed explanation for "
+		"that action type. Training uses the whole answer. At play time, generation stops at &lt;TRUNC&gt;, and an executor "
+		"sends the action to the game as keyboard and mouse input.</figcaption>\n</figure>\n"
+	)
+
+
+def fig_cv_latency():
+	W, H = 640, 250
+	g = []
+	ax0, ax1, top = 290, 600, 30
+	px = lambda v: ax0 + (ax1 - ax0) * math.log10(v) / 2
+	rows = [
+		("VARP: 10 GPT-4o calls", 90.23, GREY),
+		("Cradle: 5 GPT-4o calls", 61.68, GREY),
+		("CombatVLA, full answer", 3.73, LAVENDER),
+		("CombatVLA, stop at &lt;TRUNC&gt;", 1.85, BLUE),
+	]
+	bottom = top + 20 + len(rows) * 40
+	for v in (1, 2, 5, 10, 20, 50, 100):
+		x = px(v)
+		major = v in (1, 10, 100)
+		g.append(f'<line x1="{x:.1f}" y1="{top}" x2="{x:.1f}" y2="{bottom}" stroke="currentColor" stroke-opacity="{0.22 if major else 0.09}"/>')
+		g.append(f'<text x="{x:.1f}" y="{bottom + 18}" fill="currentColor" fill-opacity="0.8" text-anchor="middle" font-size="11">{v}</text>')
+	g.append(f'<text x="{(ax0 + ax1) / 2}" y="{bottom + 38}" fill="currentColor" text-anchor="middle" font-size="12">time per step (s), log scale</text>')
+	for k, (label, v, c) in enumerate(rows):
+		y = top + 30 + k * 40
+		g.append(f'<text x="{ax0 - 16}" y="{y + 4}" fill="currentColor" text-anchor="end" font-size="13">{label}</text>')
+		g.append(f'<line x1="{ax0}" y1="{y}" x2="{px(v):.1f}" y2="{y}" stroke="{c}" stroke-width="2" stroke-opacity="0.6"/>')
+		g.append(f'<circle cx="{px(v):.1f}" cy="{y}" r="7" fill="{c}" fill-opacity="0.9"/>')
+		right = px(v) > ax1 - 60
+		tx = px(v) - 12 if right else px(v) + 12
+		g.append(f'<text x="{tx:.1f}" y="{y - 10 if right else y + 4}" fill="currentColor" text-anchor="{"end" if right else "start"}" font-size="12" font-weight="600">{v:.2f} s</text>')
+	return svg(W, H, "\n".join(g), "CombatVLA time per step against GPT-4o agent frameworks") + (
+		"<figcaption>Time from the input frames to the actions for one step, on a log scale. The two framework values are "
+		"from Table 3 of the paper, and the two CombatVLA values are from Table 4. Stopping at &lt;TRUNC&gt; halves the "
+		"time of one call.</figcaption>\n</figure>\n"
+	)
+
+
 def main():
 	OUT.mkdir(parents=True, exist_ok=True)
 	for name, fn in (
@@ -417,6 +839,10 @@ def main():
 		("binomial-test", fig_binomial_test),
 		("pi0-architecture", fig_pi0_architecture), ("fm-path", fig_fm_path),
 		("fm-pairs", fig_fm_pairs), ("fm-conditions", fig_fm_conditions),
+		("ng-pipeline", fig_ng_pipeline), ("ng-model", fig_ng_model),
+		("ng-transfer", fig_ng_transfer),
+		("jv-model", fig_jv_model), ("jv-stages", fig_jv_stages), ("jv-results", fig_jv_results),
+		("cv-aot", fig_cv_aot), ("cv-latency", fig_cv_latency),
 	):
 		(OUT / f"{name}.html").write_text(fn())
 		print("wrote", name)

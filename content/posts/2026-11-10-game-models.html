@@ -1,0 +1,185 @@
+<!--
+title: Foundation Models for Playing Video Games
+date: 2026-11-10
+tags: Games, Imitation-Learning, Flow-Matching, Paper-Notes
+cite_key: wang2026gamemodels
+-->
+<p>This post surveys models that play video games from the screen. Each section covers one paper: the problem it addresses, its main ideas and its experiments.</p>
+
+<h1>Context</h1>
+
+<p>A gaming agent receives screen frames and outputs keyboard, mouse or controller inputs. LLM agents play through hand-built game APIs or perception modules. Reinforcement learning agents train in one game with a dedicated simulator. Both approaches need work for each new game.</p>
+
+<p><strong>Behavior cloning</strong> trains an agent to copy human play, and it scales with data instead of per-game engineering. It needs pairs of a frame and the action that the player took. Video PreTraining (VPT) (<a href="#references">Baker et al. 2022</a>) got such pairs for Minecraft with an inverse dynamics model that labels online videos.</p>
+
+<h1>NitroGen</h1>
+
+<p>NitroGen (<a href="#references">Magne et al. 2026</a>) from NVIDIA is one policy that plays many commercial games with a gamepad. Video of human play is abundant, but almost all of it has no action labels. NitroGen gets labels at scale, across many games, and trains one policy on them.</p>
+
+<h2>Action labels from input overlays</h2>
+
+<p>Many gameplay videos show a live picture of the player&rsquo;s gamepad, drawn by <strong>input overlay</strong> software. NitroGen reads an action for each frame from this overlay (Fig. 1). Template matching finds the overlay, and a segmentation model (<a href="#references">Xie et al. 2021</a>) reads the buttons and sticks. Filtering removes idle play and leaves 40,000 hours from more than 1,000 games.</p>
+
+<p>The labels need no human annotation, because the parser trains on synthetic overlays with known inputs. The overlay is masked before policy training, so the policy sees only the game.</p>
+
+<!--fig:ng-pipeline-->
+
+<h2>Model</h2>
+
+<p>The model maps one game frame to a chunk of gamepad actions (Fig. 2). A SigLIP 2 encoder (<a href="#references">Tschannen et al. 2025</a>) and four self-attention layers turn the frame into 256 tokens. A diffusion transformer (DiT) from GR00T N1 (<a href="#references">Bjorck et al. 2025</a>) generates the actions with flow matching, as in <a href="../2026-11-08-pi0/">$\pi_0$</a>.</p>
+
+<p>The DiT blocks alternate two kinds of attention. In a cross-attention block, each action token reads the frame tokens, so the actions depend on the scene. In a self-attention block, the action tokens read each other, so the steps of one chunk agree.</p>
+
+<!--fig:ng-model-->
+
+<p>The input is one frame, with no game API, reward or instruction. All games share one action space: 16 buttons and two sticks. The authors call the model a system-1 policy: it reacts to the frame and does not plan. During tests, a simulator stops the game clock while the model computes, so play is synchronous.</p>
+
+<h2>Experiments</h2>
+
+<p>The test suite has 30 tasks in 10 games, and humans judge success. Without fine-tuning, the model completes 38% to 62% of the tasks on average, depending on the visual style and the task type.</p>
+
+<p>For transfer, one game is held out of pre-training. Fine-tuning from NitroGen scores higher than training the same model from scratch on that game (Fig. 3). The gain is largest for generic skills such as combat and smallest for game-specific mechanics.</p>
+
+<!--fig:ng-transfer-->
+
+<p>The pre-training results have no comparison model, and some details differ between the paper and the code (<!--note-ref:nitrogen-gaps-->).</p>
+
+<aside class="note" id="nitrogen-gaps" title="NitroGen: gaps and inconsistencies" kind="reading">
+<p>The paper reports no baseline for the pre-training results, no confidence intervals, no judging rules, and no names of games or tasks. The released code contains the game wrapper, but no task definitions.</p>
+<p>The paper describes chunks of 16 actions with 20 numbers each, and Appendix A writes a chunk as $16 \times 24$. The configuration inside the released checkpoint uses 18 actions per chunk with 25 numbers each. Fig. 2 follows the released checkpoint: SigLIP 2 Large with 4 more self-attention layers, and 8 DiT blocks of width 1024.</p>
+</aside>
+
+<h1>JARVIS-VLA</h1>
+
+<p>JARVIS-VLA (<a href="#references">Li et al. 2025</a>) from Peking University and BIGAI plays Minecraft with the keyboard and mouse. It follows text instructions such as &ldquo;craft a ladder&rdquo;.</p>
+
+<p>A <strong>vision-language-action (VLA) model</strong> is a vision-language model (VLM) that is fine-tuned to output actions. Earlier VLA models, such as OpenVLA (<a href="#references">Kim et al. 2024</a>), train the VLM on action trajectories only. Trajectories teach the actions, but they contain little knowledge about the game world. JARVIS-VLA first trains the VLM on Minecraft text and images, and then on actions.</p>
+
+<h2>Actions as tokens</h2>
+
+<p>The model is Qwen2-VL 7B (<a href="#references">Wang et al. 2024</a>) with its original architecture: a vision transformer (ViT), an adapter and a language model (Fig. 4). The prompt contains the instruction and the recent frames at $644 \times 364$ pixels. The model writes each action as a short sequence of tokens. As in RT-2 (<a href="#references">Brohan et al. 2023</a>), rarely used tokens of the vocabulary get the meaning of keys and mouse moves.</p>
+
+<p>An action starts and ends with a marker token. Between the markers are one token for each pressed key and two camera tokens, one for each axis. Each camera token selects one of 21 bins that turn the view. The bins are dense near zero: the smallest turn is about 0.2 degrees and the largest is 10 degrees. In the crafting and furnace screens, the same tokens move the cursor. Thus one model does 3D tasks, such as mining and combat, and 2D tasks in these screens.</p>
+
+<!--fig:jv-model-->
+
+<p>An answer is one action or a chunk of several actions. For example, the table shows answers from the released training data and, in the last row, from Appendix C of the paper. The first camera token turns the view vertically, and the second turns it horizontally. In the crafting screen, the same values move the cursor.</p>
+
+<table>
+<thead><tr><th>Instruction</th><th>Answer</th><th>Effect</th></tr></thead>
+<tbody>
+<tr><td>Break the acacia leaves to collect them.</td><td><code>[act] attack cam 7 cam 0 [/act]</code></td><td>attack; turn &minus;0.7&deg; vertically and &minus;10&deg; horizontally</td></tr>
+<tr><td>Break the sugar cane.</td><td><code>[act] forward right cam 10 cam 10 [/act]</code></td><td>move forward and right; no turn</td></tr>
+<tr><td>Use yellow dye and glass to craft yellow stained glass.</td><td><code>[act] use cam 14 cam 12 [/act]</code></td><td>right-click; move the cursor by +1.2&deg; and +0.4&deg;</td></tr>
+<tr><td>Get a white bed from the crafting table.</td><td><code>[act] cam 10 cam 5 [/act]</code></td><td>no key; move the cursor by &minus;1.8&deg; horizontally</td></tr>
+<tr><td>Craft a bread so I can use it.</td><td><code>[act] cam 13 cam 5 [/act] [act] use cam 3 cam 2 [/act]</code></td><td>a chunk of two actions: move the cursor, then right-click and move it</td></tr>
+</tbody>
+</table>
+
+<p>The 7B model produces 5.5 actions per second. In the released evaluation code, the game waits for each action, so play is synchronous.</p>
+
+<h2>Three training stages</h2>
+
+<p>Training has three stages, which the authors call ActVLP (Fig. 5). Stage I trains the language model on text questions and answers about Minecraft. Stage II trains the full model on captions, visual questions and spatial grounding, which asks for the positions of objects in a frame. Stage III trains the language model on about 10 billion tokens of play with actions. Last, the model is fine-tuned on more than 100 trajectories for each test task.</p>
+
+<!--fig:jv-stages-->
+
+<p>All stages use next-token prediction. The knowledge about the game comes from stages I and II, which have no actions.</p>
+
+<h2>Experiments</h2>
+
+<p>The test uses four groups of tasks from the MCU benchmark: mine blocks, kill entities, craft items and smelt items. Each group has at least 5 tasks, and each task runs at least 30 times. Crafting and smelting need precise mouse control in the game screens.</p>
+
+<p>JARVIS-VLA has the highest average success rate in all four groups (Fig. 6). Qwen2-VL fine-tuned only on the test tasks scores higher than earlier Minecraft agents in three groups. Training on actions without stages I and II scores lower than JARVIS-VLA in all groups. The largest difference is in smelting: 29% against 70%.</p>
+
+<!--fig:jv-results-->
+
+<p>An ablation mixes all the data in one training stage. On four crafting and smelting tasks, this model scores 7% to 40%, and the model with separate stages scores 63% to 83%. Across checkpoints, a lower loss on the stage I and II data goes with a higher task success rate. Some details differ between the paper and the code (<!--note-ref:jarvis-gaps-->).</p>
+
+<aside class="note" id="jarvis-gaps" title="JARVIS-VLA: gaps and inconsistencies" kind="reading">
+<p>Section 2.1 reserves 51 tokens for actions, 22 for the mouse and 29 for the keyboard. Appendix A lists 42 mouse tokens, 21 bins for each of two axes, and the released code uses 73 action tokens. The stage I data has 277K entries in Section 2.3 and 202K in Appendix D.1. Inference runs on one RTX 3090 in Section 3.1 and on four A800 GPUs in Appendix C. The example in Appendix C names the first camera token <code>cam_w</code>, but the released code uses it for the vertical axis. The table above follows the code.</p>
+<p>The paper does not report the total number of test tasks, how it measures actions per second, or whether the game waits for the model. The main results use one action for each forward pass. The authors name the inference speed as the main limitation.</p>
+</aside>
+
+<h1>CombatVLA</h1>
+
+<p>CombatVLA (<a href="#references">Chen et al. 2025</a>) from Alibaba is a 3B VLA model for combat in 3D action role-playing games. The test games are Black Myth: Wukong and Sekiro: Shadows Die Twice.</p>
+
+<p>Combat needs a reaction within seconds and a precise reading of the screen. Agent frameworks such as Cradle (<a href="#references">Tan et al. 2024</a>) and VARP (<a href="#references">Chen et al. 2024</a>) call GPT-4o several times for each step. One step takes 62 seconds in Cradle and 90 seconds in VARP. CombatVLA makes each decision with one call of a small model, in 1.85 seconds.</p>
+
+<h2>Action-of-thought data</h2>
+
+<p>An <strong>action tracker</strong> runs in the background while people play. It records keyboard and mouse events and screenshots with time stamps, and aligns each action with the frames before it. Six players recorded 200 hours of Black Myth: Wukong. After selection, the training data has about 5,000 samples from two combat tasks.</p>
+
+<p>The authors call each sample an <strong>action-of-thought (AoT)</strong>. The input is a few frames, and the answer is an action followed by an explanation (Fig. 7). The explanation is a fixed text for each action type, for example that the enemy is about to attack and the character must dodge. A special token &lt;TRUNC&gt; separates the action from the explanation. At play time, generation stops at &lt;TRUNC&gt;, so the explanation is only a training signal.</p>
+
+<!--fig:cv-aot-->
+
+<p>The model is Qwen2.5-VL 3B (<a href="#references">Bai et al. 2025</a>), trained in three stages. Stage 1 maps a video clip to the sequence of actions in it. Stage 2 maps the 4 frames before an action to that action and its explanation. Stage 3 adds &lt;TRUNC&gt; to the answers. An extra loss term gives larger weights to rare critical actions, such as healing and dodging.</p>
+
+<h2>Output actions</h2>
+
+<p>An answer is a list of actions. Each action has a type (keyboard or mouse), a key or button, and a press or a hold. A hold also has a duration in seconds. The controls are W, A, S and D to move, Shift for a quick move, Space to dodge, R to heal and 1 to immobilize. The left mouse button gives a light attack, and a held right button gives a heavy attack.</p>
+
+<p>For example, Fig. 4 of the paper shows these three training answers:</p>
+
+<table>
+<thead><tr><th>Explanation in the sample</th><th>Actions</th><th>Effect</th></tr></thead>
+<tbody>
+<tr><td>Health is low (stage 1)</td><td>press R; hold S for 0.81 s; hold D for 1.03 s</td><td>heal, move back, move right</td></tr>
+<tr><td>The enemy is about to attack (stage 2)</td><td>press Space; press Space; hold A for 0.62 s</td><td>dodge twice, move left</td></tr>
+<tr><td>Cut at &lt;TRUNC&gt; (stage 3)</td><td>press 1; press left button; press left button</td><td>immobilize, two light attacks</td></tr>
+</tbody>
+</table>
+
+<p>The released harness reads the answer as a Python dictionary. In that format, the first answer is:</p>
+
+<pre tabindex="0"><code class="language-python">{'actions': [
+    {'type': 'keyboard', 'key': 'r', 'action': 'press'},
+    {'type': 'keyboard', 'key': 's', 'action': 'hold', 'duration': 0.814},
+    {'type': 'keyboard', 'key': 'd', 'action': 'hold', 'duration': 1.033}]}
+&lt;trunc&gt; one explanation for each action</code></pre>
+
+<h2>Latency</h2>
+
+<p>At play time, a harness records the screen and gives the model 3 frames at $1008 \times 560$ pixels. It runs the returned actions as simulated keyboard and mouse input. Each step is one model call, with no planner, memory or reflection module. Cradle and VARP make 5 and 10 GPT-4o calls for each step.</p>
+
+<div class="key-result">
+<div class="key-result-title">Time per step: 1.85 s</div>
+<p>One call of a 3B model replaces 5 to 10 GPT-4o calls. A step is 33 times faster than in Cradle (61.68 s) and 49 times faster than in VARP (90.23 s).</p>
+</div>
+
+<p>The truncation halves the time of one call. Generation stops at &lt;TRUNC&gt;, so one call takes 1.85 s instead of 3.73 s (Fig. 8). Thus the explanation costs no time at play.</p>
+
+<!--fig:cv-latency-->
+
+<p>Because of the remaining delay, the harness pauses the game during each model call and resumes it while the actions run.</p>
+
+<h2>Experiments</h2>
+
+<p>The authors build <strong>CUBench</strong>, 914 questions about Black Myth: Wukong frames in three groups: information gathering, comprehension and reasoning. CombatVLA scores 63.6% on average. Gemini 2.0 Flash scores 57.9%, GPT-4o 57.3% and the base model 55.9%. GPT-4o scores higher on comprehension alone. On general benchmarks such as MME and OCRBench, CombatVLA scores below its base model.</p>
+
+<p>The game test has 13 tasks, 10 in Black Myth: Wukong and 3 in Sekiro, with 10 attempts each. The training data covers 2 of these tasks, so the other 11 are zero-shot. The paper reports a higher success rate for CombatVLA than for Cradle, VARP and ten human players.</p>
+
+<p>The success rates appear only as bars in a figure of the paper, and some details differ between the paper and the code (<!--note-ref:combatvla-gaps-->).</p>
+
+<aside class="note" id="combatvla-gaps" title="CombatVLA: gaps and inconsistencies" kind="reading">
+<p>Section 4.2 freezes the vision encoder, and Section 5.1 describes full-parameter fine-tuning. Fig. 1 of the paper calls CombatVLA 50 times faster than Cradle and VARP. Table 3 gives a factor of 33 against Cradle and 49 against VARP. Section 4.2 scales the action weights to the range 0.1 to 1.0. The values in Section 9.4 lie between 0.01 and 0.1. In the first sample of Fig. 4, the explanation of the key D says that the character moves left.</p>
+<p>The paper pauses the game during each model call. The released runner pauses the game once before its loop and has no pause or unpause inside the loop. The paper does not state whether the human players had the same pauses. The repository contains the execution harness, but no model weights, data or training code.</p>
+</aside>
+
+<h1>References</h1>
+
+<p>[1] Bowen Baker, Ilge Akkaya, Peter Zhokhov, et al. <a href="https://arxiv.org/abs/2206.11795">&ldquo;Video PreTraining (VPT): Learning to Act by Watching Unlabeled Online Videos.&rdquo;</a> NeurIPS, 2022.</p>
+<p>[2] Lo&iuml;c Magne, Anas Awadalla, Guanzhi Wang, et al. <a href="https://arxiv.org/abs/2601.02427">&ldquo;NitroGen: An Open Foundation Model for Generalist Gaming Agents.&rdquo;</a> arXiv:2601.02427, 2026. Code: <a href="https://github.com/MineDojo/NitroGen">MineDojo/NitroGen</a>.</p>
+<p>[3] Enze Xie, Wenhai Wang, Zhiding Yu, et al. <a href="https://arxiv.org/abs/2105.15203">&ldquo;SegFormer: Simple and Efficient Design for Semantic Segmentation with Transformers.&rdquo;</a> NeurIPS, 2021.</p>
+<p>[4] Michael Tschannen, Alexey Gritsenko, Xiao Wang, et al. <a href="https://arxiv.org/abs/2502.14786">&ldquo;SigLIP 2: Multilingual Vision-Language Encoders with Improved Semantic Understanding, Localization, and Dense Features.&rdquo;</a> arXiv:2502.14786, 2025.</p>
+<p>[5] NVIDIA: Johan Bjorck, Fernando Casta&ntilde;eda, et al. <a href="https://arxiv.org/abs/2503.14734">&ldquo;GR00T N1: An Open Foundation Model for Generalist Humanoid Robots.&rdquo;</a> arXiv:2503.14734, 2025.</p>
+<p>[6] Muyao Li, Zihao Wang, Kaichen He, Xiaojian Ma, Yitao Liang. <a href="https://arxiv.org/abs/2503.16365">&ldquo;JARVIS-VLA: Post-Training Large-Scale Vision Language Models to Play Visual Games with Keyboards and Mouse.&rdquo;</a> arXiv:2503.16365, 2025. Code: <a href="https://github.com/CraftJarvis/JarvisVLA">CraftJarvis/JarvisVLA</a>.</p>
+<p>[7] Moo Jin Kim, Karl Pertsch, Siddharth Karamcheti, et al. <a href="https://arxiv.org/abs/2406.09246">&ldquo;OpenVLA: An Open-Source Vision-Language-Action Model.&rdquo;</a> arXiv:2406.09246, 2024.</p>
+<p>[8] Peng Wang, Shuai Bai, Sinan Tan, et al. <a href="https://arxiv.org/abs/2409.12191">&ldquo;Qwen2-VL: Enhancing Vision-Language Model&rsquo;s Perception of the World at Any Resolution.&rdquo;</a> arXiv:2409.12191, 2024.</p>
+<p>[9] Anthony Brohan, Noah Brown, Justice Carbajal, et al. <a href="https://arxiv.org/abs/2307.15818">&ldquo;RT-2: Vision-Language-Action Models Transfer Web Knowledge to Robotic Control.&rdquo;</a> arXiv:2307.15818, 2023.</p>
+<p>[10] Peng Chen, Pi Bu, Yingyao Wang, et al. <a href="https://arxiv.org/abs/2503.09527">&ldquo;CombatVLA: An Efficient Vision-Language-Action Model for Combat Tasks in 3D Action Role-Playing Games.&rdquo;</a> ICCV, 2025. Code: <a href="https://github.com/ChenVoid/CombatVLA">ChenVoid/CombatVLA</a>.</p>
+<p>[11] Weihao Tan, Wentao Zhang, Xinrun Xu, et al. <a href="https://arxiv.org/abs/2403.03186">&ldquo;Cradle: Empowering Foundation Agents Towards General Computer Control.&rdquo;</a> arXiv:2403.03186, 2024.</p>
+<p>[12] Peng Chen, Pi Bu, Jun Song, et al. <a href="https://arxiv.org/abs/2409.12889">&ldquo;Can VLMs Play Action Role-Playing Games? Take Black Myth Wukong as a Study Case.&rdquo;</a> arXiv:2409.12889, 2024.</p>
+<p>[13] Shuai Bai, Keqin Chen, Xuejing Liu, et al. <a href="https://arxiv.org/abs/2502.13923">&ldquo;Qwen2.5-VL Technical Report.&rdquo;</a> arXiv:2502.13923, 2025.</p>
